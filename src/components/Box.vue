@@ -33,7 +33,7 @@ const {isDragging} = toRefs(collect)
   >
     <div v-if="loading">
       <div
-          class="border-gray-200 shadow hover:bg-gray-100 cursor-pointer transition inline-flex items-center text-2xl space-x-2.5 py-2.5 px-4 font-medium border rounded-lg ">
+          class="border-[#c9c9c9] bg-white shadow-sm hover:bg-gradient-to-b hover:from-white hover:to-[#e0f2fe] hover:border-[#999] hover:shadow-md cursor-pointer transition-all duration-200 inline-flex items-center text-[18px] space-x-2 py-1 px-3 font-medium border rounded-[5px] select-none">
         <svg class="animate-spin -ml-1 mr-2 h-6 w-6 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

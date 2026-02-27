@@ -7,5 +7,7 @@ import Container from "@/components/Container.vue";
 </script>
 
 <template>
-  <Example></Example>
+  <div class="h-full">
+    <Example />
+  </div>
 </template>

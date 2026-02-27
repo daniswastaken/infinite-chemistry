@@ -41,8 +41,9 @@ const [, drop] = useDrop(() => ({
       if(containerElement.value){
         const containerCoords = containerElement.value.getBoundingClientRect()
         if(delta && delta.x && delta.y){
+          // Adjust offset to target center of item card. Standard Infinite Craft sizing.
           const left = Math.round(delta.x - containerCoords.left - 40)
-          const top = Math.round(delta.y - containerCoords.top - 15)
+          const top = Math.round(delta.y - containerCoords.top - 20)
           moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon)
         }
       }
@@ -53,38 +54,41 @@ const [, drop] = useDrop(() => ({
 </script>
 
 <template>
-  <div ref="containerElement">
+  <div ref="containerElement" class="w-full h-full relative">
 
-    <main class="flex gap-x-3">
-      <div class="w-3/4">
-        <div :ref="drop" class="container">
-          <Box
-              v-for="(value, key) in boxes"
-              :id="key"
-              :key="key"
-              :left="value.left"
-              :top="value.top"
-              :loading="value.loading"
-          >
-            <ItemCard size="large" :id="String(key)" :title="value.title" :emoji="value.emoji" :symbol="value.symbol" :icon="value.icon"/>
-          </Box>
-        </div>
-      </div>
-      <div class="w-1/4 bg-white shadow px-4 py-3 border-gray-200 border rounded-lg overflow-y-scroll max-h-[80vh]">
-        <h2 class="font-semibold">Resources</h2>
-        <AvailableResources></AvailableResources>
-      </div>
-    </main>
+    <div :ref="drop" class="container">
+      <Box
+          v-for="(value, key) in boxes"
+          :id="String(key)"
+          :key="String(key)"
+          :left="value.left"
+          :top="value.top"
+          :loading="value.loading"
+      >
+        <ItemCard size="large" :id="String(key)" :title="value.title" :emoji="value.emoji" :symbol="value.symbol" :icon="value.icon"/>
+      </Box>
+    </div>
 
+    <!-- Background branding like Infinite Craft -->
+    <div class="pointer-events-none fixed top-[25px] left-[25px] z-[2]">
+      <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px]" alt="Infinite Chemistry Logo" />
+    </div>
+
+    <div class="fixed right-0 top-0 bottom-0 w-[305px] bg-white border-l border-[#e2e2e2] flex flex-col z-[10]">
+      <AvailableResources></AvailableResources>
+    </div>
 
   </div>
-
 </template>
 
 <style scoped>
 .container {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 90vh;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
 }
 </style>
