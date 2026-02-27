@@ -22,6 +22,11 @@ export const useBoxesStore = defineStore('counter', () => {
 
   const selectedIds = ref<string[]>([])
   const history = ref<string[]>([])
+  const showFormulas = ref(false)
+
+  function toggleFormulas() {
+    showFormulas.value = !showFormulas.value
+  }
 
   function saveHistory() {
     // Snapshot of current boxes
@@ -117,6 +122,8 @@ export const useBoxesStore = defineStore('counter', () => {
     removeSelected,
     undo,
     moveBox,
-    saveHistory
+    saveHistory,
+    showFormulas,
+    toggleFormulas
   }
 })

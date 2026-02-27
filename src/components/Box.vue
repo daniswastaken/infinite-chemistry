@@ -11,6 +11,7 @@ const props = defineProps<{
   emoji?: string
   symbol?: string
   icon?: string
+  formula?: string
   hideSourceOnDrag?: boolean
   loading?: boolean
   selected?: boolean
@@ -20,7 +21,7 @@ const props = defineProps<{
 // drag API so there is no native ghost to suppress.
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
-  item: {id: props.id, left: props.left, top: props.top, title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon},
+  item: {id: props.id, left: props.left, top: props.top, title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula},
   collect: monitor => ({
     isDragging: monitor.isDragging(),
   }),

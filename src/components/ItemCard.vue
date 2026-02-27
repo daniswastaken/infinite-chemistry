@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import {twMerge} from "tailwind-merge";
 import {getElementIcon} from "@/utils/elements";
+import {useBoxesStore} from "@/stores/useBoxesStore";
 
 const props = defineProps<{
   title: string;
+  formula?: string;
   emoji?: string;
   symbol?: string;
   icon?: string;
@@ -12,6 +14,8 @@ const props = defineProps<{
   selected?: boolean;
   isHovered?: boolean;
 }>()
+
+const store = useBoxesStore()
 
 </script>
 <template>
@@ -27,7 +31,7 @@ const props = defineProps<{
       <img v-else-if="symbol" :src="getElementIcon(symbol)" class="w-6 h-6 flex-shrink-0 pointer-events-none" :alt="symbol" draggable="false" @contextmenu.prevent />
       <img v-else-if="icon" :src="icon" class="h-[18px] w-auto flex-shrink-0 pointer-events-none" :alt="title" draggable="false" @contextmenu.prevent />
       <span>
-        {{ title }}
+        {{ store.showFormulas ? (props.formula || props.symbol || props.title) : props.title }}
       </span>
   </div>
 

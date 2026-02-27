@@ -4,6 +4,9 @@ import { useDragLayer } from 'vue3-dnd'
 import { ItemTypes } from '@/components/ItemTypes'
 import { getElementIcon } from '@/utils/elements'
 import { twMerge } from 'tailwind-merge'
+import { useBoxesStore } from '@/stores/useBoxesStore'
+
+const store = useBoxesStore()
 
 const collect = useDragLayer((monitor) => ({
   item: monitor.getItem(),
@@ -53,7 +56,9 @@ const layerStyle = computed(() => {
         draggable="false"
         @contextmenu.prevent
       />
-      <span>{{ item?.title }}</span>
+      <span>
+        {{ store.showFormulas ? (item?.formula || item?.symbol || item?.title) : item?.title }}
+      </span>
     </div>
   </div>
 </template>

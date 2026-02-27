@@ -314,6 +314,7 @@ const [collect, drop] = useDrop(() => ({
             :top="value.top"
             :loading="value.loading"
             :title="value.title"
+            :formula="value.formula"
             :emoji="value.emoji"
             :symbol="value.symbol"
             :icon="value.icon"
@@ -323,6 +324,7 @@ const [collect, drop] = useDrop(() => ({
             size="small" 
             :id="String(key)" 
             :title="value.title" 
+            :formula="value.formula"
             :emoji="value.emoji" 
             :symbol="value.symbol" 
             :icon="value.icon"
@@ -350,7 +352,20 @@ const [collect, drop] = useDrop(() => ({
       <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px]" alt="Infinite Chemistry Logo" />
     </div>
 
-      <button @click="handleClearClick" :style="{ right: `${sidebarWidth + 16}px` }" class="fixed bottom-4 z-[10] p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" title="Clear Canvas">
+      <button 
+        @click="store.toggleFormulas" 
+        :style="{ right: `${sidebarWidth + 60}px` }" 
+        class="fixed bottom-4 z-[10] p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        :title="store.showFormulas ? 'Tampilkan Nama' : 'Tampilkan Rumus'"
+      >
+        <img 
+          src="@/assets/icons/show-elements.svg" 
+          class="w-6 h-6 grayscale hover:grayscale-0 transition-all opacity-70 group-hover:opacity-100" 
+          alt="Show Elements" 
+        />
+      </button>
+
+      <button @click="handleClearClick" :style="{ right: `${sidebarWidth + 16}px` }" class="fixed bottom-4 z-[10] p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" title="Bersihkan Kanvas">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-gray-500 group-hover:text-gray-700">
           <path d="m16 22-1-4"/>
           <path d="M19 14a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1"/>

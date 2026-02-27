@@ -9,12 +9,13 @@ const props = defineProps<{
   symbol?: string
   icon?: string
   title: string
+  formula?: string
 }>()
 
 // No getEmptyImage/dragPreview needed — TouchBackend doesn't use HTML5 drag.
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
-  item: { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon },
+  item: { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula },
   collect: monitor => ({
     isDragging: monitor.isDragging(),
   }),
@@ -29,7 +30,7 @@ const { isDragging } = toRefs(collect)
       role="Box"
       data-testid="box"
   >
-    <ItemCard :title="title" :emoji="emoji" :symbol="symbol" :icon="icon" size="small"></ItemCard>
+    <ItemCard :title="title" :formula="formula" :emoji="emoji" :symbol="symbol" :icon="icon" size="small"></ItemCard>
   </div>
 </template>
 
