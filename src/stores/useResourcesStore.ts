@@ -1,23 +1,26 @@
-import {ref} from 'vue'
-import {defineStore} from 'pinia'
-import {useLocalStorage} from "@vueuse/core";
+import { ref } from 'vue'
+import { defineStore } from 'pinia'
+import { elementMap } from '@/utils/elements'
 
 export interface ResourceStoreEntry {
-    title: string
-    emoji: string
+  title: string
+  emoji?: string
+  symbol?: string
+  icon?: string
 }
 
 export const useResourcesStore = defineStore('resources', () => {
-    const resources =
-            useLocalStorage<ResourceStoreEntry[]>('opencraft/resources', [
-                {title: 'Fire', emoji: '🔥'},
-                {title: 'Water', emoji: '💧'},
-                {title: 'Earth', emoji: '🌍'},
-                {title: 'Air', emoji: '💨'},
-            ]);
-    function addResource(box: ResourceStoreEntry) {
-        resources.value.push(box)
-    }
+  const initialResources: ResourceStoreEntry[] = Object.entries(elementMap).map(
+    ([symbol, title]) => ({
+      title,
+      symbol
+    })
+  )
 
-    return { resources, addResource}
+  const resources = ref<ResourceStoreEntry[]>(initialResources)
+  function addResource(box: ResourceStoreEntry) {
+    resources.value.push(box)
+  }
+
+  return { resources, addResource }
 })

@@ -4,13 +4,15 @@ import { ItemTypes } from './ItemTypes'
 import { toRefs } from '@vueuse/core'
 import ItemCard from "@/components/ItemCard.vue";
 const props = defineProps<{
-  emoji: string
+  emoji?: string
+  symbol?: string
+  icon?: string
   title: string
 }>()
 
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
-  item: { title: props.title, emoji: props.emoji },
+  item: { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon },
   collect: monitor => ({
     isDragging: monitor.isDragging(),
   }),
@@ -25,7 +27,7 @@ const { isDragging } = toRefs(collect)
       role="Box"
       data-testid="box"
   >
-    <ItemCard :title="title" :emoji="emoji"></ItemCard>
+    <ItemCard :title="title" :emoji="emoji" :symbol="symbol" :icon="icon" size="small"></ItemCard>
   </div>
 </template>
 

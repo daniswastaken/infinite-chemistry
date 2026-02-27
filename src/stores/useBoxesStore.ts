@@ -1,20 +1,22 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import {reactive} from "vue";
+import { reactive } from 'vue'
 
 export interface BoxStoreEntry {
-    top: number
-    left: number
-    title: string
-    emoji: string
-    loading?: boolean
+  top: number
+  left: number
+  title: string
+  emoji?: string
+  symbol?: string
+  icon?: string
+  loading?: boolean
 }
 
 export const useBoxesStore = defineStore('counter', () => {
   const boxes = reactive<{
     [key: string]: BoxStoreEntry
   }>({
-    a: {top: 20, left: 80, title: 'Fire', emoji: '🔥'},
+    a: { top: 20, left: 80, title: 'Hidrogen', symbol: 'H' }
   })
 
   function addBox(box: BoxStoreEntry) {
@@ -26,5 +28,5 @@ export const useBoxesStore = defineStore('counter', () => {
     delete boxes[id]
   }
 
-  return { boxes , removeBox, addBox}
+  return { boxes, removeBox, addBox }
 })
