@@ -1,19 +1,48 @@
 <script setup lang="ts">
 import Resource from "@/components/Resource.vue";
 import {useResourcesStore} from "@/stores/useResourcesStore";
+import {useBoxesStore} from "@/stores/useBoxesStore";
 import {storeToRefs} from "pinia";
 import {computed, ref} from "vue";
-const store = useResourcesStore()
-const {resources} = storeToRefs(store)
+
+const resourcesStore = useResourcesStore()
+const {resources} = storeToRefs(resourcesStore)
+
+const boxesStore = useBoxesStore()
+const {showFormulas} = storeToRefs(boxesStore)
+
 const searchTerm = ref('')
 const activeTab = ref('Elemen')
+
+const normalizeFormula = (text: string) => {
+  if (!text) return ''
+  // Map subscripts back to regular numbers
+  const subscripts: Record<string, string> = {
+    '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4',
+    '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9'
+  }
+  return text.split('').map(char => subscripts[char] || char).join('').toLowerCase()
+}
 
 const filteredResources = computed(() => {
   return resources.value.filter((resource) => {
     // Filter by type matching the active tab
     if (resource.type !== activeTab.value) return false
     
-    return resource.title.toLowerCase().includes(searchTerm.value.toLowerCase())
+    const query = searchTerm.value.toLowerCase()
+    
+    // If formula mode is ON, search primarily by formula/symbol
+    if (showFormulas.value) {
+      const normalizedResFormula = normalizeFormula(resource.formula || '')
+      const normalizedResSymbol = (resource.symbol || '').toLowerCase()
+      
+      const formulaMatch = normalizedResFormula.includes(query)
+      const symbolMatch = normalizedResSymbol.includes(query)
+      return formulaMatch || symbolMatch
+    }
+    
+    // Regular search by Indonesian title
+    return resource.title.toLowerCase().includes(query)
   })
 })
 </script>
@@ -73,7 +102,19 @@ const filteredResources = computed(() => {
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
       </div>
-      <input v-model="searchTerm" type="text" class="block w-full py-3 pl-10 text-[16px] text-[#b0b0b0] bg-white focus:outline-none transition placeholder-[#b0b0b0]" :placeholder="`Search (${filteredResources.length}) items...`">
+      <input v-model="searchTerm" type="text" class="block w-full py-3 pl-10 pr-10 text-[16px] text-[#b0b0b0] bg-white focus:outline-none transition placeholder-[#b0b0b0]" :placeholder="`Search (${filteredResources.length}) items...`">
+      <button 
+        v-if="searchTerm" 
+        @click="searchTerm = ''" 
+        class="absolute inset-y-0 right-0 flex items-center px-3 group cursor-pointer h-full"
+        title="Clear search"
+      >
+        <img 
+          src="@/assets/icons/clear.svg" 
+          class="w-4 h-4 opacity-40 group-hover:opacity-100 transition-opacity" 
+          alt="Clear" 
+        />
+      </button>
     </div>
   </div>
 </template>

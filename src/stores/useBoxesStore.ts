@@ -11,6 +11,8 @@ export interface BoxStoreEntry {
   icon?: string
   loading?: boolean
   formula?: string
+  max_covalent_slots?: number
+  current_occupied_slots?: number
 }
 
 export const useBoxesStore = defineStore('counter', () => {
