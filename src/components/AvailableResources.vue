@@ -10,10 +10,8 @@ const activeTab = ref('Elemen')
 
 const filteredResources = computed(() => {
   return resources.value.filter((resource) => {
-    // For now, only 'Elemen' tab has content. 
-    // Later, actual classification logic will dictate if an item matches Ion or Kovalen.
-    if (activeTab.value === 'Elemen' && resource.atomicNumber === undefined) return false;
-    if (activeTab.value !== 'Elemen') return false; 
+    // Filter by type matching the active tab
+    if (resource.type !== activeTab.value) return false
     
     return resource.title.toLowerCase().includes(searchTerm.value.toLowerCase())
   })

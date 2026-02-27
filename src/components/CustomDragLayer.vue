@@ -45,6 +45,14 @@ const layerStyle = computed(() => {
         draggable="false"
         @contextmenu.prevent
       />
+      <img
+        v-else-if="item?.icon"
+        :src="item.icon"
+        class="h-[18px] w-auto flex-shrink-0 pointer-events-none"
+        :alt="item.title"
+        draggable="false"
+        @contextmenu.prevent
+      />
       <span>{{ item?.title }}</span>
     </div>
   </div>

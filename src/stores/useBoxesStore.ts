@@ -10,6 +10,7 @@ export interface BoxStoreEntry {
   symbol?: string
   icon?: string
   loading?: boolean
+  formula?: string
 }
 
 export const useBoxesStore = defineStore('counter', () => {

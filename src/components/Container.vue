@@ -9,14 +9,57 @@ import ItemCard from "@/components/ItemCard.vue";
 import AvailableResources from "@/components/AvailableResources.vue";
 import CustomDragLayer from "@/components/CustomDragLayer.vue";
 import {useBoxesStore} from "@/stores/useBoxesStore";
+import {useResourcesStore} from "@/stores/useResourcesStore";
 import {storeToRefs} from "pinia";
+import {mixElements} from "@/utils/chemistryEngine";
 
 const store = useBoxesStore()
 const { boxes, selectedIds } = storeToRefs(store)
 const { setSelectedIds, clearSelection, clearBoxes, removeSelected } = store
 
+const resourcesStore = useResourcesStore()
+const { resources } = storeToRefs(resourcesStore)
+const { addResource } = resourcesStore
+
+// Collision detection helper
+function getOverlappingBox(left: number, top: number, excludeId?: string) {
+  const boxWidth = 120
+  const boxHeight = 45
+  
+  const dragRect = {
+    left,
+    top,
+    right: left + boxWidth,
+    bottom: top + boxHeight
+  }
+
+  for (const id in boxes.value) {
+    if (id === excludeId) continue
+    const box = (boxes.value as any)[id]
+    
+    const targetRect = {
+      left: box.left,
+      top: box.top,
+      right: box.left + boxWidth,
+      bottom: box.top + boxHeight
+    }
+
+    // Check for overlap
+    const isOverlapping = !(
+      dragRect.left > targetRect.right ||
+      dragRect.right < targetRect.left ||
+      dragRect.top > targetRect.bottom ||
+      dragRect.bottom < targetRect.top
+    )
+
+    if (isOverlapping) return { id, ...box }
+  }
+  return null
+}
+
 const isConfirming = ref(false)
 const isSelecting = ref(false)
+const overlappingId = ref<string | null>(null)
 const selectionStart = ref({ x: 0, y: 0 })
 const selectionEnd = ref({ x: 0, y: 0 })
 
@@ -81,8 +124,6 @@ const updateSelection = (e: MouseEvent) => {
   for (const id in boxesVal) {
     const box = (boxesVal as any)[id]
     // Basic rectangle intersection
-    // Assuming boxes have a rough size of 150x50 if not explicitly sized
-    // In actual implementation Box dimensions can be grabbed but this is a good estimate
     const boxWidth = 120
     const boxHeight = 45
     
@@ -150,15 +191,11 @@ const stopResize = () => {
   window.removeEventListener('mouseup', stopResize)
 }
 
-// No local moveBox needed anymore, we use store.moveBox
-
 const containerElement = ref<HTMLElement | null>(null)
 
 const handleKeyDown = (e: KeyboardEvent) => {
-  // Don't delete or undo if user is typing in an input or textarea
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
 
-  // Undo (Ctrl+Z)
   if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault()
     store.undo()
@@ -166,7 +203,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   }
 
   if (e.key === 'Backspace' || e.key === 'Delete') {
-    e.preventDefault() // Prevent browser back navigation on Backspace
+    e.preventDefault()
     removeSelected()
   }
 }
@@ -181,14 +218,66 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
 })
-const [, drop] = useDrop(() => ({
+
+const [collect, drop] = useDrop(() => ({
   accept: ItemTypes.BOX,
-  drop(item: DragItem, monitor) {
+  hover(item: DragItem, monitor) {
     const offset = monitor.getSourceClientOffset() as XYCoord
     if (offset && containerElement.value) {
       const containerCoords = containerElement.value.getBoundingClientRect()
       const left = Math.round(offset.x - containerCoords.left)
       const top = Math.round(offset.y - containerCoords.top)
+
+      const overlapping = getOverlappingBox(left, top, item.id)
+      overlappingId.value = overlapping?.id || null
+    } else {
+      overlappingId.value = null
+    }
+  },
+  drop(item: DragItem, monitor) {
+    overlappingId.value = null
+    const offset = monitor.getSourceClientOffset() as XYCoord
+    if (offset && containerElement.value) {
+      const containerCoords = containerElement.value.getBoundingClientRect()
+      const left = Math.round(offset.x - containerCoords.left)
+      const top = Math.round(offset.y - containerCoords.top)
+
+      // Collision Bonding Logic
+      const overlapping = getOverlappingBox(left, top, item.id)
+      
+      if (overlapping) {
+        const symbolA = overlapping.symbol
+        const symbolB = store.boxes[item.id!]?.symbol ?? item.symbol
+
+        if (symbolA && symbolB) {
+          const result = mixElements(symbolA, symbolB)
+          
+          if (result) {
+            store.saveHistory()
+            if (item.id) store.removeBox(item.id, false)
+            store.removeBox(overlapping.id, false)
+
+            store.addBox({
+              title: result.name,
+              symbol: undefined,
+              icon: result.icon,
+              formula: result.formula,
+              left: overlapping.left,
+              top: overlapping.top
+            }, false)
+
+            if (!resources.value.find((r) => r.title === result.name)) {
+              addResource({
+                title: result.name,
+                icon: result.icon,
+                formula: result.formula,
+                type: 'Kovalen'
+              })
+            }
+            return
+          }
+        }
+      }
 
       if (item.id) {
         store.moveBox(item.id, left, top)
@@ -238,6 +327,7 @@ const [, drop] = useDrop(() => ({
             :symbol="value.symbol" 
             :icon="value.icon"
             :selected="selectedIds.includes(String(key))"
+            :isHovered="overlappingId === String(key)"
           />
         </Box>
       </TransitionGroup>
