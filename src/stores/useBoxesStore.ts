@@ -28,5 +28,11 @@ export const useBoxesStore = defineStore('counter', () => {
     delete boxes[id]
   }
 
-  return { boxes, removeBox, addBox }
+  function clearBoxes() {
+    for (const key in boxes) {
+      delete boxes[key]
+    }
+  }
+
+  return { boxes, removeBox, addBox, clearBoxes }
 })

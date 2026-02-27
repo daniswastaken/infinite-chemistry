@@ -3,6 +3,7 @@ import { useDrag } from 'vue3-dnd'
 import { ItemTypes } from './ItemTypes'
 import { toRefs } from '@vueuse/core'
 import ItemCard from "@/components/ItemCard.vue";
+
 const props = defineProps<{
   emoji?: string
   symbol?: string
@@ -10,6 +11,7 @@ const props = defineProps<{
   title: string
 }>()
 
+// No getEmptyImage/dragPreview needed — TouchBackend doesn't use HTML5 drag.
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
   item: { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon },
@@ -22,7 +24,7 @@ const { isDragging } = toRefs(collect)
 
 <template>
   <div
-      class="inline-block"
+      class="inline-block flex-shrink-0 cursor-grab"
       :ref="drag"
       role="Box"
       data-testid="box"
