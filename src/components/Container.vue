@@ -4,7 +4,7 @@ import type {XYCoord} from 'vue3-dnd'
 import {ItemTypes} from './ItemTypes'
 import Box from './Box.vue'
 import type {DragItem} from './interfaces'
-import {reactive, ref, onMounted} from 'vue'
+import {reactive, ref, onMounted, computed, onUnmounted} from 'vue'
 import ItemCard from "@/components/ItemCard.vue";
 import AvailableResources from "@/components/AvailableResources.vue";
 import CustomDragLayer from "@/components/CustomDragLayer.vue";
@@ -12,18 +12,116 @@ import {useBoxesStore} from "@/stores/useBoxesStore";
 import {storeToRefs} from "pinia";
 
 const store = useBoxesStore()
-const { boxes } = store
+const { boxes, selectedIds } = storeToRefs(store)
+const { setSelectedIds, clearSelection, clearBoxes, removeSelected } = store
 
 const isConfirming = ref(false)
+const isSelecting = ref(false)
+const selectionStart = ref({ x: 0, y: 0 })
+const selectionEnd = ref({ x: 0, y: 0 })
+
+const selectionRect = computed(() => {
+  if (!isSelecting.value) return null
+  const x = Math.min(selectionStart.value.x, selectionEnd.value.x)
+  const y = Math.min(selectionStart.value.y, selectionEnd.value.y)
+  const width = Math.abs(selectionStart.value.x - selectionEnd.value.x)
+  const height = Math.abs(selectionStart.value.y - selectionEnd.value.y)
+  return { x, y, width, height }
+})
+
+const startSelection = (e: MouseEvent) => {
+  // Only left click
+  if (e.button !== 0) return
+
+  const target = e.target as HTMLElement
+  // Don't start if clicking on a box or a button/sidebar item
+  if (target.closest('[role="Box"]') || target.closest('button') || target.closest('input')) return
+  
+  // Also check if we're clicking inside the sidebar area
+  const containerCoords = containerElement.value?.getBoundingClientRect()
+  if (!containerCoords) return
+  
+  // If clicking on the right side where sidebar is, ignore
+  if (e.clientX > window.innerWidth - sidebarWidth.value) return
+
+  // Blur any active inputs so keyboard shortcuts work
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur()
+  }
+  
+  // Focus the container so it definitely hears the keyboard
+  (e.currentTarget as HTMLElement).focus()
+
+  isSelecting.value = true
+  selectionStart.value = { 
+    x: e.clientX - containerCoords.left, 
+    y: e.clientY - containerCoords.top 
+  }
+  selectionEnd.value = { ...selectionStart.value }
+  
+  if (!e.shiftKey) {
+    clearSelection()
+  }
+}
+
+const updateSelection = (e: MouseEvent) => {
+  if (!isSelecting.value || !containerElement.value) return
+  
+  const containerCoords = containerElement.value.getBoundingClientRect()
+  selectionEnd.value = { 
+    x: e.clientX - containerCoords.left, 
+    y: e.clientY - containerCoords.top 
+  }
+  
+  const rect = selectionRect.value
+  if (!rect) return
+  
+  const selected: string[] = []
+  const boxesVal = boxes.value
+  for (const id in boxesVal) {
+    const box = (boxesVal as any)[id]
+    // Basic rectangle intersection
+    // Assuming boxes have a rough size of 150x50 if not explicitly sized
+    // In actual implementation Box dimensions can be grabbed but this is a good estimate
+    const boxWidth = 120
+    const boxHeight = 45
+    
+    const boxRect = {
+      left: box.left,
+      top: box.top,
+      right: box.left + boxWidth,
+      bottom: box.top + boxHeight
+    }
+    
+    const marqueeRect = {
+      left: rect.x,
+      top: rect.y,
+      right: rect.x + rect.width,
+      bottom: rect.y + rect.height
+    }
+    
+    if (!(marqueeRect.left > boxRect.right || 
+          marqueeRect.right < boxRect.left || 
+          marqueeRect.top > boxRect.bottom || 
+          marqueeRect.bottom < boxRect.top)) {
+      selected.push(id)
+    }
+  }
+  setSelectedIds(selected)
+}
+
+const finishSelection = () => {
+  isSelecting.value = false
+}
 
 const handleClearClick = () => {
-  if (Object.keys(boxes).length > 0) {
+  if (Object.keys(boxes.value).length > 0) {
     isConfirming.value = true
   }
 }
 
 const confirmClear = () => {
-  store.clearBoxes()
+  clearBoxes()
   isConfirming.value = false
 }
 
@@ -33,6 +131,7 @@ const isResizing = ref(false)
 const startResize = (e: MouseEvent) => {
   isResizing.value = true
   e.preventDefault()
+  e.stopPropagation() // Prevent selection from starting
   window.addEventListener('mousemove', doResize)
   window.addEventListener('mouseup', stopResize)
 }
@@ -51,23 +150,36 @@ const stopResize = () => {
   window.removeEventListener('mouseup', stopResize)
 }
 
-const moveBox = (id: string | null, left: number, top: number, title?: string, emoji?: string, symbol?: string, icon?: string) => {
-  if (id) {
-    Object.assign(boxes[id], {left, top})
-  } else if (title) {
-    const key = Math.random().toString(36).substring(7);
-    boxes[key] = {top, left, title, emoji, symbol, icon}
-    console.log(boxes)
-
-  }
-}
+// No local moveBox needed anymore, we use store.moveBox
 
 const containerElement = ref<HTMLElement | null>(null)
+
+const handleKeyDown = (e: KeyboardEvent) => {
+  // Don't delete or undo if user is typing in an input or textarea
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+  // Undo (Ctrl+Z)
+  if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault()
+    store.undo()
+    return
+  }
+
+  if (e.key === 'Backspace' || e.key === 'Delete') {
+    e.preventDefault() // Prevent browser back navigation on Backspace
+    removeSelected()
+  }
+}
 
 onMounted(() => {
   if ((window as any).particlesJS) {
     (window as any).particlesJS.load('particles-js', '/particles.js/particles.json');
   }
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 const [, drop] = useDrop(() => ({
   accept: ItemTypes.BOX,
@@ -79,9 +191,9 @@ const [, drop] = useDrop(() => ({
       const top = Math.round(offset.y - containerCoords.top)
 
       if (item.id) {
-        moveBox(item.id, left, top)
+        store.moveBox(item.id, left, top)
       } else {
-        moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon)
+        store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon)
       }
     }
     return undefined
@@ -90,7 +202,15 @@ const [, drop] = useDrop(() => ({
 </script>
 
 <template>
-  <div ref="containerElement" class="w-full h-full relative">
+  <div 
+    ref="containerElement" 
+    class="w-full h-full relative outline-none"
+    tabindex="0"
+    @mousedown="startSelection"
+    @mousemove="updateSelection"
+    @mouseup="finishSelection"
+    @mouseleave="finishSelection"
+  >
     <div id="particles-js" class="absolute inset-0 z-0 pointer-events-none"></div>
     <CustomDragLayer />
 
@@ -108,10 +228,31 @@ const [, drop] = useDrop(() => ({
             :emoji="value.emoji"
             :symbol="value.symbol"
             :icon="value.icon"
+            :selected="selectedIds.includes(String(key))"
         >
-          <ItemCard size="small" :id="String(key)" :title="value.title" :emoji="value.emoji" :symbol="value.symbol" :icon="value.icon"/>
+          <ItemCard 
+            size="small" 
+            :id="String(key)" 
+            :title="value.title" 
+            :emoji="value.emoji" 
+            :symbol="value.symbol" 
+            :icon="value.icon"
+            :selected="selectedIds.includes(String(key))"
+          />
         </Box>
       </TransitionGroup>
+      
+      <!-- Selection Rectangle -->
+      <div 
+        v-if="isSelecting && selectionRect" 
+        class="absolute border border-blue-500 bg-blue-500/10 pointer-events-none z-[50] rounded-sm"
+        :style="{
+          left: `${selectionRect.x}px`,
+          top: `${selectionRect.y}px`,
+          width: `${selectionRect.width}px`,
+          height: `${selectionRect.height}px`
+        }"
+      ></div>
     </div>
 
     <!-- Background branding like Infinite Craft -->

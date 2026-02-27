@@ -13,6 +13,7 @@ const props = defineProps<{
   icon?: string
   hideSourceOnDrag?: boolean
   loading?: boolean
+  selected?: boolean
 }>()
 
 // No getEmptyImage/dragPreview needed — TouchBackend doesn't use the HTML5
