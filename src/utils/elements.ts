@@ -843,5 +843,5 @@ export const elementMap: Record<string, string> = elements.reduce(
 )
 
 export const getElementIcon = (symbol: string) => {
-  return `/src/assets/elements/${symbol.toLowerCase()}.svg`
+  return new URL(`../assets/elements/${symbol.toLowerCase()}.svg`, import.meta.url).href
 }

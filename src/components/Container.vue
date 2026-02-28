@@ -210,7 +210,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
 onMounted(() => {
   if ((window as any).particlesJS) {
-    (window as any).particlesJS.load('particles-js', '/particles.js/particles.json');
+    (window as any).particlesJS.load('particles-js', `${import.meta.env.BASE_URL}particles.js/particles.json`);
   }
   window.addEventListener('keydown', handleKeyDown)
 })

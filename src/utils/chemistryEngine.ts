@@ -138,7 +138,7 @@ export function attemptBond(
               newCompound: {
                 name,
                 formula,
-                icon: '/src/assets/icons/covalent.svg',
+                icon: new URL('../assets/icons/covalent.svg', import.meta.url).href,
                 components: newComps,
                 current_occupied_slots: 999
               }
@@ -253,7 +253,7 @@ export function attemptBond(
     newCompound: {
       name,
       formula,
-      icon: '/src/assets/icons/covalent.svg',
+      icon: new URL('../assets/icons/covalent.svg', import.meta.url).href,
       components: newComps,
       current_occupied_slots: occupied
     }
