@@ -260,7 +260,10 @@ export function attemptBond(
   }
 }
 
-function generateNomenclature(comps: Record<string, number>): { name: string; formula: string } {
+export function generateNomenclature(comps: Record<string, number>): {
+  name: string
+  formula: string
+} {
   // Sort elements by IUPAC priority
   const syms = Object.keys(comps).sort(
     (a, b) => getNomenclaturePriority(a) - getNomenclaturePriority(b)
