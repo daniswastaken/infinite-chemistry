@@ -53,7 +53,7 @@ const filteredResources = computed(() => {
 
     <!-- Resource List -->
     <div class="flex-1 overflow-y-auto px-2 py-2 pb-4 flex gap-[6px] flex-wrap content-start custom-scroller">
-      <Resource v-for="resource in filteredResources" :key="resource.title" :title="resource.title" :formula="resource.formula" :emoji="resource.emoji" :symbol="resource.symbol" :icon="resource.icon"></Resource>
+      <Resource v-for="resource in filteredResources" :key="resource.title" :title="resource.title" :formula="resource.formula" :emoji="resource.emoji" :symbol="resource.symbol" :icon="resource.icon" :components="resource.components"></Resource>
     </div>
 
     <!-- Fade Overlay -->

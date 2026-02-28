@@ -12,6 +12,7 @@ export interface ResourceStoreEntry {
   atomicNumber?: number
   type: ResourceType
   formula?: string
+  components?: Record<string, number>
 }
 
 export const useResourcesStore = defineStore('resources', () => {

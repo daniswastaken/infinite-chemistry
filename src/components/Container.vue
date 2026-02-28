@@ -11,7 +11,7 @@ import CustomDragLayer from "@/components/CustomDragLayer.vue";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {storeToRefs} from "pinia";
-import {mixElements} from "@/utils/chemistryEngine";
+import {attemptBond} from "@/utils/chemistryEngine";
 
 const store = useBoxesStore()
 const { boxes, selectedIds } = storeToRefs(store)
@@ -246,35 +246,42 @@ const [collect, drop] = useDrop(() => ({
       const overlapping = getOverlappingBox(left, top, item.id)
       
       if (overlapping) {
-        const symbolA = overlapping.symbol
-        const symbolB = store.boxes[item.id!]?.symbol ?? item.symbol
+        const targetComps = overlapping.components ?? (overlapping.symbol ? { [overlapping.symbol]: 1 } : {})
+        const itemSym = store.boxes[item.id!]?.symbol ?? item.symbol
+        const itemComps = item.components ?? (store.boxes[item.id!]?.components) ?? (itemSym ? { [itemSym]: 1 } : {})
 
-        if (symbolA && symbolB) {
-          const result = mixElements(symbolA, symbolB)
+        if (Object.keys(targetComps).length > 0 && Object.keys(itemComps).length > 0) {
+          const result = attemptBond(targetComps, itemComps)
           
-          if (result) {
+          if (result.success && result.newCompound) {
             store.saveHistory()
             if (item.id) store.removeBox(item.id, false)
             store.removeBox(overlapping.id, false)
 
             store.addBox({
-              title: result.name,
+              title: result.newCompound.name,
               symbol: undefined,
-              icon: result.icon,
-              formula: result.formula,
+              icon: result.newCompound.icon,
+              formula: result.newCompound.formula,
+              components: result.newCompound.components,
+              current_occupied_slots: result.newCompound.current_occupied_slots,
               left: overlapping.left,
               top: overlapping.top
             }, false)
 
-            if (!resources.value.find((r) => r.title === result.name)) {
+            if (!resources.value.find((r) => r.formula === result.newCompound!.formula)) {
               addResource({
-                title: result.name,
-                icon: result.icon,
-                formula: result.formula,
+                title: result.newCompound!.name,
+                icon: result.newCompound!.icon,
+                formula: result.newCompound!.formula,
+                components: result.newCompound!.components,
                 type: 'Kovalen'
               })
             }
             return
+          } else if (result.reason === 'capacity_reached') {
+            store.triggerRejectAnimation(overlapping.id)
+            // allow it to drop next to it normally
           }
         }
       }
@@ -282,7 +289,7 @@ const [collect, drop] = useDrop(() => ({
       if (item.id) {
         store.moveBox(item.id, left, top)
       } else {
-        store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon)
+        store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon, item.formula, item.components)
       }
     }
     return undefined
@@ -330,6 +337,7 @@ const [collect, drop] = useDrop(() => ({
             :icon="value.icon"
             :selected="selectedIds.includes(String(key))"
             :isHovered="overlappingId === String(key)"
+            :isRejected="store.rejectedBoxId === String(key)"
           />
         </Box>
       </TransitionGroup>

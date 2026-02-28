@@ -13,6 +13,7 @@ const props = defineProps<{
   size: 'small' | 'large';
   selected?: boolean;
   isHovered?: boolean;
+  isRejected?: boolean;
 }>()
 
 const store = useBoxesStore()
@@ -23,7 +24,8 @@ const store = useBoxesStore()
         :class="twMerge(
           props.size === 'large' ? 'text-[18px] space-x-2 py-1 px-3' : 'text-[15px] space-x-1.5 px-2 py-1.5',
           'border-[#c9c9c9] bg-white shadow-sm hover:bg-gradient-to-b hover:from-white hover:to-[#e0f2fe] hover:border-[#999] hover:shadow-md cursor-pointer transition-all duration-200 inline-flex items-center font-medium border rounded-[5px] select-none whitespace-nowrap',
-          (props.selected || props.isHovered) && 'bg-gradient-to-b from-white to-[#e0f2fe] border-[#999] shadow-md'
+          (props.selected || props.isHovered) && 'bg-gradient-to-b from-white to-[#e0f2fe] border-[#999] shadow-md',
+          props.isRejected && 'border-red-500 !bg-red-50 shadow-md animate-shake'
         )">
       <span v-if="emoji">
           {{ emoji }}
@@ -38,5 +40,14 @@ const store = useBoxesStore()
 </template>
 
 <style scoped>
+.animate-shake {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
 
+@keyframes shake {
+  10%, 90% { transform: translate3d(-3px, 0, 0); }
+  20%, 80% { transform: translate3d(5px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+  40%, 60% { transform: translate3d(5px, 0, 0); }
+}
 </style>

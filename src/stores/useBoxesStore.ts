@@ -13,6 +13,7 @@ export interface BoxStoreEntry {
   formula?: string
   max_covalent_slots?: number
   current_occupied_slots?: number
+  components?: Record<string, number>
 }
 
 export const useBoxesStore = defineStore('counter', () => {
@@ -25,9 +26,17 @@ export const useBoxesStore = defineStore('counter', () => {
   const selectedIds = ref<string[]>([])
   const history = ref<string[]>([])
   const showFormulas = ref(false)
+  const rejectedBoxId = ref<string | null>(null)
 
   function toggleFormulas() {
     showFormulas.value = !showFormulas.value
+  }
+
+  function triggerRejectAnimation(id: string) {
+    rejectedBoxId.value = id
+    setTimeout(() => {
+      if (rejectedBoxId.value === id) rejectedBoxId.value = null
+    }, 500) // 500ms shake animation duration
   }
 
   function saveHistory() {
@@ -87,12 +96,14 @@ export const useBoxesStore = defineStore('counter', () => {
     title?: string,
     emoji?: string,
     symbol?: string,
-    icon?: string
+    icon?: string,
+    formula?: string,
+    components?: Record<string, number>
   ) {
     if (id) {
       updateBoxPosition(id, left, top)
     } else if (title) {
-      addBox({ top, left, title, emoji, symbol, icon })
+      addBox({ top, left, title, emoji, symbol, icon, formula, components })
     }
   }
 
@@ -126,6 +137,8 @@ export const useBoxesStore = defineStore('counter', () => {
     moveBox,
     saveHistory,
     showFormulas,
-    toggleFormulas
+    toggleFormulas,
+    rejectedBoxId,
+    triggerRejectAnimation
   }
 })

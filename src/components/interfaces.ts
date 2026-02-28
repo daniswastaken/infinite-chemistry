@@ -7,4 +7,6 @@ export interface DragItem {
   symbol?: string
   icon?: string
   title: string
+  formula?: string
+  components?: Record<string, number>
 }
