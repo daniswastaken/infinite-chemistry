@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
+import { playSound } from '@/utils/audio'
 
 export interface BoxStoreEntry {
   top: number
@@ -11,6 +12,7 @@ export interface BoxStoreEntry {
   icon?: string
   loading?: boolean
   formula?: string
+  isNew?: boolean
   max_covalent_slots?: number
   current_occupied_slots?: number
   components?: Record<string, number>
@@ -27,6 +29,8 @@ export const useBoxesStore = defineStore('counter', () => {
   const history = ref<string[]>([])
   const showFormulas = ref(false)
   const rejectedBoxId = ref<string | null>(null)
+  const successBoxId = ref<string | null>(null)
+  const successStartTime = ref<number>(0)
 
   function toggleFormulas() {
     showFormulas.value = !showFormulas.value
@@ -37,6 +41,17 @@ export const useBoxesStore = defineStore('counter', () => {
     setTimeout(() => {
       if (rejectedBoxId.value === id) rejectedBoxId.value = null
     }, 500) // 500ms shake animation duration
+  }
+
+  function triggerSuccessAnimation(id: string) {
+    successBoxId.value = id
+    successStartTime.value = Date.now()
+    setTimeout(() => {
+      if (successBoxId.value === id) {
+        successBoxId.value = null
+        successStartTime.value = 0
+      }
+    }, 3200) // 3.2s duration to safely allow 3s CSS animation to finish
   }
 
   function saveHistory() {
@@ -57,19 +72,22 @@ export const useBoxesStore = defineStore('counter', () => {
     // Restore previous state
     Object.assign(boxes, lastState)
     selectedIds.value = []
+    playSound('put', 0.3)
   }
 
   function addBox(box: BoxStoreEntry, shouldSaveHistory = true) {
     if (shouldSaveHistory) saveHistory()
     const randomId = Math.random().toString(36).substr(2, 5)
     boxes[randomId] = box
+    return randomId
   }
 
-  function removeBox(id: string, shouldSaveHistory = true) {
+  function removeBox(id: string, shouldSaveHistory = true, silent = false) {
     if (shouldSaveHistory) saveHistory()
     delete boxes[id]
     // Also remove from selected if present
     selectedIds.value = selectedIds.value.filter((sid) => sid !== id)
+    if (!silent) playSound('delete')
   }
 
   function clearBoxes() {
@@ -79,6 +97,7 @@ export const useBoxesStore = defineStore('counter', () => {
     }
     selectedIds.value = []
     history.value = []
+    playSound('delete')
   }
 
   function updateBoxPosition(id: string, left: number, top: number) {
@@ -115,13 +134,14 @@ export const useBoxesStore = defineStore('counter', () => {
     selectedIds.value = []
   }
 
-  function removeSelected() {
+  function removeSelected(silent = false) {
     if (selectedIds.value.length === 0) return
     saveHistory()
     selectedIds.value.forEach((id) => {
       delete boxes[id]
     })
     selectedIds.value = []
+    if (!silent) playSound('delete')
   }
 
   return {
@@ -139,6 +159,9 @@ export const useBoxesStore = defineStore('counter', () => {
     showFormulas,
     toggleFormulas,
     rejectedBoxId,
-    triggerRejectAnimation
+    triggerRejectAnimation,
+    successBoxId,
+    successStartTime,
+    triggerSuccessAnimation
   }
 })

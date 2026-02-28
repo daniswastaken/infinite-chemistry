@@ -2,6 +2,7 @@
 import {useDrag} from 'vue3-dnd'
 import {ItemTypes} from './ItemTypes'
 import {toRefs} from '@vueuse/core'
+import { playSound } from '@/utils/audio'
 
 const props = defineProps<{
   id: any
@@ -32,10 +33,12 @@ const {isDragging} = toRefs(collect)
 <template>
   <div
       :ref="drag"
+      :id="props.id"
       class="absolute cursor-grab"
       :style="{ left: `${left}px`, top: `${top}px`, opacity: isDragging ? 0 : 1 }"
       role="Box"
       data-testid="box"
+      @mousedown="playSound('put', 0.5)"
   >
     <div v-if="loading">
       <div

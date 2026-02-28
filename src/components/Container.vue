@@ -12,6 +12,7 @@ import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {storeToRefs} from "pinia";
 import {attemptBond} from "@/utils/chemistryEngine";
+import {playSound} from "@/utils/audio";
 
 const store = useBoxesStore()
 const { boxes, selectedIds } = storeToRefs(store)
@@ -23,25 +24,37 @@ const { addResource } = resourcesStore
 
 // Collision detection helper
 function getOverlappingBox(left: number, top: number, excludeId?: string) {
-  const boxWidth = 120
-  const boxHeight = 45
+  // Use actual DOM measurements if available, otherwise fallback
+  const fallbackWidth = 120
+  const fallbackHeight = 45
   
+  // Try to find the dragging element to get its actual size
+  // Note: For sidebar items, item.id is null, so we use fallbacks
+  const dragEl = excludeId ? document.getElementById(excludeId) : null
+  const dWidth = dragEl?.offsetWidth || fallbackWidth
+  const dHeight = dragEl?.offsetHeight || fallbackHeight
+
   const dragRect = {
     left,
     top,
-    right: left + boxWidth,
-    bottom: top + boxHeight
+    right: left + dWidth,
+    bottom: top + dHeight
   }
 
   for (const id in boxes.value) {
     if (id === excludeId) continue
     const box = (boxes.value as any)[id]
     
+    // Get actual target dimensions
+    const targetEl = document.getElementById(id)
+    const tWidth = targetEl?.offsetWidth || fallbackWidth
+    const tHeight = targetEl?.offsetHeight || fallbackHeight
+
     const targetRect = {
       left: box.left,
       top: box.top,
-      right: box.left + boxWidth,
-      bottom: box.top + boxHeight
+      right: box.left + tWidth,
+      bottom: box.top + tHeight
     }
 
     // Check for overlap
@@ -121,17 +134,22 @@ const updateSelection = (e: MouseEvent) => {
   
   const selected: string[] = []
   const boxesVal = boxes.value
+  const fallbackWidth = 120
+  const fallbackHeight = 45
+
   for (const id in boxesVal) {
     const box = (boxesVal as any)[id]
-    // Basic rectangle intersection
-    const boxWidth = 120
-    const boxHeight = 45
+    
+    // Get actual dimensions for marquee accuracy
+    const el = document.getElementById(id)
+    const w = el?.offsetWidth || fallbackWidth
+    const h = el?.offsetHeight || fallbackHeight
     
     const boxRect = {
       left: box.left,
       top: box.top,
-      right: box.left + boxWidth,
-      bottom: box.top + boxHeight
+      right: box.left + w,
+      bottom: box.top + h
     }
     
     const marqueeRect = {
@@ -255,10 +273,10 @@ const [collect, drop] = useDrop(() => ({
           
           if (result.success && result.newCompound) {
             store.saveHistory()
-            if (item.id) store.removeBox(item.id, false)
-            store.removeBox(overlapping.id, false)
+            if (item.id) store.removeBox(item.id, false, true)
+            store.removeBox(overlapping.id, false, true)
 
-            store.addBox({
+            const newId = store.addBox({
               title: result.newCompound.name,
               symbol: undefined,
               icon: result.newCompound.icon,
@@ -266,10 +284,13 @@ const [collect, drop] = useDrop(() => ({
               components: result.newCompound.components,
               current_occupied_slots: result.newCompound.current_occupied_slots,
               left: overlapping.left,
-              top: overlapping.top
+              top: overlapping.top,
+              isNew: true
             }, false)
 
-            if (!resources.value.find((r) => r.formula === result.newCompound!.formula)) {
+            const isNewDiscovery = !resources.value.find((r) => r.formula === result.newCompound!.formula)
+
+            if (isNewDiscovery) {
               addResource({
                 title: result.newCompound!.name,
                 icon: result.newCompound!.icon,
@@ -277,10 +298,13 @@ const [collect, drop] = useDrop(() => ({
                 components: result.newCompound!.components,
                 type: 'Kovalen'
               })
+              store.triggerSuccessAnimation(newId)
             }
+            playSound('fusion')
             return
           } else if (result.reason === 'capacity_reached') {
             store.triggerRejectAnimation(overlapping.id)
+            playSound('failed')
             // allow it to drop next to it normally
           }
         }
@@ -326,6 +350,7 @@ const [collect, drop] = useDrop(() => ({
             :symbol="value.symbol"
             :icon="value.icon"
             :selected="selectedIds.includes(String(key))"
+            :class="{ 'is-new': value.isNew }"
         >
           <ItemCard 
             size="small" 
@@ -338,6 +363,7 @@ const [collect, drop] = useDrop(() => ({
             :selected="selectedIds.includes(String(key))"
             :isHovered="overlappingId === String(key)"
             :isRejected="store.rejectedBoxId === String(key)"
+            :isSuccess="store.successBoxId === String(key)"
           />
         </Box>
       </TransitionGroup>
@@ -437,6 +463,15 @@ const [collect, drop] = useDrop(() => ({
   height: 100%;
   overflow: hidden;
   z-index: 1;
+}
+
+.box-list-enter-active.is-new {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.box-list-enter-from.is-new {
+  opacity: 0;
+  transform: scale(0.5);
 }
 
 .box-list-leave-active {

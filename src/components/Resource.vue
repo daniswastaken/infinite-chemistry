@@ -3,6 +3,7 @@ import { useDrag } from 'vue3-dnd'
 import { ItemTypes } from './ItemTypes'
 import { toRefs } from '@vueuse/core'
 import ItemCard from "@/components/ItemCard.vue";
+import { playSound } from '@/utils/audio'
 
 const props = defineProps<{
   emoji?: string
@@ -29,6 +30,7 @@ const { isDragging } = toRefs(collect)
       :ref="drag"
       role="Box"
       data-testid="box"
+      @mousedown="playSound('put', 0.8)"
   >
     <ItemCard :title="title" :formula="formula" :emoji="emoji" :symbol="symbol" :icon="icon" size="small"></ItemCard>
   </div>
