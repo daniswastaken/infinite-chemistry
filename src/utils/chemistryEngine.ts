@@ -35,6 +35,7 @@ function toSubscript(n: number): string {
  * Elements not in this list (should not appear, but fallback to Infinity).
  */
 const NOMENCLATURE_PRIORITY: string[] = [
+  'Al',
   'B',
   'Si',
   'C',
@@ -98,10 +99,29 @@ export function attemptBond(
 
   if (!isTargetSingleAtom && !isAttachmentSingleAtom) {
     if (isSameBasePolymer(targetComps, attachmentComps)) {
-      if (isMoleculeSaturated(targetComps) && isMoleculeSaturated(attachmentComps)) {
+      const isTargetDimerEx = isStrictDimerException(targetComps)
+      const isAttachDimerEx = isStrictDimerException(attachmentComps)
+
+      if (
+        (isMoleculeSaturated(targetComps) && isMoleculeSaturated(attachmentComps)) ||
+        (isTargetDimerEx && isAttachDimerEx)
+      ) {
         // Calculate the proposed central atom count
         const centralSym = getCentralAtom(targetComps)
         if (centralSym) {
+          const centralEl = elements.find((e) => e.symbol === centralSym)
+
+          // Octet Limit & Metal Check: Reject polymerization if central atom is from Period 1 & 2 (atomic ≤ 10)
+          // or if it doesn't support covalent bonding.
+          // EXCEPTION: Aluminum (Al) in AlCl3 is allowed via isStrictDimerException.
+          if (
+            centralEl &&
+            (centralEl.atomicNumber <= 10 || !centralEl.supports_covalent) &&
+            !isTargetDimerEx
+          ) {
+            return { success: false, reason: 'capacity_reached' }
+          }
+
           const targetCentralCount = targetComps[centralSym] || 0
           const attachmentCentralCount = attachmentComps[centralSym] || 0
           const totalCentral = targetCentralCount + attachmentCentralCount
@@ -368,4 +388,17 @@ function capitalize(s: string): string {
 
 function decapitalize(s: string): string {
   return s.charAt(0).toLowerCase() + s.slice(1)
+}
+
+function isStrictDimerException(comps: Record<string, number>): boolean {
+  const keys = Object.keys(comps)
+  if (keys.length !== 2) return false
+
+  // AlCl3
+  if (comps['Al'] === 1 && comps['Cl'] === 3 && keys.length === 2) return true
+
+  // ClO3
+  if (comps['Cl'] === 1 && comps['O'] === 3 && keys.length === 2) return true
+
+  return false
 }
