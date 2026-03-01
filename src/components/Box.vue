@@ -3,6 +3,9 @@ import {useDrag} from 'vue3-dnd'
 import {ItemTypes} from './ItemTypes'
 import {toRefs} from '@vueuse/core'
 import { playSound } from '@/utils/audio'
+import {useBoxesStore} from "@/stores/useBoxesStore";
+
+const store = useBoxesStore()
 
 const props = defineProps<{
   id: any
@@ -16,13 +19,18 @@ const props = defineProps<{
   hideSourceOnDrag?: boolean
   loading?: boolean
   selected?: boolean
+  zIndex?: number
 }>()
 
 // No getEmptyImage/dragPreview needed — TouchBackend doesn't use the HTML5
 // drag API so there is no native ghost to suppress.
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
-  item: {id: props.id, left: props.left, top: props.top, title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula},
+  item: () => {
+    store.bringToFront(props.id)
+    playSound('put', 0.5)
+    return {id: props.id, left: props.left, top: props.top, title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula}
+  },
   collect: monitor => ({
     isDragging: monitor.isDragging(),
   }),
@@ -35,10 +43,9 @@ const {isDragging} = toRefs(collect)
       :ref="drag"
       :id="props.id"
       class="absolute cursor-grab"
-      :style="{ left: `${left}px`, top: `${top}px`, opacity: isDragging ? 0 : 1 }"
+      :style="{ left: `${left}px`, top: `${top}px`, opacity: isDragging ? 0 : 1, zIndex: zIndex || 1 }"
       role="Box"
       data-testid="box"
-      @mousedown="playSound('put', 0.5)"
   >
     <div v-if="loading">
       <div

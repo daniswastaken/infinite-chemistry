@@ -5,3 +5,133 @@
 body {
   font-family: 'Inter', sans-serif;
 }
+
+/* Desktop defaults: controls row is invisible, buttons are fixed */
+.mobile-controls-row {
+  display: contents; /* on desktop, acts as if the wrapper doesn't exist */
+}
+
+.desktop-control-btn {
+  position: fixed;
+  bottom: 1rem;
+  z-index: 10;
+}
+
+/* ============================================================
+   MOBILE RESPONSIVE LAYOUT  (max-width: 768px)
+   Converts the desktop right-sidebar into a bottom tray.
+   ============================================================ */
+@media (max-width: 768px) {
+  /* --- Root Layout: vertical flex column -------------------- */
+  .mobile-root {
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+  }
+
+  /* --- Canvas Area: fills the remaining space above tray ---- */
+  .mobile-canvas-area {
+    flex: 1 1 0%;
+    position: relative;
+    overflow: hidden;
+    min-height: 0; /* allow flex shrinking */
+  }
+
+  /* --- Logo: absolute within canvas, not fixed ------------- */
+  .mobile-logo {
+    position: absolute !important;
+  }
+
+  /* --- Controls Row: floats inside the canvas at bottom-right */
+  .mobile-controls-row {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 4px;
+    z-index: 10;
+  }
+
+  /* Override the desktop fixed-position buttons inside the row */
+  .mobile-controls-row .desktop-control-btn {
+    position: static !important;
+    right: auto !important;
+  }
+
+  /* --- Sidebar → Bottom Tray ------------------------------ */
+  .mobile-sidebar {
+    position: static !important;
+    width: 100% !important;
+    height: 35dvh !important;
+    border-left: none !important;
+    border-top: 1px solid #c8c8c8 !important;
+    flex-shrink: 0;
+  }
+
+  /* Hide the drag-to-resize handle on mobile */
+  .mobile-resize-handle {
+    display: none !important;
+  }
+
+  /* --- AvailableResources: reorder children ---------------- */
+  /* The sidebar's flex-col puts AvailableResources as its child.
+     Inside AvailableResources we have two root-level elements:
+       1. .mobile-resources-wrapper  (resource list + fade)
+       2. .mobile-tabs-search        (tabs + search)
+     On mobile we flip the visual order so tabs/search appear ABOVE
+     the scrollable list. We also need the parent (sidebar) to
+     host a proper flex column for this ordering to work. */
+
+  .mobile-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Tabs & search come first visually */
+  .mobile-tabs-search {
+    order: -1;
+    position: static !important;
+    flex-shrink: 0;
+  }
+
+  /* Resource list fills remaining space */
+  .mobile-resources-wrapper {
+    order: 1;
+    flex: 1 1 0%;
+    min-height: 0;
+  }
+
+  /* Horizontal scroll for explicit rows */
+  .mobile-resource-list {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 8px !important;
+    padding-right: 48px !important;
+    touch-action: pan-x !important;
+    scrollbar-width: none !important; /* Firefox */
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .mobile-resource-list::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Right-side fade overlay */
+  .mobile-fade-overlay {
+    height: 100% !important;
+    width: 40px !important;
+    top: 0 !important;
+    bottom: auto !important;
+    right: 0 !important;
+    left: auto !important;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 1)
+    ) !important;
+  }
+}

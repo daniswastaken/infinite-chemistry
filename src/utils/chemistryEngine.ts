@@ -16,6 +16,16 @@ export interface BondAttemptResult {
   }
 }
 
+// ─── Preload Icons ───────────────────────────────────────────────────────────
+
+const COVALENT_ICON_URL = new URL('../assets/icons/covalent.svg', import.meta.url).href
+const IONIC_ICON_URL = new URL('../assets/icons/ionic.svg', import.meta.url).href
+
+if (typeof Image !== 'undefined') {
+  new Image().src = COVALENT_ICON_URL
+  new Image().src = IONIC_ICON_URL
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function capitalize(s: string): string {
@@ -195,7 +205,7 @@ function handleIonicBond(
     newCompound: {
       name,
       formula,
-      icon: new URL('../assets/icons/ionic.svg', import.meta.url).href,
+      icon: IONIC_ICON_URL,
       components: newComps,
       current_occupied_slots: 999, // Ionic compounds are fully satisfied
       bondType: 'ionic'
@@ -303,7 +313,7 @@ export function attemptBond(
               newCompound: {
                 name,
                 formula,
-                icon: new URL('../assets/icons/covalent.svg', import.meta.url).href,
+                icon: COVALENT_ICON_URL,
                 components: newComps,
                 current_occupied_slots: 999,
                 bondType: 'covalent'
@@ -439,7 +449,7 @@ export function attemptBond(
     newCompound: {
       name,
       formula,
-      icon: new URL('../assets/icons/covalent.svg', import.meta.url).href,
+      icon: COVALENT_ICON_URL,
       components: newComps,
       current_occupied_slots: occupied,
       bondType: 'covalent'

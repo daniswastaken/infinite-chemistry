@@ -16,7 +16,10 @@ const props = defineProps<{
 
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
-  item: { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula, components: props.components },
+  item: () => {
+    playSound('put', 0.8)
+    return { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula, components: props.components }
+  },
   collect: monitor => ({
     isDragging: monitor.isDragging(),
   }),
@@ -30,7 +33,6 @@ const { isDragging } = toRefs(collect)
       :ref="drag"
       role="Box"
       data-testid="box"
-      @mousedown="playSound('put', 0.8)"
   >
     <ItemCard :title="title" :formula="formula" :emoji="emoji" :symbol="symbol" :icon="icon" size="small"></ItemCard>
   </div>

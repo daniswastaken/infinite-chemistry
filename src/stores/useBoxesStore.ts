@@ -16,6 +16,7 @@ export interface BoxStoreEntry {
   max_covalent_slots?: number
   current_occupied_slots?: number
   components?: Record<string, number>
+  zIndex?: number
 }
 
 export const useBoxesStore = defineStore('counter', () => {
@@ -31,6 +32,14 @@ export const useBoxesStore = defineStore('counter', () => {
   const rejectedBoxId = ref<string | null>(null)
   const successBoxId = ref<string | null>(null)
   const successStartTime = ref<number>(0)
+  const highestZIndex = ref(1)
+
+  function bringToFront(id: string) {
+    if (boxes[id]) {
+      highestZIndex.value++
+      boxes[id].zIndex = highestZIndex.value
+    }
+  }
 
   function toggleFormulas() {
     showFormulas.value = !showFormulas.value
@@ -77,6 +86,8 @@ export const useBoxesStore = defineStore('counter', () => {
 
   function addBox(box: BoxStoreEntry, shouldSaveHistory = true) {
     if (shouldSaveHistory) saveHistory()
+    highestZIndex.value++
+    box.zIndex = highestZIndex.value
     const randomId = Math.random().toString(36).substr(2, 5)
     boxes[randomId] = box
     return randomId
@@ -105,6 +116,7 @@ export const useBoxesStore = defineStore('counter', () => {
       saveHistory()
       boxes[id].left = left
       boxes[id].top = top
+      bringToFront(id)
     }
   }
 
@@ -162,6 +174,7 @@ export const useBoxesStore = defineStore('counter', () => {
     triggerRejectAnimation,
     successBoxId,
     successStartTime,
-    triggerSuccessAnimation
+    triggerSuccessAnimation,
+    bringToFront
   }
 })

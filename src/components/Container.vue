@@ -320,77 +320,174 @@ const [collect, drop] = useDrop(() => ({
     return undefined
   },
 }))
+
+// Ghost entries used to animate a box deletion above the sidebar z-index
+interface GhostEntry {
+  id: string
+  fixedLeft: number
+  fixedTop: number
+  title: string
+  formula?: string
+  emoji?: string
+  symbol?: string
+  icon?: string
+  animating: boolean
+}
+const deletingBoxGhosts = ref<GhostEntry[]>([])
+
+const ANIM_DURATION_MS = 150
+
+function removeBoxWithAnimation(id: string, dropPosition?: { x: number, y: number }) {
+  const box = (store.boxes as any)[id]
+  if (!box) return
+
+  // Get the real DOM element of the box to find its screen position
+  const el = document.getElementById(id)
+  let fixedLeft = box.left
+  let fixedTop = box.top
+
+  // If we have an explicit drop position from the monitor, use that.
+  // Otherwise fall back to the element's current DOM position.
+  if (dropPosition) {
+    fixedLeft = dropPosition.x
+    fixedTop = dropPosition.y
+  } else if (el) {
+    const rect = el.getBoundingClientRect()
+    fixedLeft = rect.left
+    fixedTop = rect.top
+  } else if (containerElement.value) {
+    // Fallback: offset by canvas container's position
+    const containerRect = containerElement.value.getBoundingClientRect()
+    fixedLeft = containerRect.left + box.left
+    fixedTop = containerRect.top + box.top
+  }
+
+  // Push a ghost entry to render in the Teleport overlay
+  const ghost: GhostEntry = {
+    id,
+    fixedLeft,
+    fixedTop,
+    title: box.title,
+    formula: box.formula,
+    emoji: box.emoji,
+    symbol: box.symbol,
+    icon: box.icon,
+    animating: false
+  }
+  deletingBoxGhosts.value.push(ghost)
+
+  // Immediately remove the real box (it vanishes from canvas)
+  store.removeBox(id, true, true) // shouldSaveHistory=true, silent=true (no sound yet)
+  playSound('delete')
+
+  // On next frame, set animating=true to trigger the CSS transition.
+  // Double rAF: first rAF = Vue renders ghost in DOM (scale:1),
+  // second rAF = browser paints it, THEN we flip to scale:0 so the transition fires.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const g = deletingBoxGhosts.value.find(g => g.id === id)
+      if (g) g.animating = true
+    })
+  })
+
+  // Remove ghost after animation plays out
+  setTimeout(() => {
+    deletingBoxGhosts.value = deletingBoxGhosts.value.filter(g => g.id !== id)
+  }, ANIM_DURATION_MS + 50)
+}
+
+const [collectSidebar, dropSidebar] = useDrop(() => ({
+  accept: ItemTypes.BOX,
+  drop(item: DragItem, monitor) {
+    if (item.id) {
+      // getSourceClientOffset gives the top-left of the dragged element at the drop point
+      const sourceOffset = monitor.getSourceClientOffset()
+      const dropPosition = sourceOffset ? { x: sourceOffset.x, y: sourceOffset.y } : undefined
+      removeBoxWithAnimation(item.id, dropPosition)
+    }
+    return undefined
+  },
+  collect: (monitor) => ({
+    isOver: monitor.isOver(),
+    canDrop: monitor.canDrop() && monitor.getItem()?.id // Only show feedback if it's a canvas item
+  })
+}))
 </script>
 
 <template>
   <div 
     ref="containerElement" 
-    class="w-full h-full relative outline-none"
+    class="mobile-root w-full h-full relative outline-none"
     tabindex="0"
     @mousedown="startSelection"
     @mousemove="updateSelection"
     @mouseup="finishSelection"
     @mouseleave="finishSelection"
   >
-    <div id="particles-js" class="absolute inset-0 z-0 pointer-events-none"></div>
-    <CustomDragLayer />
+    <!-- Canvas Area -->
+    <div class="mobile-canvas-area">
+      <div id="particles-js" class="absolute inset-0 z-0 pointer-events-none"></div>
+      <CustomDragLayer />
 
-    <div :ref="drop" class="container">
-      <TransitionGroup name="box-list">
-        <Box
-            v-for="(value, key) in boxes"
-            @contextmenu.prevent="store.removeBox(String(key))"
-            :id="String(key)"
-            :key="String(key)"
-            :left="value.left"
-            :top="value.top"
-            :loading="value.loading"
-            :title="value.title"
-            :formula="value.formula"
-            :emoji="value.emoji"
-            :symbol="value.symbol"
-            :icon="value.icon"
-            :selected="selectedIds.includes(String(key))"
-            :class="{ 'is-new': value.isNew }"
-        >
-          <ItemCard 
-            size="small" 
-            :id="String(key)" 
-            :title="value.title" 
-            :formula="value.formula"
-            :emoji="value.emoji" 
-            :symbol="value.symbol" 
-            :icon="value.icon"
-            :selected="selectedIds.includes(String(key))"
-            :isHovered="overlappingId === String(key)"
-            :isRejected="store.rejectedBoxId === String(key)"
-            :isSuccess="store.successBoxId === String(key)"
-          />
-        </Box>
-      </TransitionGroup>
-      
-      <!-- Selection Rectangle -->
-      <div 
-        v-if="isSelecting && selectionRect" 
-        class="absolute border border-blue-500 bg-blue-500/10 pointer-events-none z-[50] rounded-sm"
-        :style="{
-          left: `${selectionRect.x}px`,
-          top: `${selectionRect.y}px`,
-          width: `${selectionRect.width}px`,
-          height: `${selectionRect.height}px`
-        }"
-      ></div>
-    </div>
+      <div :ref="drop" class="container">
+        <TransitionGroup name="box-list">
+          <Box
+              v-for="(value, key) in boxes"
+              @contextmenu.prevent="store.removeBox(String(key))"
+              :id="String(key)"
+              :key="String(key)"
+              :left="value.left"
+              :top="value.top"
+              :loading="value.loading"
+              :title="value.title"
+              :formula="value.formula"
+              :emoji="value.emoji"
+              :symbol="value.symbol"
+              :icon="value.icon"
+              :selected="selectedIds.includes(String(key))"
+              :zIndex="value.zIndex"
+              :class="{ 'is-new': value.isNew }"
+          >
+            <ItemCard 
+              size="small" 
+              :id="String(key)" 
+              :title="value.title" 
+              :formula="value.formula"
+              :emoji="value.emoji" 
+              :symbol="value.symbol" 
+              :icon="value.icon"
+              :selected="selectedIds.includes(String(key))"
+              :isHovered="overlappingId === String(key)"
+              :isRejected="store.rejectedBoxId === String(key)"
+              :isSuccess="store.successBoxId === String(key)"
+            />
+          </Box>
+        </TransitionGroup>
+        
+        <!-- Selection Rectangle -->
+        <div 
+          v-if="isSelecting && selectionRect" 
+          class="absolute border border-blue-500 bg-blue-500/10 pointer-events-none z-[50] rounded-sm"
+          :style="{
+            left: `${selectionRect.x}px`,
+            top: `${selectionRect.y}px`,
+            width: `${selectionRect.width}px`,
+            height: `${selectionRect.height}px`
+          }"
+        ></div>
+      </div>
 
-    <!-- Background branding like Infinite Craft -->
-    <div class="fixed top-[15px] left-[15px] z-[2] pointer-events-none">
-      <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px]" alt="Infinite Chemistry Logo" />
-    </div>
+      <!-- Background branding like Infinite Craft -->
+      <div class="mobile-logo absolute top-[15px] left-[15px] z-0 pointer-events-none opacity-80">
+        <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px]" alt="Infinite Chemistry Logo" />
+      </div>
 
+      <!-- Controls Row (inside canvas, floats at bottom-right on mobile) -->
+      <div class="mobile-controls-row">
       <button 
         @click="store.toggleFormulas" 
+        class="desktop-control-btn p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 60}px` }" 
-        class="fixed bottom-4 z-[10] p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
         :title="store.showFormulas ? 'Tampilkan Nama' : 'Tampilkan Rumus'"
       >
         <img 
@@ -400,14 +497,21 @@ const [collect, drop] = useDrop(() => ({
         />
       </button>
 
-      <button @click="handleClearClick" :style="{ right: `${sidebarWidth + 16}px` }" class="fixed bottom-4 z-[10] p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" title="Bersihkan Kanvas">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-gray-500 group-hover:text-gray-700">
+      <button 
+        @click="handleClearClick" 
+        class="desktop-control-btn p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        :style="{ right: `${sidebarWidth + 16}px` }" 
+        title="Bersihkan Kanvas"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-all">
           <path d="m16 22-1-4"/>
           <path d="M19 14a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1"/>
           <path d="M19 14H5l-1.973 6.767A1 1 0 0 0 4 22h16a1 1 0 0 0 .973-1.233z"/>
           <path d="m8 22 1-4"/>
         </svg>
       </button>
+      </div>
+    </div>
 
     <!-- Confirmation Modal -->
     <Transition name="fade">
@@ -444,13 +548,39 @@ const [collect, drop] = useDrop(() => ({
       </div>
     </Transition>
 
-    <div :style="{ width: `${sidebarWidth}px` }" class="fixed right-0 top-0 bottom-0 bg-white border-l border-[#c8c8c8] flex flex-col z-[10]">
+    <!-- Sidebar (desktop) / Bottom Tray (mobile) -->
+    <div 
+      :ref="dropSidebar" 
+      :style="{ width: `${sidebarWidth}px` }" 
+      class="mobile-sidebar fixed right-0 top-0 bottom-0 bg-white border-l border-[#c8c8c8] flex flex-col z-[10] transition-colors duration-200"
+      :class="{ 'bg-red-50/50': collectSidebar.isOver && collectSidebar.canDrop }"
+    >
       <div
-          class="absolute left-0 top-0 bottom-0 w-[5px] cursor-col-resize hover:bg-[#f0f0f0] transition-colors z-[11]"
+          class="mobile-resize-handle absolute left-0 top-0 bottom-0 w-[5px] cursor-col-resize hover:bg-[#f0f0f0] transition-colors z-[11]"
           @mousedown="startResize"
       ></div>
       <AvailableResources></AvailableResources>
     </div>
+
+    <!-- Delete animation ghosts: Teleported to <body> so they render above the sidebar z-index -->
+    <Teleport to="body">
+      <div
+        v-for="ghost in deletingBoxGhosts"
+        :key="ghost.id"
+        class="ghost-delete pointer-events-none"
+        :class="{ 'ghost-delete--out': ghost.animating }"
+        :style="{ left: `${ghost.fixedLeft}px`, top: `${ghost.fixedTop}px` }"
+      >
+        <ItemCard
+          size="small"
+          :title="ghost.title"
+          :formula="ghost.formula"
+          :emoji="ghost.emoji"
+          :symbol="ghost.symbol"
+          :icon="ghost.icon"
+        />
+      </div>
+    </Teleport>
 
   </div>
 </template>
@@ -491,6 +621,20 @@ const [collect, drop] = useDrop(() => ({
 
 .fade-enter-from,
 .fade-leave-to {
+  opacity: 0;
+}
+
+/* Ghost element rendered via Teleport above all other z-layers for delete animation */
+.ghost-delete {
+  position: fixed;
+  z-index: 9999;
+  transition: all 0.15s cubic-bezier(0.3, 0, 1, 1);
+  transform: scale(1);
+  opacity: 1;
+}
+
+.ghost-delete--out {
+  transform: scale(0);
   opacity: 0;
 }
 </style>

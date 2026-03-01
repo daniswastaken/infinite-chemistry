@@ -45,23 +45,51 @@ const filteredResources = computed(() => {
     return resource.title.toLowerCase().includes(query)
   })
 })
+
+const chunkedResources = computed(() => {
+  const isMobile = window.innerWidth <= 768;
+  const numRows = isMobile ? 3 : 1; // On mobile use 3 rows, desktop use 1 (standard wrap)
+  
+  if (!isMobile) {
+    return [filteredResources.value];
+  }
+
+  const rows: typeof filteredResources.value[] = Array.from({ length: numRows }, () => []);
+  filteredResources.value.forEach((res, index) => {
+    rows[index % numRows].push(res);
+  });
+  return rows;
+})
 </script>
 
 <template>
   <!-- Resource List Container with Fade -->
-  <div class="flex-1 overflow-hidden relative flex flex-col">
+  <div class="mobile-resources-wrapper flex-1 overflow-hidden relative flex flex-col">
 
     <!-- Resource List -->
-    <div class="flex-1 overflow-y-auto px-2 py-2 pb-24 flex gap-[6px] flex-wrap content-start custom-scroller">
-      <Resource v-for="resource in filteredResources" :key="resource.title" :title="resource.title" :formula="resource.formula" :emoji="resource.emoji" :symbol="resource.symbol" :icon="resource.icon" :components="resource.components"></Resource>
+    <div class="mobile-resource-list flex-1 overflow-y-auto px-2 pt-0 pb-24 md:py-2 content-start custom-scroller">
+      <template v-if="chunkedResources.length === 1">
+        <!-- Desktop: Standard wrap -->
+        <div class="flex gap-[6px] flex-wrap content-start">
+          <Resource v-for="resource in chunkedResources[0]" :key="resource.title" :title="resource.title" :formula="resource.formula" :emoji="resource.emoji" :symbol="resource.symbol" :icon="resource.icon" :components="resource.components"></Resource>
+        </div>
+      </template>
+      <template v-else>
+        <!-- Mobile: 3 explicit horizontal rows -->
+        <div class="flex flex-col gap-[6px]">
+          <div v-for="(row, idx) in chunkedResources" :key="idx" class="flex gap-[6px] w-max pr-[48px]">
+            <Resource v-for="resource in row" :key="resource.title" :title="resource.title" :formula="resource.formula" :emoji="resource.emoji" :symbol="resource.symbol" :icon="resource.icon" :components="resource.components"></Resource>
+          </div>
+        </div>
+      </template>
     </div>
 
     <!-- Fade Overlay -->
-    <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/90 via-white/50 to-transparent pointer-events-none z-[5]"></div>
+    <div class="mobile-fade-overlay absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/90 via-white/50 to-transparent pointer-events-none z-[5]"></div>
   </div>
 
   <!-- Search Bar and Tabs Container -->
-  <div class="mt-auto sticky bottom-0 z-10 w-full flex-shrink-0 bg-white">
+  <div class="mobile-tabs-search mt-auto sticky bottom-0 z-10 w-full flex-shrink-0 bg-white">
     
     <!-- Tabs -->
     <div class="flex items-end px-2 pt-2 gap-1 w-full scroller-hide border-b border-[#c8c8c8]">
@@ -102,7 +130,7 @@ const filteredResources = computed(() => {
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
       </div>
-      <input v-model="searchTerm" type="text" class="block w-full py-3 pl-10 pr-10 text-[16px] text-[#b0b0b0] bg-white focus:outline-none transition placeholder-[#b0b0b0]" :placeholder="`Search (${filteredResources.length}) items...`">
+      <input v-model="searchTerm" type="text" class="block w-full py-3 md:py-3 pl-10 md:pl-10 pr-10 text-[15px] md:text-[16px] text-[#b0b0b0] bg-white focus:outline-none transition placeholder-[#b0b0b0]" :placeholder="`Search (${filteredResources.length}) items...`">
       <button 
         v-if="searchTerm" 
         @click="searchTerm = ''" 
