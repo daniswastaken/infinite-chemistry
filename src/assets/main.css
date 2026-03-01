@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  overscroll-behavior-y: none;
+  touch-action: pan-x pan-y;
+}
+
 body {
   font-family: 'Inter', sans-serif;
 }
