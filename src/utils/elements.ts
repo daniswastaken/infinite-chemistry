@@ -16,6 +16,10 @@ export interface ElementInfo {
   electronegativity?: number
   possible_oxidation_states?: number[]
   ide_name?: string
+  anion_name?: string
+  primary_ionic_charge?: number
+  fixed_ionic_charge?: number
+  is_metal: boolean
   is_diatomic_element: boolean
   group_number: number | 'lanthanide' | 'actinide'
 }
@@ -33,8 +37,30 @@ export const elements: ElementInfo[] = [
     electronegativity: 2.2,
     possible_oxidation_states: [1, -1],
     ide_name: 'hidrida',
+    anion_name: 'hidrida',
     is_diatomic_element: true,
+    primary_ionic_charge: 1,
+    fixed_ionic_charge: 1,
+    is_metal: false,
     group_number: 1
+  },
+  {
+    atomicNumber: 2,
+    symbol: 'He',
+    name: 'Helium',
+    supports_covalent: true,
+    supports_ionic: true,
+    primary_covalent_valency: 1,
+    max_covalent_slots: 1,
+    valence_requirement: 1,
+    electronegativity: 4.5,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    ide_name: 'heliumida',
+    anion_name: 'heliumida',
+    is_diatomic_element: false,
+    is_metal: false,
+    group_number: 18
   },
   {
     atomicNumber: 3,
@@ -45,6 +71,10 @@ export const elements: ElementInfo[] = [
     electronegativity: 0.98,
     possible_oxidation_states: [1],
     is_diatomic_element: false,
+    anion_name: 'litiumida',
+    primary_ionic_charge: 1,
+    fixed_ionic_charge: 1,
+    is_metal: true,
     group_number: 1
   },
   {
@@ -56,6 +86,10 @@ export const elements: ElementInfo[] = [
     electronegativity: 1.57,
     possible_oxidation_states: [2],
     is_diatomic_element: false,
+    anion_name: 'beriliumida',
+    primary_ionic_charge: 2,
+    fixed_ionic_charge: 2,
+    is_metal: true,
     group_number: 2
   },
   {
@@ -69,7 +103,10 @@ export const elements: ElementInfo[] = [
     valence_requirement: 3,
     electronegativity: 2.04,
     ide_name: 'borida',
+    anion_name: 'borida',
     is_diatomic_element: false,
+    primary_ionic_charge: 3,
+    is_metal: false,
     group_number: 13
   },
   {
@@ -84,7 +121,11 @@ export const elements: ElementInfo[] = [
     electronegativity: 2.55,
     possible_oxidation_states: [4, 2, -4],
     ide_name: 'karbida',
+    anion_name: 'karbida',
     is_diatomic_element: false,
+    primary_ionic_charge: -4,
+    fixed_ionic_charge: -4,
+    is_metal: false,
     group_number: 14
   },
   {
@@ -93,13 +134,17 @@ export const elements: ElementInfo[] = [
     name: 'Nitrogen',
     supports_covalent: true,
     supports_ionic: true,
-    primary_covalent_valency: 3,
+    primary_covalent_valency: 1,
     max_covalent_slots: 5,
     valence_requirement: 3,
     electronegativity: 3.04,
     possible_oxidation_states: [3, 5, 4, 2, -3],
     ide_name: 'nitrida',
+    anion_name: 'nitrida',
     is_diatomic_element: true,
+    primary_ionic_charge: -3,
+    fixed_ionic_charge: -3,
+    is_metal: false,
     group_number: 15
   },
   {
@@ -114,7 +159,11 @@ export const elements: ElementInfo[] = [
     electronegativity: 3.44,
     possible_oxidation_states: [-2],
     ide_name: 'oksida',
+    anion_name: 'oksida',
     is_diatomic_element: true,
+    primary_ionic_charge: -2,
+    fixed_ionic_charge: -2,
+    is_metal: false,
     group_number: 16
   },
   {
@@ -129,8 +178,30 @@ export const elements: ElementInfo[] = [
     electronegativity: 3.98,
     possible_oxidation_states: [-1],
     ide_name: 'fluorida',
+    anion_name: 'fluorida',
     is_diatomic_element: true,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    is_metal: false,
     group_number: 17
+  },
+  {
+    atomicNumber: 10,
+    symbol: 'Ne',
+    name: 'Neon',
+    supports_covalent: true,
+    supports_ionic: true,
+    primary_covalent_valency: 1,
+    max_covalent_slots: 1,
+    valence_requirement: 1,
+    electronegativity: 4.0,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    ide_name: 'neonida',
+    anion_name: 'neonida',
+    is_diatomic_element: false,
+    is_metal: false,
+    group_number: 18
   },
   {
     atomicNumber: 11,
@@ -141,6 +212,10 @@ export const elements: ElementInfo[] = [
     electronegativity: 0.93,
     possible_oxidation_states: [1],
     is_diatomic_element: false,
+    anion_name: 'natriumida',
+    primary_ionic_charge: 1,
+    fixed_ionic_charge: 1,
+    is_metal: true,
     group_number: 1
   },
   {
@@ -152,6 +227,10 @@ export const elements: ElementInfo[] = [
     electronegativity: 1.31,
     possible_oxidation_states: [2],
     is_diatomic_element: false,
+    anion_name: 'magnesiumida',
+    primary_ionic_charge: 2,
+    fixed_ionic_charge: 2,
+    is_metal: true,
     group_number: 2
   },
   {
@@ -163,6 +242,10 @@ export const elements: ElementInfo[] = [
     electronegativity: 1.61,
     possible_oxidation_states: [3],
     is_diatomic_element: false,
+    anion_name: 'aluminiumida',
+    primary_ionic_charge: 3,
+    fixed_ionic_charge: 3,
+    is_metal: true,
     group_number: 13
   },
   {
@@ -176,7 +259,11 @@ export const elements: ElementInfo[] = [
     valence_requirement: 4,
     electronegativity: 1.9,
     ide_name: 'silisida',
+    anion_name: 'silisida',
     is_diatomic_element: false,
+    primary_ionic_charge: -4,
+    fixed_ionic_charge: -4,
+    is_metal: false,
     group_number: 14
   },
   {
@@ -185,13 +272,17 @@ export const elements: ElementInfo[] = [
     name: 'Fosfor',
     supports_covalent: true,
     supports_ionic: true,
-    primary_covalent_valency: 3,
+    primary_covalent_valency: 5,
     max_covalent_slots: 5,
-    valence_requirement: 3,
+    valence_requirement: 5,
     electronegativity: 2.19,
     possible_oxidation_states: [3, 5, -3],
     ide_name: 'fosfida',
+    anion_name: 'fosfida',
     is_diatomic_element: false,
+    primary_ionic_charge: -3,
+    fixed_ionic_charge: -3,
+    is_metal: false,
     group_number: 15
   },
   {
@@ -200,13 +291,17 @@ export const elements: ElementInfo[] = [
     name: 'Belerang',
     supports_covalent: true,
     supports_ionic: true,
-    primary_covalent_valency: 2,
+    primary_covalent_valency: 6,
     max_covalent_slots: 6,
-    valence_requirement: 2,
+    valence_requirement: 6,
     electronegativity: 2.58,
     possible_oxidation_states: [2, 4, 6, -2],
     ide_name: 'sulfida',
+    anion_name: 'sulfida',
     is_diatomic_element: false,
+    primary_ionic_charge: -2,
+    fixed_ionic_charge: -2,
+    is_metal: false,
     group_number: 16
   },
   {
@@ -221,8 +316,30 @@ export const elements: ElementInfo[] = [
     electronegativity: 3.16,
     possible_oxidation_states: [1, 3, 5, 7, -1],
     ide_name: 'klorida',
+    anion_name: 'klorida',
     is_diatomic_element: true,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    is_metal: false,
     group_number: 17
+  },
+  {
+    atomicNumber: 18,
+    symbol: 'Ar',
+    name: 'Argon',
+    supports_covalent: true,
+    supports_ionic: true,
+    primary_covalent_valency: 1,
+    max_covalent_slots: 1,
+    valence_requirement: 1,
+    electronegativity: 3.5,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    ide_name: 'argonida',
+    anion_name: 'argonida',
+    is_diatomic_element: false,
+    is_metal: false,
+    group_number: 18
   },
   {
     atomicNumber: 19,
@@ -232,6 +349,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [1],
     is_diatomic_element: false,
+    anion_name: 'kaliumida',
+    primary_ionic_charge: 1,
+    fixed_ionic_charge: 1,
+    is_metal: true,
     group_number: 1
   },
   {
@@ -242,6 +363,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2],
     is_diatomic_element: false,
+    anion_name: 'kalsiumida',
+    primary_ionic_charge: 2,
+    fixed_ionic_charge: 2,
+    is_metal: true,
     group_number: 2
   },
   {
@@ -252,6 +377,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [3],
     is_diatomic_element: false,
+    anion_name: 'skandiumida',
+    primary_ionic_charge: 3,
+    fixed_ionic_charge: 3,
+    is_metal: true,
     group_number: 3
   },
   {
@@ -262,6 +391,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [4, 3],
     is_diatomic_element: false,
+    anion_name: 'titaniumida',
+    primary_ionic_charge: 4,
+    is_metal: true,
     group_number: 4
   },
   {
@@ -272,16 +404,22 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [5, 4, 3, 2],
     is_diatomic_element: false,
+    anion_name: 'vanadiumida',
+    primary_ionic_charge: 5,
+    is_metal: true,
     group_number: 5
   },
   {
     atomicNumber: 24,
     symbol: 'Cr',
-    name: 'Krom',
+    name: 'Kromium',
     supports_covalent: false,
     supports_ionic: true,
     possible_oxidation_states: [3, 2, 6],
     is_diatomic_element: false,
+    anion_name: 'kromida',
+    primary_ionic_charge: 6,
+    is_metal: true,
     group_number: 6
   },
   {
@@ -292,6 +430,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2, 4, 7, 3, 6],
     is_diatomic_element: false,
+    anion_name: 'manganida',
+    primary_ionic_charge: 7,
+    is_metal: true,
     group_number: 7
   },
   {
@@ -302,6 +443,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2, 3],
     is_diatomic_element: false,
+    anion_name: 'besiida',
+    primary_ionic_charge: 3,
+    is_metal: true,
     group_number: 8
   },
   {
@@ -312,6 +456,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2, 3],
     is_diatomic_element: false,
+    anion_name: 'kobaltida',
+    primary_ionic_charge: 2,
+    is_metal: true,
     group_number: 9
   },
   {
@@ -322,6 +469,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2, 3],
     is_diatomic_element: false,
+    anion_name: 'nikelida',
+    primary_ionic_charge: 2,
+    is_metal: true,
     group_number: 10
   },
   {
@@ -332,6 +482,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2, 1],
     is_diatomic_element: false,
+    anion_name: 'tembagaida',
+    primary_ionic_charge: 2,
+    is_metal: true,
     group_number: 11
   },
   {
@@ -342,6 +495,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2],
     is_diatomic_element: false,
+    anion_name: 'sengida',
+    primary_ionic_charge: 2,
+    fixed_ionic_charge: 2,
+    is_metal: true,
     group_number: 12
   },
   {
@@ -352,6 +509,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [3],
     is_diatomic_element: false,
+    anion_name: 'galiumida',
+    primary_ionic_charge: 3,
+    is_metal: true,
     group_number: 13
   },
   {
@@ -365,7 +525,11 @@ export const elements: ElementInfo[] = [
     valence_requirement: 4,
     electronegativity: 2.01,
     ide_name: 'germanida',
+    anion_name: 'germanida',
     is_diatomic_element: false,
+    primary_ionic_charge: -4,
+    fixed_ionic_charge: -4,
+    is_metal: false,
     group_number: 14
   },
   {
@@ -375,11 +539,15 @@ export const elements: ElementInfo[] = [
     supports_covalent: true,
     supports_ionic: false,
     primary_covalent_valency: 3,
-    max_covalent_slots: 3,
+    max_covalent_slots: 6,
     valence_requirement: 3,
     electronegativity: 2.18,
     ide_name: 'arsenida',
+    anion_name: 'arsenida',
     is_diatomic_element: false,
+    primary_ionic_charge: -3,
+    fixed_ionic_charge: -3,
+    is_metal: false,
     group_number: 15
   },
   {
@@ -394,13 +562,17 @@ export const elements: ElementInfo[] = [
     electronegativity: 2.55,
     possible_oxidation_states: [4, 6, -2],
     ide_name: 'selenida',
+    anion_name: 'selenida',
     is_diatomic_element: false,
+    primary_ionic_charge: -2,
+    fixed_ionic_charge: -2,
+    is_metal: false,
     group_number: 16
   },
   {
     atomicNumber: 35,
     symbol: 'Br',
-    name: 'Brom',
+    name: 'Bromin',
     supports_covalent: true,
     supports_ionic: true,
     primary_covalent_valency: 1,
@@ -409,8 +581,30 @@ export const elements: ElementInfo[] = [
     electronegativity: 2.96,
     possible_oxidation_states: [1, 5, -1],
     ide_name: 'bromida',
+    anion_name: 'bromida',
     is_diatomic_element: true,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    is_metal: false,
     group_number: 17
+  },
+  {
+    atomicNumber: 36,
+    symbol: 'Kr',
+    name: 'Kripton',
+    supports_covalent: true,
+    supports_ionic: true,
+    primary_covalent_valency: 1,
+    max_covalent_slots: 1,
+    valence_requirement: 1,
+    electronegativity: 3.0,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    ide_name: 'kriptonida',
+    anion_name: 'kriptonida',
+    is_diatomic_element: false,
+    is_metal: false,
+    group_number: 18
   },
   {
     atomicNumber: 37,
@@ -420,6 +614,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [1],
     is_diatomic_element: false,
+    anion_name: 'rubidiumida',
+    primary_ionic_charge: 1,
+    fixed_ionic_charge: 1,
+    is_metal: true,
     group_number: 1
   },
   {
@@ -430,6 +628,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2],
     is_diatomic_element: false,
+    anion_name: 'stronsiumida',
+    primary_ionic_charge: 2,
+    fixed_ionic_charge: 2,
+    is_metal: true,
     group_number: 2
   },
   {
@@ -440,6 +642,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [3],
     is_diatomic_element: false,
+    anion_name: 'yttriumida',
+    primary_ionic_charge: 3,
+    is_metal: true,
     group_number: 3
   },
   {
@@ -450,6 +655,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [4],
     is_diatomic_element: false,
+    anion_name: 'zirkoniumida',
+    primary_ionic_charge: 4,
+    is_metal: true,
     group_number: 4
   },
   {
@@ -460,6 +668,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [5, 3],
     is_diatomic_element: false,
+    anion_name: 'niobiumida',
+    primary_ionic_charge: 5,
+    is_metal: true,
     group_number: 5
   },
   {
@@ -470,6 +681,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [6, 4],
     is_diatomic_element: false,
+    anion_name: 'molibdenida',
+    primary_ionic_charge: 6,
+    is_metal: true,
     group_number: 6
   },
   {
@@ -480,6 +694,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [7, 4],
     is_diatomic_element: false,
+    anion_name: 'teknesiumida',
+    primary_ionic_charge: 7,
+    is_metal: true,
     group_number: 7
   },
   {
@@ -490,6 +707,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [3, 4],
     is_diatomic_element: false,
+    anion_name: 'rutheniumida',
+    primary_ionic_charge: 3,
+    is_metal: true,
     group_number: 8
   },
   {
@@ -500,6 +720,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [3],
     is_diatomic_element: false,
+    anion_name: 'rhodiumida',
+    primary_ionic_charge: 3,
+    is_metal: true,
     group_number: 9
   },
   {
@@ -510,6 +733,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2, 4],
     is_diatomic_element: false,
+    anion_name: 'paladiumida',
+    primary_ionic_charge: 2,
+    is_metal: true,
     group_number: 10
   },
   {
@@ -520,6 +746,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [1],
     is_diatomic_element: false,
+    anion_name: 'perakida',
+    primary_ionic_charge: 1,
+    fixed_ionic_charge: 1,
+    is_metal: true,
     group_number: 11
   },
   {
@@ -530,6 +760,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2],
     is_diatomic_element: false,
+    anion_name: 'kadmiumida',
+    primary_ionic_charge: 2,
+    fixed_ionic_charge: 2,
+    is_metal: true,
     group_number: 12
   },
   {
@@ -540,6 +774,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [3, 1],
     is_diatomic_element: false,
+    anion_name: 'indiumida',
+    primary_ionic_charge: 3,
+    is_metal: true,
     group_number: 13
   },
   {
@@ -550,6 +787,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [4, 2],
     is_diatomic_element: false,
+    anion_name: 'timahida',
+    primary_ionic_charge: 4,
+    is_metal: true,
     group_number: 14
   },
   {
@@ -563,7 +803,11 @@ export const elements: ElementInfo[] = [
     valence_requirement: 3,
     electronegativity: 2.05,
     ide_name: 'antimonida',
+    anion_name: 'antimonida',
     is_diatomic_element: false,
+    primary_ionic_charge: -3,
+    fixed_ionic_charge: -3,
+    is_metal: false,
     group_number: 15
   },
   {
@@ -572,18 +816,22 @@ export const elements: ElementInfo[] = [
     name: 'Telurium',
     supports_covalent: true,
     supports_ionic: false,
-    primary_covalent_valency: 2,
-    max_covalent_slots: 2,
-    valence_requirement: 2,
+    primary_covalent_valency: 4,
+    max_covalent_slots: 6,
+    valence_requirement: 4,
     electronegativity: 2.1,
     ide_name: 'telurida',
+    anion_name: 'telurida',
     is_diatomic_element: false,
+    primary_ionic_charge: -2,
+    fixed_ionic_charge: -2,
+    is_metal: false,
     group_number: 16
   },
   {
     atomicNumber: 53,
     symbol: 'I',
-    name: 'Yodium',
+    name: 'Iodin',
     supports_covalent: true,
     supports_ionic: true,
     primary_covalent_valency: 1,
@@ -591,8 +839,30 @@ export const elements: ElementInfo[] = [
     electronegativity: 2.66,
     possible_oxidation_states: [1, 5, 7, -1],
     ide_name: 'iodida',
+    anion_name: 'iodida',
     is_diatomic_element: true,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    is_metal: false,
     group_number: 17
+  },
+  {
+    atomicNumber: 54,
+    symbol: 'Xe',
+    name: 'Xenon',
+    supports_covalent: true,
+    supports_ionic: true,
+    primary_covalent_valency: 1,
+    max_covalent_slots: 1,
+    valence_requirement: 1,
+    electronegativity: 2.6,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    ide_name: 'xenonida',
+    anion_name: 'xenonida',
+    is_diatomic_element: false,
+    is_metal: false,
+    group_number: 18
   },
   {
     atomicNumber: 55,
@@ -602,6 +872,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [1],
     is_diatomic_element: false,
+    anion_name: 'sesiumida',
+    primary_ionic_charge: 1,
+    fixed_ionic_charge: 1,
+    is_metal: true,
     group_number: 1
   },
   {
@@ -612,6 +886,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2],
     is_diatomic_element: false,
+    anion_name: 'bariumida',
+    primary_ionic_charge: 2,
+    fixed_ionic_charge: 2,
+    is_metal: true,
     group_number: 2
   },
   {
@@ -622,6 +900,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [4],
     is_diatomic_element: false,
+    anion_name: 'hafniumida',
+    primary_ionic_charge: 4,
+    is_metal: true,
     group_number: 4
   },
   {
@@ -632,6 +913,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [5],
     is_diatomic_element: false,
+    anion_name: 'tantalumida',
+    primary_ionic_charge: 5,
+    is_metal: true,
     group_number: 5
   },
   {
@@ -642,6 +926,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [6, 4],
     is_diatomic_element: false,
+    anion_name: 'wolframida',
+    primary_ionic_charge: 6,
+    is_metal: true,
     group_number: 6
   },
   {
@@ -652,6 +939,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [7, 4, 6],
     is_diatomic_element: false,
+    anion_name: 'rheniumida',
+    primary_ionic_charge: 7,
+    is_metal: true,
     group_number: 7
   },
   {
@@ -662,6 +952,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [4, 8, 3],
     is_diatomic_element: false,
+    anion_name: 'osmiumida',
+    primary_ionic_charge: 4,
+    is_metal: true,
     group_number: 8
   },
   {
@@ -672,6 +965,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [4, 3, 6],
     is_diatomic_element: false,
+    anion_name: 'iridiumida',
+    primary_ionic_charge: 4,
+    is_metal: true,
     group_number: 9
   },
   {
@@ -682,6 +978,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [4, 2],
     is_diatomic_element: false,
+    anion_name: 'platinaida',
+    primary_ionic_charge: 4,
+    is_metal: true,
     group_number: 10
   },
   {
@@ -692,6 +991,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [3, 1],
     is_diatomic_element: false,
+    anion_name: 'emasida',
+    primary_ionic_charge: 3,
+    is_metal: true,
     group_number: 11
   },
   {
@@ -702,6 +1004,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2, 1],
     is_diatomic_element: false,
+    anion_name: 'raksaida',
+    primary_ionic_charge: 2,
+    is_metal: true,
     group_number: 12
   },
   {
@@ -712,6 +1017,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [3, 1],
     is_diatomic_element: false,
+    anion_name: 'thalliumida',
+    primary_ionic_charge: 3,
+    is_metal: true,
     group_number: 13
   },
   {
@@ -722,6 +1030,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2, 4],
     is_diatomic_element: false,
+    anion_name: 'timbalida',
+    primary_ionic_charge: 4,
+    is_metal: true,
     group_number: 14
   },
   {
@@ -732,6 +1043,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [3, 5],
     is_diatomic_element: false,
+    anion_name: 'bismutida',
+    primary_ionic_charge: 3,
+    is_metal: true,
     group_number: 15
   },
   {
@@ -745,7 +1059,11 @@ export const elements: ElementInfo[] = [
     valence_requirement: 2,
     electronegativity: 2.02,
     ide_name: 'polonida',
+    anion_name: 'polonida',
     is_diatomic_element: false,
+    primary_ionic_charge: -2,
+    fixed_ionic_charge: -2,
+    is_metal: false,
     group_number: 16
   },
   {
@@ -759,7 +1077,11 @@ export const elements: ElementInfo[] = [
     valence_requirement: 1,
     electronegativity: 2.2,
     ide_name: 'astatinida',
+    anion_name: 'astatinida',
     is_diatomic_element: false,
+    primary_ionic_charge: -1,
+    fixed_ionic_charge: -1,
+    is_metal: false,
     group_number: 17
   },
   {
@@ -770,6 +1092,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [1],
     is_diatomic_element: false,
+    anion_name: 'fransiumida',
+    primary_ionic_charge: 1,
+    fixed_ionic_charge: 1,
+    is_metal: true,
     group_number: 1
   },
   {
@@ -780,6 +1106,10 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [2],
     is_diatomic_element: false,
+    anion_name: 'radiumida',
+    primary_ionic_charge: 2,
+    fixed_ionic_charge: 2,
+    is_metal: true,
     group_number: 2
   },
   {
@@ -790,6 +1120,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [4],
     is_diatomic_element: false,
+    anion_name: 'rutherfordiumida',
+    primary_ionic_charge: 4,
+    is_metal: true,
     group_number: 4
   },
   {
@@ -800,6 +1133,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [5],
     is_diatomic_element: false,
+    anion_name: 'dubniumida',
+    primary_ionic_charge: 5,
+    is_metal: true,
     group_number: 5
   },
   {
@@ -810,6 +1146,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [6],
     is_diatomic_element: false,
+    anion_name: 'seaborgiumida',
+    primary_ionic_charge: 6,
+    is_metal: true,
     group_number: 6
   },
   {
@@ -820,6 +1159,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [7],
     is_diatomic_element: false,
+    anion_name: 'bohriumida',
+    primary_ionic_charge: 7,
+    is_metal: true,
     group_number: 7
   },
   {
@@ -830,6 +1172,9 @@ export const elements: ElementInfo[] = [
     supports_ionic: true,
     possible_oxidation_states: [8],
     is_diatomic_element: false,
+    anion_name: 'hassiumida',
+    primary_ionic_charge: 8,
+    is_metal: true,
     group_number: 8
   }
 ]

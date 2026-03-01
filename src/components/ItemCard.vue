@@ -35,7 +35,8 @@ watch(() => props.isSuccess, (val) => {
         :id="props.id"
         :class="twMerge(
           props.size === 'large' ? 'text-[18px] space-x-2 py-1 px-3' : 'text-[15px] space-x-1.5 px-2 py-1.5',
-          'border-[#c9c9c9] bg-white shadow-sm hover:bg-gradient-to-b hover:from-white hover:to-[#e0f2fe] hover:border-[#999] hover:shadow-md cursor-pointer transition-all duration-100 inline-flex items-center font-medium border rounded-[5px] select-none whitespace-nowrap',
+          'cursor-pointer transition-all duration-100 inline-flex items-center font-medium border rounded-[5px] select-none whitespace-nowrap',
+          'border-[#c9c9c9] bg-white shadow-sm hover:bg-gradient-to-b hover:from-white hover:to-[#e0f2fe] hover:border-[#999] hover:shadow-md text-slate-800',
           (props.selected || props.isHovered) && 'bg-gradient-to-b from-white to-[#e0f2fe] border-[#999] shadow-md',
           props.isHovered && 'scale-[1.03]',
           props.isRejected && 'border-red-500 !bg-red-50 shadow-md animate-shake'

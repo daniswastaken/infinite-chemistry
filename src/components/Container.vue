@@ -290,23 +290,24 @@ const [collect, drop] = useDrop(() => ({
 
             const isNewDiscovery = !resources.value.find((r) => r.formula === result.newCompound!.formula)
 
-            if (isNewDiscovery) {
+            if (isNewDiscovery && result.newCompound!.bondType !== 'pre-bond-cluster') {
               addResource({
                 title: result.newCompound!.name,
                 icon: result.newCompound!.icon,
                 formula: result.newCompound!.formula,
                 components: result.newCompound!.components,
-                type: 'Kovalen'
+                type: result.newCompound!.bondType === 'ionic' ? 'Ion' : 'Kovalen'
               })
               store.triggerSuccessAnimation(newId)
             }
             playSound('fusion')
             return
-          } else if (result.reason === 'capacity_reached') {
+          } else if (!result.success) {
             store.triggerRejectAnimation(overlapping.id)
             playSound('failed')
             // allow it to drop next to it normally
           }
+
         }
       }
 
