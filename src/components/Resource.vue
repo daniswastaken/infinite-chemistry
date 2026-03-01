@@ -12,13 +12,14 @@ const props = defineProps<{
   title: string
   formula?: string
   components?: Record<string, number>
+  polyatomicId?: string
 }>()
 
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
   item: () => {
     playSound('put', 0.8)
-    return { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula, components: props.components }
+    return { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula, components: props.components, polyatomicId: props.polyatomicId }
   },
   collect: monitor => ({
     isDragging: monitor.isDragging(),

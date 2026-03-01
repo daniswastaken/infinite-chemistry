@@ -17,6 +17,7 @@ export interface BoxStoreEntry {
   current_occupied_slots?: number
   components?: Record<string, number>
   zIndex?: number
+  polyatomicId?: string
 }
 
 export const useBoxesStore = defineStore('counter', () => {
@@ -29,6 +30,7 @@ export const useBoxesStore = defineStore('counter', () => {
   const selectedIds = ref<string[]>([])
   const history = ref<string[]>([])
   const showFormulas = ref(false)
+  const isPolyatomicModeActive = ref(false)
   const rejectedBoxId = ref<string | null>(null)
   const successBoxId = ref<string | null>(null)
   const successStartTime = ref<number>(0)
@@ -44,7 +46,9 @@ export const useBoxesStore = defineStore('counter', () => {
   function toggleFormulas() {
     showFormulas.value = !showFormulas.value
   }
-
+  function togglePolyatomicMode() {
+    isPolyatomicModeActive.value = !isPolyatomicModeActive.value
+  }
   function triggerRejectAnimation(id: string) {
     rejectedBoxId.value = id
     setTimeout(() => {
@@ -129,12 +133,13 @@ export const useBoxesStore = defineStore('counter', () => {
     symbol?: string,
     icon?: string,
     formula?: string,
-    components?: Record<string, number>
+    components?: Record<string, number>,
+    polyatomicId?: string
   ) {
     if (id) {
       updateBoxPosition(id, left, top)
     } else if (title) {
-      addBox({ top, left, title, emoji, symbol, icon, formula, components })
+      addBox({ top, left, title, emoji, symbol, icon, formula, components, polyatomicId })
     }
   }
 
@@ -169,7 +174,9 @@ export const useBoxesStore = defineStore('counter', () => {
     moveBox,
     saveHistory,
     showFormulas,
+    isPolyatomicModeActive,
     toggleFormulas,
+    togglePolyatomicMode,
     rejectedBoxId,
     triggerRejectAnimation,
     successBoxId,

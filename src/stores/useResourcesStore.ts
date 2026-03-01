@@ -1,6 +1,8 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { elements } from '@/utils/elements'
+import { polyatomics } from '@/utils/polyatomics'
+import { formatFormula } from '@/utils/chemistryEngine'
 
 export type ResourceType = 'Elemen' | 'Ion' | 'Kovalen'
 
@@ -13,17 +15,18 @@ export interface ResourceStoreEntry {
   type: ResourceType
   formula?: string
   components?: Record<string, number>
+  polyatomicId?: string
 }
 
 export const useResourcesStore = defineStore('resources', () => {
-  const initialResources: ResourceStoreEntry[] = elements.map((el) => ({
+  const initialElements: ResourceStoreEntry[] = elements.map((el) => ({
     title: el.name,
     symbol: el.symbol,
     atomicNumber: el.atomicNumber,
     type: 'Elemen'
   }))
 
-  const resources = ref<ResourceStoreEntry[]>(initialResources)
+  const resources = ref<ResourceStoreEntry[]>([...initialElements])
   function addResource(box: ResourceStoreEntry) {
     resources.value.push(box)
     // Optional: Sort after adding

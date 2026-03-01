@@ -1,7 +1,22 @@
+export interface PolyatomicIon {
+  id: string
+  formula: string
+  name: string
+  charge: number
+  is_cation: boolean
+}
+
+export type ChemicalComponent = {
+  type: 'element' | 'polyatomic'
+  data: ElementInfo | PolyatomicIon
+  count: number
+}
+
 export interface MoleculeInstance {
-  centralAtom: ElementInfo
-  attachedAtoms: ElementInfo[]
-  current_occupied_slots: number
+  cation: ChemicalComponent
+  anion: ChemicalComponent
+  formula: string
+  name: string
 }
 
 export interface ElementInfo {

@@ -11,7 +11,7 @@ import CustomDragLayer from "@/components/CustomDragLayer.vue";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {storeToRefs} from "pinia";
-import {attemptBond} from "@/utils/chemistryEngine";
+import {attemptBond, attemptPolyatomicBond} from "@/utils/chemistryEngine";
 import {playSound} from "@/utils/audio";
 
 const store = useBoxesStore()
@@ -264,13 +264,65 @@ const [collect, drop] = useDrop(() => ({
       const overlapping = getOverlappingBox(left, top, item.id)
       
       if (overlapping) {
-        const targetComps = overlapping.components ?? (overlapping.symbol ? { [overlapping.symbol]: 1 } : {})
-        const itemSym = store.boxes[item.id!]?.symbol ?? item.symbol
-        const itemComps = item.components ?? (store.boxes[item.id!]?.components) ?? (itemSym ? { [itemSym]: 1 } : {})
+        const targetPolyId = overlapping.polyatomicId ?? null
+        const targetSym = overlapping.symbol ?? null
+        const targetComps = overlapping.components ?? (targetSym ? { [targetSym]: 1 } : {})
 
-        if (Object.keys(targetComps).length > 0 && Object.keys(itemComps).length > 0) {
-          const result = attemptBond(targetComps, itemComps)
-          
+        const itemBox = item.id ? store.boxes[item.id] : null
+        const itemPolyId = itemBox?.polyatomicId ?? item.polyatomicId ?? null
+        const itemSym = itemBox?.symbol ?? item.symbol ?? null
+        const itemComps = item.components ?? itemBox?.components ?? (itemSym ? { [itemSym]: 1 } : {})
+
+        const eitherIsPolyatomic = !!targetPolyId || !!itemPolyId
+
+        if (eitherIsPolyatomic) {
+          // ── Polyatomic bonding path ──
+          const result = attemptPolyatomicBond(
+            targetPolyId,
+            targetSym,
+            itemPolyId,
+            itemSym
+          )
+
+          if (result.success && result.newCompound) {
+            store.saveHistory()
+            if (item.id) store.removeBox(item.id, false, true)
+            store.removeBox(overlapping.id, false, true)
+
+            const newId = store.addBox({
+              title: result.newCompound.name,
+              symbol: undefined,
+              icon: result.newCompound.icon,
+              formula: result.newCompound.formula,
+              components: result.newCompound.components,
+              current_occupied_slots: result.newCompound.current_occupied_slots,
+              left: overlapping.left,
+              top: overlapping.top,
+              isNew: true
+            }, false)
+
+            const isNewDiscovery = !resources.value.find((r) => r.formula === result.newCompound!.formula)
+            if (isNewDiscovery) {
+              addResource({
+                title: result.newCompound!.name,
+                icon: result.newCompound!.icon,
+                formula: result.newCompound!.formula,
+                components: result.newCompound!.components,
+                type: 'Ion'
+              })
+              store.triggerSuccessAnimation(newId)
+            }
+            playSound('fusion')
+            return
+          } else if (!result.success) {
+            store.triggerRejectAnimation(overlapping.id)
+            playSound('failed')
+          }
+
+        } else if (Object.keys(targetComps).length > 0 && Object.keys(itemComps).length > 0) {
+          // ── Standard element bonding path ──
+          const result = attemptBond(targetComps, itemComps, store.isPolyatomicModeActive)
+
           if (result.success && result.newCompound) {
             store.saveHistory()
             if (item.id) store.removeBox(item.id, false, true)
@@ -296,7 +348,7 @@ const [collect, drop] = useDrop(() => ({
                 icon: result.newCompound!.icon,
                 formula: result.newCompound!.formula,
                 components: result.newCompound!.components,
-                type: result.newCompound!.bondType === 'ionic' ? 'Ion' : 'Kovalen'
+                type: (result.newCompound!.bondType === 'ionic' || result.newCompound!.bondType === 'ionic-polyatomic') ? 'Ion' : 'Kovalen'
               })
               store.triggerSuccessAnimation(newId)
             }
@@ -305,16 +357,14 @@ const [collect, drop] = useDrop(() => ({
           } else if (!result.success) {
             store.triggerRejectAnimation(overlapping.id)
             playSound('failed')
-            // allow it to drop next to it normally
           }
-
         }
-      }
+      } // end if (overlapping)
 
       if (item.id) {
         store.moveBox(item.id, left, top)
       } else {
-        store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon, item.formula, item.components)
+        store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon, item.formula, item.components, item.polyatomicId)
       }
     }
     return undefined
@@ -484,6 +534,21 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
 
       <!-- Controls Row (inside canvas, floats at bottom-right on mobile) -->
       <div class="mobile-controls-row">
+      <button 
+        @click="store.togglePolyatomicMode()"
+        class="desktop-control-btn p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        :class="{ 'bg-blue-100/50 hover:bg-blue-100/80': store.isPolyatomicModeActive }"
+        :style="{ right: `${sidebarWidth + 104}px` }" 
+        :title="store.isPolyatomicModeActive ? 'Eksperimen Aktif' : 'Eksperimen'"
+      >
+        <img 
+          src="@/assets/icons/flask.svg" 
+          class="w-6 h-6 transition-all" 
+          :class="store.isPolyatomicModeActive ? 'opacity-100' : 'grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100'"
+          alt="Experiment" 
+        />
+      </button>
+
       <button 
         @click="store.toggleFormulas" 
         class="desktop-control-btn p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
