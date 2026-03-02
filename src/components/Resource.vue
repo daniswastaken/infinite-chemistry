@@ -18,7 +18,7 @@ const props = defineProps<{
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
   item: () => {
-    playSound('click', 0.3, 1.0)
+    playSound('put', 0.5)
     return { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula, components: props.components, polyatomicId: props.polyatomicId }
   },
   collect: monitor => ({

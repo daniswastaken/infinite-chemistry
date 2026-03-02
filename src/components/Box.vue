@@ -16,6 +16,8 @@ const props = defineProps<{
   symbol?: string
   icon?: string
   formula?: string
+  components?: Record<string, number>
+  polyatomicId?: string
   hideSourceOnDrag?: boolean
   loading?: boolean
   selected?: boolean
@@ -29,7 +31,18 @@ const [collect, drag] = useDrag(() => ({
   item: () => {
     store.bringToFront(props.id)
     playSound('put', 0.5)
-    return {id: props.id, left: props.left, top: props.top, title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula}
+    return {
+      id: props.id, 
+      left: props.left, 
+      top: props.top, 
+      title: props.title, 
+      emoji: props.emoji, 
+      symbol: props.symbol, 
+      icon: props.icon, 
+      formula: props.formula,
+      components: props.components,
+      polyatomicId: props.polyatomicId
+    }
   },
   collect: monitor => ({
     isDragging: monitor.isDragging(),

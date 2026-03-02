@@ -563,6 +563,8 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
               :icon="value.icon"
               :selected="selectedIds.includes(String(key))"
               :zIndex="value.zIndex"
+              :components="value.components"
+              :polyatomicId="value.polyatomicId"
               :class="{ 'is-new': value.isNew }"
           >
             <ItemCard 
@@ -662,7 +664,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
             
             <div class="flex gap-2.5 w-full">
               <button 
-                @click="isConfirming = false; playSound('click', 0.3, 1.0)"
+                @click="isConfirming = false; playSound('click', 0.3, 1.2)"
                 class="flex-1 px-4 py-2.5 rounded-[5px] bg-white border border-[#c9c9c9] text-slate-600 font-medium hover:bg-slate-50 active:bg-slate-100 transition-all text-sm"
               >
                 Batal
