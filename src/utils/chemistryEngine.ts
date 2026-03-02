@@ -64,6 +64,41 @@ export function formatFormula(formula: string): string {
   })
 }
 
+/**
+ * Converts a string or number to Unicode superscripts.
+ */
+function toSuperscript(s: string | number): string {
+  const superscripts: Record<string, string> = {
+    '0': '⁰',
+    '1': '¹',
+    '2': '²',
+    '3': '³',
+    '4': '⁴',
+    '5': '⁵',
+    '6': '⁶',
+    '7': '⁷',
+    '8': '⁸',
+    '9': '⁹',
+    '+': '⁺',
+    '-': '⁻'
+  }
+  return String(s)
+    .split('')
+    .map((c) => superscripts[c] || c)
+    .join('')
+}
+
+/**
+ * Formats an ionic charge (e.g. -2 -> "²⁻", +1 -> "⁺")
+ */
+export function formatIonCharge(charge: number): string {
+  if (charge === 0) return ''
+  const sign = charge > 0 ? '+' : '-'
+  const abs = Math.abs(charge)
+  if (abs === 1) return toSuperscript(sign)
+  return toSuperscript(abs) + toSuperscript(sign)
+}
+
 // Converts a number to an uppercase Roman numeral (e.g. 3 → "III")
 function toRomanNumeral(n: number): string {
   const romans: Record<number, string> = {
@@ -119,15 +154,19 @@ function getNomenclaturePriority(symbol: string): number {
 
 /**
  * Combines a prefix with an element name, handling vowel elision.
- * Standard nomenclature (and Indonesian convention) drops the terminal 'a' or 'o'
- * from the prefix if the element name starts with 'o'.
+ * Indonesian convention only drops the terminal 'a' or 'o' from the prefix
+ * when the element name is exactly 'oksida' (oxide compounds).
+ *
+ * - Oxide anion   → elide: tetroksida, monoksida, pentoksida
+ * - Allotropes    → keep: tetraoksigen, pentaoksigen
+ * - Other anions  → keep: tetraklorida, difluorida
  */
 function applyPrefix(prefix: string, name: string): string {
   const p = prefix.toLowerCase()
   const n = name.toLowerCase()
 
-  // Only elide for 'a' or 'o' endings when followed by 'o' (e.g. Monoksida, Tetroksida)
-  if ((p.endsWith('a') || p.endsWith('o')) && n.startsWith('o')) {
+  // Only elide for oxide compounds (where the anion name is exactly 'oksida')
+  if ((p.endsWith('a') || p.endsWith('o')) && n === 'oksida') {
     return capitalize(p.slice(0, -1) + n)
   }
 
@@ -278,7 +317,7 @@ export function attemptBond(
             success: true,
             newCompound: {
               name: ionData.name,
-              formula: formatFormula(ionData.formula),
+              formula: formatFormula(ionData.formula) + formatIonCharge(ionData.charge),
               components: { [ionData.id]: 1 },
               current_occupied_slots: 0,
               bondType: 'ionic-polyatomic',
@@ -306,7 +345,7 @@ export function attemptBond(
               success: true,
               newCompound: {
                 name: ionData.name,
-                formula: formatFormula(ionData.formula),
+                formula: formatFormula(ionData.formula) + formatIonCharge(ionData.charge),
                 components: { [ionData.id]: 1 },
                 current_occupied_slots: 0,
                 bondType: 'ionic-polyatomic',

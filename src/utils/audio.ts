@@ -14,7 +14,8 @@ const soundUrls = {
   failed: new URL('../assets/music/failed.mp3', import.meta.url).href,
   delete: new URL('../assets/music/delete.mp3', import.meta.url).href,
   put: new URL('../assets/music/put.mp3', import.meta.url).href,
-  success: new URL('../assets/music/success.mp3', import.meta.url).href
+  success: new URL('../assets/music/success.mp3', import.meta.url).href,
+  click: new URL('../assets/music/click.mp3', import.meta.url).href
 }
 
 export type SoundType = keyof typeof soundUrls
@@ -82,7 +83,7 @@ const loadPromises: Partial<Record<SoundType, Promise<AudioBuffer | null>>> = {}
 
 // ─── Play Sound ──────────────────────────────────────────────────────────────
 
-export const playSound = (type: SoundType, volume?: number) => {
+export const playSound = (type: SoundType, volume?: number, pitch: number = 1.0) => {
   const ctx = getAudioContext()
 
   // If context is still suspended (no user interaction yet), try resuming
@@ -94,7 +95,7 @@ export const playSound = (type: SoundType, volume?: number) => {
   if (!buffer) {
     // Buffer hasn't loaded yet — wait for it, then play
     loadPromises[type]?.then((buf) => {
-      if (buf) playSingleBuffer(ctx, buf, volume)
+      if (buf) playSingleBuffer(ctx, buf, volume, pitch)
     })
     return
   }
@@ -112,18 +113,26 @@ export const playSound = (type: SoundType, volume?: number) => {
     const stackSize = 3
     for (let i = 0; i < stackSize; i++) {
       setTimeout(() => {
-        playSingleBuffer(ctx, buffer, effectiveVolume)
+        playSingleBuffer(ctx, buffer, effectiveVolume, pitch)
       }, i * 2)
     }
     return
   }
 
-  playSingleBuffer(ctx, buffer, effectiveVolume)
+  playSingleBuffer(ctx, buffer, effectiveVolume, pitch)
 }
 
-function playSingleBuffer(ctx: AudioContext, buffer: AudioBuffer, volume?: number) {
+function playSingleBuffer(
+  ctx: AudioContext,
+  buffer: AudioBuffer,
+  volume?: number,
+  pitch: number = 1.0
+) {
   const source = ctx.createBufferSource()
   source.buffer = buffer
+
+  // Apply pitch (playback speed)
+  source.playbackRate.value = pitch
 
   // Apply volume via a GainNode
   const gainNode = ctx.createGain()

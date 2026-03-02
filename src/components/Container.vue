@@ -184,6 +184,15 @@ const confirmClear = () => {
   isConfirming.value = false
 }
 
+const isMobile = ref(false)
+
+onMounted(() => {
+  isMobile.value = window.innerWidth <= 768
+  window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth <= 768
+  })
+})
+
 const sidebarWidth = ref(350)
 const isResizing = ref(false)
 
@@ -298,6 +307,7 @@ const [collect, drop] = useDrop(() => ({
               current_occupied_slots: result.newCompound.current_occupied_slots,
               left: overlapping.left,
               top: overlapping.top,
+              polyatomicId: result.newCompound.polyatomicId,
               isNew: true
             }, false)
 
@@ -308,12 +318,54 @@ const [collect, drop] = useDrop(() => ({
                 icon: result.newCompound!.icon,
                 formula: result.newCompound!.formula,
                 components: result.newCompound!.components,
+                polyatomicId: result.newCompound!.polyatomicId,
                 type: 'Ion'
               })
               store.triggerSuccessAnimation(newId)
             }
             playSound('fusion')
             return
+          } else if (!result.success && store.isPolyatomicModeActive) {
+            // FALLBACK: If ionic bonding failed but we are in Experiment Mode,
+            // try standard bonding logic to allow for polyatomic evolution (e.g., SO3 + O -> SO4)
+            const fallbackResult = attemptBond(targetComps, itemComps, true)
+            
+            if (fallbackResult.success && fallbackResult.newCompound) {
+              store.saveHistory()
+              if (item.id) store.removeBox(item.id, false, true)
+              store.removeBox(overlapping.id, false, true)
+
+              const newId = store.addBox({
+                title: fallbackResult.newCompound.name,
+                symbol: undefined,
+                icon: fallbackResult.newCompound.icon,
+                formula: fallbackResult.newCompound.formula,
+                components: fallbackResult.newCompound.components,
+                current_occupied_slots: fallbackResult.newCompound.current_occupied_slots,
+                left: overlapping.left,
+                top: overlapping.top,
+                polyatomicId: fallbackResult.newCompound.polyatomicId,
+                isNew: true
+              }, false)
+
+              const isNewDiscovery = !resources.value.find((r) => r.formula === fallbackResult.newCompound!.formula)
+              if (isNewDiscovery) {
+                addResource({
+                  title: fallbackResult.newCompound!.name,
+                  icon: fallbackResult.newCompound!.icon,
+                  formula: fallbackResult.newCompound!.formula,
+                  components: fallbackResult.newCompound!.components,
+                  polyatomicId: fallbackResult.newCompound!.polyatomicId,
+                  type: 'Ion'
+                })
+                store.triggerSuccessAnimation(newId)
+              }
+              playSound('fusion')
+              return
+            }
+            
+            store.triggerRejectAnimation(overlapping.id)
+            playSound('failed')
           } else if (!result.success) {
             store.triggerRejectAnimation(overlapping.id)
             playSound('failed')
@@ -337,6 +389,7 @@ const [collect, drop] = useDrop(() => ({
               current_occupied_slots: result.newCompound.current_occupied_slots,
               left: overlapping.left,
               top: overlapping.top,
+              polyatomicId: result.newCompound.polyatomicId,
               isNew: true
             }, false)
 
@@ -348,6 +401,7 @@ const [collect, drop] = useDrop(() => ({
                 icon: result.newCompound!.icon,
                 formula: result.newCompound!.formula,
                 components: result.newCompound!.components,
+                polyatomicId: result.newCompound!.polyatomicId,
                 type: (result.newCompound!.bondType === 'ionic' || result.newCompound!.bondType === 'ionic-polyatomic') ? 'Ion' : 'Kovalen'
               })
               store.triggerSuccessAnimation(newId)
@@ -474,6 +528,19 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
     @mouseup="finishSelection"
     @mouseleave="finishSelection"
   >
+    <!-- Polyatomic Mode Glow Overlay (Screen edges) -->
+    <div 
+      class="absolute inset-0 pointer-events-none transition-opacity duration-700 z-[5] overflow-hidden"
+      :class="store.isPolyatomicModeActive ? 'opacity-100' : 'opacity-0'"
+      :style="{ 
+        right: !isMobile ? `${sidebarWidth}px` : '0',
+        bottom: isMobile ? '35dvh' : '0'
+      }"
+    >
+      <div class="absolute inset-0 shadow-[inset_0_0_80px_rgba(59,130,246,0.35)] animate-glow-pulse"></div>
+      <div class="absolute inset-0 border-[3px] border-blue-400/10 blur-[1px]"></div>
+    </div>
+
     <!-- Canvas Area -->
     <div class="mobile-canvas-area">
       <div id="particles-js" class="absolute inset-0 z-0 pointer-events-none"></div>
@@ -535,40 +602,39 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       <!-- Controls Row (inside canvas, floats at bottom-right on mobile) -->
       <div class="mobile-controls-row">
       <button 
-        @click="store.togglePolyatomicMode()"
-        class="desktop-control-btn p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
-        :class="{ 'bg-blue-100/50 hover:bg-blue-100/80': store.isPolyatomicModeActive }"
+        @click="(e) => { store.togglePolyatomicMode(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }"
+        class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 104}px` }" 
-        :title="store.isPolyatomicModeActive ? 'Eksperimen Aktif' : 'Eksperimen'"
+        :title="store.isPolyatomicModeActive ? 'Mode Poliatomik (Aktif)' : 'Mode Poliatomik'"
       >
         <img 
           src="@/assets/icons/flask.svg" 
           class="w-6 h-6 transition-all" 
-          :class="store.isPolyatomicModeActive ? 'opacity-100' : 'grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100'"
+          :class="store.isPolyatomicModeActive ? 'opacity-100' : 'grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100'"
           alt="Experiment" 
         />
       </button>
 
       <button 
-        @click="store.toggleFormulas" 
-        class="desktop-control-btn p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        @click="(e) => { store.toggleFormulas(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
+        class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 60}px` }" 
         :title="store.showFormulas ? 'Tampilkan Nama' : 'Tampilkan Rumus'"
       >
         <img 
           src="@/assets/icons/show-elements.svg" 
-          class="w-6 h-6 grayscale hover:grayscale-0 transition-all opacity-70 group-hover:opacity-100" 
+          class="w-6 h-6 grayscale md:hover:grayscale-0 transition-all opacity-70 md:group-hover:opacity-100" 
           alt="Show Elements" 
         />
       </button>
 
       <button 
-        @click="handleClearClick" 
-        class="desktop-control-btn p-2 hover:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        @click="(e) => { handleClearClick(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
+        class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 16}px` }" 
         title="Bersihkan Kanvas"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 opacity-70 md:group-hover:opacity-100 transition-all">
           <path d="m16 22-1-4"/>
           <path d="M19 14a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1"/>
           <path d="M19 14H5l-1.973 6.767A1 1 0 0 0 4 22h16a1 1 0 0 0 .973-1.233z"/>
@@ -580,30 +646,30 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
 
     <!-- Confirmation Modal -->
     <Transition name="fade">
-      <div v-if="isConfirming" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm" @click.self="isConfirming = false">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all border border-gray-100 animate-in fade-in zoom-in duration-200">
+      <div v-if="isConfirming" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/5 backdrop-blur-md" @click.self="isConfirming = false">
+        <div class="bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-6 max-w-[340px] w-full mx-4 transform transition-all border border-[#c9c9c9] animate-in fade-in zoom-in duration-300">
           <div class="flex flex-col items-center text-center">
-            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="w-14 h-14 bg-red-50/50 rounded-full flex items-center justify-center mb-5 border border-red-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 6h18"></path>
                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
               </svg>
             </div>
             
-            <h3 class="text-xl font-bold text-gray-900 mb-2 font-outfit">Bersihkan Kanvas?</h3>
-            <p class="text-gray-500 mb-8">Apakah Anda yakin ingin menghapus semua elemen dari kanvas? Tindakan ini tidak dapat dibatalkan.</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-2 font-outfit uppercase tracking-wide">Bersihkan Kanvas?</h3>
+            <p class="text-[15px] text-slate-500 mb-6 leading-relaxed">Apakah Anda yakin ingin menghapus semua elemen dari kanvas?</p>
             
-            <div class="flex gap-3 w-full">
+            <div class="flex gap-2.5 w-full">
               <button 
-                @click="isConfirming = false"
-                class="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors"
+                @click="isConfirming = false; playSound('click', 0.3, 1.0)"
+                class="flex-1 px-4 py-2.5 rounded-[5px] bg-white border border-[#c9c9c9] text-slate-600 font-medium hover:bg-slate-50 active:bg-slate-100 transition-all text-sm"
               >
                 Batal
               </button>
               <button 
-                @click="confirmClear"
-                class="flex-1 px-4 py-3 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 shadow-lg shadow-red-200 transition-all active:scale-95"
+                @click="confirmClear(); playSound('click', 0.3, 1.0)"
+                class="flex-1 px-4 py-2.5 rounded-[5px] bg-red-500 text-white font-semibold hover:bg-red-600 active:bg-red-700 shadow-sm active:scale-95 transition-all text-sm"
               >
                 Hapus Semua
               </button>
@@ -701,5 +767,20 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
 .ghost-delete--out {
   transform: scale(0);
   opacity: 0;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { 
+    opacity: 1; 
+    box-shadow: inset 0 0 60px rgba(59, 130, 246, 0.3);
+  }
+  50% { 
+    opacity: 0.8; 
+    box-shadow: inset 0 0 100px rgba(59, 130, 246, 0.45);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
 }
 </style>
