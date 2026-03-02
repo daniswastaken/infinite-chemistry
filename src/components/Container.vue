@@ -670,7 +670,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
                 Batal
               </button>
               <button 
-                @click="confirmClear(); playSound('click', 0.3, 1.0)"
+                @click="confirmClear()"
                 class="flex-1 px-4 py-2.5 rounded-[5px] bg-red-500 text-white font-semibold hover:bg-red-600 active:bg-red-700 shadow-sm active:scale-95 transition-all text-sm"
               >
                 Hapus Semua

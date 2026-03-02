@@ -4,6 +4,7 @@ import {useResourcesStore} from "@/stores/useResourcesStore";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {storeToRefs} from "pinia";
 import {computed, ref} from "vue";
+import { playSound } from "@/utils/audio";
 
 const resourcesStore = useResourcesStore()
 const {resources} = storeToRefs(resourcesStore)
