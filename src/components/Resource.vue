@@ -12,14 +12,14 @@ const props = defineProps<{
   title: string
   formula?: string
   components?: Record<string, number>
-  polyatomicId?: string
+  atomicId?: string
 }>()
 
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
   item: () => {
     playSound('put', 0.5)
-    return { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula, components: props.components, polyatomicId: props.polyatomicId }
+    return { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula, components: props.components, atomicId: props.atomicId }
   },
   collect: monitor => ({
     isDragging: monitor.isDragging(),
@@ -35,7 +35,7 @@ const { isDragging } = toRefs(collect)
       role="Box"
       data-testid="box"
   >
-    <ItemCard :title="title" :formula="formula" :emoji="emoji" :symbol="symbol" :icon="icon" :polyatomicId="polyatomicId" :components="components" size="small"></ItemCard>
+    <ItemCard :title="title" :formula="formula" :emoji="emoji" :symbol="symbol" :icon="icon" :atomicId="atomicId" :components="components" size="small"></ItemCard>
   </div>
 </template>
 

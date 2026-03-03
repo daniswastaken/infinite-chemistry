@@ -48,7 +48,7 @@ const filteredResources = computed(() => {
     
     // Also search by ionic name if in Atomic Mode and it's a single element
     let ionicMatch = false
-    if (boxesStore.isPolyatomicModeActive && resource.symbol && !resource.polyatomicId) {
+    if (boxesStore.isAtomicModeActive && resource.symbol && !resource.atomicId) {
       const element = elements.find(e => e.symbol === resource.symbol)
       if (element) {
         const ionic = getElementIonicForm(element)
@@ -87,14 +87,14 @@ const chunkedResources = computed(() => {
       <template v-if="chunkedResources.length === 1">
         <!-- Desktop: Standard wrap -->
         <div class="flex gap-[6px] flex-wrap content-start">
-          <Resource v-for="resource in chunkedResources[0]" :key="resource.title" :title="resource.title" :formula="resource.formula" :emoji="resource.emoji" :symbol="resource.symbol" :icon="resource.icon" :components="resource.components" :polyatomicId="resource.polyatomicId"></Resource>
+          <Resource v-for="resource in chunkedResources[0]" :key="resource.title" :title="resource.title" :formula="resource.formula" :emoji="resource.emoji" :symbol="resource.symbol" :icon="resource.icon" :components="resource.components" :atomicId="resource.atomicId"></Resource>
         </div>
       </template>
       <template v-else>
         <!-- Mobile: 3 explicit horizontal rows -->
         <div class="flex flex-col gap-[6px]">
           <div v-for="(row, idx) in chunkedResources" :key="idx" class="flex gap-[6px] w-max pr-[48px]">
-            <Resource v-for="resource in row" :key="resource.title" :title="resource.title" :formula="resource.formula" :emoji="resource.emoji" :symbol="resource.symbol" :icon="resource.icon" :components="resource.components" :polyatomicId="resource.polyatomicId"></Resource>
+            <Resource v-for="resource in row" :key="resource.title" :title="resource.title" :formula="resource.formula" :emoji="resource.emoji" :symbol="resource.symbol" :icon="resource.icon" :components="resource.components" :atomicId="resource.atomicId"></Resource>
           </div>
         </div>
       </template>

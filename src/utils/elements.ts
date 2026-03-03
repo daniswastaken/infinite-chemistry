@@ -1,4 +1,4 @@
-export interface PolyatomicIon {
+export interface AtomicIon {
   id: string
   formula: string
   name: string
@@ -7,8 +7,8 @@ export interface PolyatomicIon {
 }
 
 export type ChemicalComponent = {
-  type: 'element' | 'polyatomic'
-  data: ElementInfo | PolyatomicIon
+  type: 'element' | 'atomic'
+  data: ElementInfo | AtomicIon
   count: number
 }
 

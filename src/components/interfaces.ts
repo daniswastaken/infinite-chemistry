@@ -9,5 +9,5 @@ export interface DragItem {
   title: string
   formula?: string
   components?: Record<string, number>
-  polyatomicId?: string
+  atomicId?: string
 }

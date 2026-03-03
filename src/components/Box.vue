@@ -17,7 +17,7 @@ const props = defineProps<{
   icon?: string
   formula?: string
   components?: Record<string, number>
-  polyatomicId?: string
+  atomicId?: string
   hideSourceOnDrag?: boolean
   loading?: boolean
   selected?: boolean
@@ -41,7 +41,7 @@ const [collect, drag] = useDrag(() => ({
       icon: props.icon, 
       formula: props.formula,
       components: props.components,
-      polyatomicId: props.polyatomicId
+      atomicId: props.atomicId
     }
   },
   collect: monitor => ({

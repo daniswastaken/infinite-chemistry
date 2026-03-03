@@ -11,7 +11,7 @@ import CustomDragLayer from "@/components/CustomDragLayer.vue";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {storeToRefs} from "pinia";
-import {attemptBond, attemptPolyatomicBond} from "@/utils/chemistryEngine";
+import {attemptBond, attemptAtomicBond} from "@/utils/chemistryEngine";
 import {playSound} from "@/utils/audio";
 
 const store = useBoxesStore()
@@ -282,23 +282,23 @@ const [collect, drop] = useDrop(() => ({
       const overlapping = getOverlappingBox(left, top, item.id)
       
       if (overlapping) {
-        const targetPolyId = overlapping.polyatomicId ?? null
+        const targetAtomicId = overlapping.atomicId ?? null
         const targetSym = overlapping.symbol ?? null
         const targetComps = overlapping.components ?? (targetSym ? { [targetSym]: 1 } : {})
 
         const itemBox = item.id ? store.boxes[item.id] : null
-        const itemPolyId = itemBox?.polyatomicId ?? item.polyatomicId ?? null
+        const itemAtomicId = itemBox?.atomicId ?? item.atomicId ?? null
         const itemSym = itemBox?.symbol ?? item.symbol ?? null
         const itemComps = item.components ?? itemBox?.components ?? (itemSym ? { [itemSym]: 1 } : {})
 
-        const eitherIsPolyatomic = !!targetPolyId || !!itemPolyId
+        const eitherIsAtomic = !!targetAtomicId || !!itemAtomicId
 
-        if (eitherIsPolyatomic) {
-          // ── Polyatomic bonding path ──
-          const result = attemptPolyatomicBond(
-            targetPolyId,
+        if (eitherIsAtomic) {
+          // ── Atomic bonding path ──
+          const result = attemptAtomicBond(
+            targetAtomicId,
             targetSym,
-            itemPolyId,
+            itemAtomicId,
             itemSym
           )
 
@@ -316,7 +316,7 @@ const [collect, drop] = useDrop(() => ({
               current_occupied_slots: result.newCompound.current_occupied_slots,
               left: overlapping.left,
               top: overlapping.top,
-              polyatomicId: result.newCompound.polyatomicId,
+              atomicId: result.newCompound.atomicId,
               isNew: true
             }, false)
 
@@ -327,16 +327,16 @@ const [collect, drop] = useDrop(() => ({
                 icon: result.newCompound!.icon,
                 formula: result.newCompound!.formula,
                 components: result.newCompound!.components,
-                polyatomicId: result.newCompound!.polyatomicId,
+                atomicId: result.newCompound!.atomicId,
                 type: 'Ion'
               })
               store.triggerSuccessAnimation(newId)
             }
             playSound('fusion')
             return
-          } else if (!result.success && store.isPolyatomicModeActive) {
+          } else if (!result.success && store.isAtomicModeActive) {
             // FALLBACK: If ionic bonding failed but we are in Experiment Mode,
-            // try standard bonding logic to allow for polyatomic evolution (e.g., SO3 + O -> SO4)
+            // try standard bonding logic to allow for atomic evolution (e.g., SO3 + O -> SO4)
             const fallbackResult = attemptBond(targetComps, itemComps, true)
             
             if (fallbackResult.success && fallbackResult.newCompound) {
@@ -353,7 +353,7 @@ const [collect, drop] = useDrop(() => ({
                 current_occupied_slots: fallbackResult.newCompound.current_occupied_slots,
                 left: overlapping.left,
                 top: overlapping.top,
-                polyatomicId: fallbackResult.newCompound.polyatomicId,
+                atomicId: fallbackResult.newCompound.atomicId,
                 isNew: true
               }, false)
 
@@ -364,7 +364,7 @@ const [collect, drop] = useDrop(() => ({
                   icon: fallbackResult.newCompound!.icon,
                   formula: fallbackResult.newCompound!.formula,
                   components: fallbackResult.newCompound!.components,
-                  polyatomicId: fallbackResult.newCompound!.polyatomicId,
+                  atomicId: fallbackResult.newCompound!.atomicId,
                   type: 'Ion'
                 })
                 store.triggerSuccessAnimation(newId)
@@ -382,7 +382,7 @@ const [collect, drop] = useDrop(() => ({
 
         } else if (Object.keys(targetComps).length > 0 && Object.keys(itemComps).length > 0) {
           // ── Standard element bonding path ──
-          const result = attemptBond(targetComps, itemComps, store.isPolyatomicModeActive)
+          const result = attemptBond(targetComps, itemComps, store.isAtomicModeActive)
 
           if (result.success && result.newCompound) {
             store.saveHistory()
@@ -398,7 +398,7 @@ const [collect, drop] = useDrop(() => ({
               current_occupied_slots: result.newCompound.current_occupied_slots,
               left: overlapping.left,
               top: overlapping.top,
-              polyatomicId: result.newCompound.polyatomicId,
+              atomicId: result.newCompound.atomicId,
               isNew: true
             }, false)
 
@@ -410,8 +410,8 @@ const [collect, drop] = useDrop(() => ({
                 icon: result.newCompound!.icon,
                 formula: result.newCompound!.formula,
                 components: result.newCompound!.components,
-                polyatomicId: result.newCompound!.polyatomicId,
-                type: (result.newCompound!.bondType === 'ionic' || result.newCompound!.bondType === 'ionic-polyatomic') ? 'Ion' : 'Kovalen'
+                atomicId: result.newCompound!.atomicId,
+                type: (result.newCompound!.bondType === 'ionic' || result.newCompound!.bondType === 'ionic-atomic') ? 'Ion' : 'Kovalen'
               })
               store.triggerSuccessAnimation(newId)
             }
@@ -427,7 +427,7 @@ const [collect, drop] = useDrop(() => ({
       if (item.id) {
         store.moveBox(item.id, left, top)
       } else {
-        store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon, item.formula, item.components, item.polyatomicId)
+        store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon, item.formula, item.components, item.atomicId)
       }
     }
     return undefined
@@ -540,7 +540,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
     <!-- Atomic Mode Glow Overlay (Screen edges) -->
     <div 
       class="absolute inset-0 pointer-events-none transition-opacity duration-700 z-[5] overflow-hidden"
-      :class="store.isPolyatomicModeActive ? 'opacity-100' : 'opacity-0'"
+      :class="store.isAtomicModeActive ? 'opacity-100' : 'opacity-0'"
       :style="{ 
         right: !isMobile ? `${sidebarWidth}px` : '0',
         bottom: isMobile ? '35dvh' : '0'
@@ -573,7 +573,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
               :selected="selectedIds.includes(String(key))"
               :zIndex="value.zIndex"
               :components="value.components"
-              :polyatomicId="value.polyatomicId"
+              :atomicId="value.atomicId"
               :class="{ 'is-new': value.isNew }"
           >
             <ItemCard 
@@ -588,7 +588,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
               :isHovered="overlappingId === String(key)"
               :isRejected="store.rejectedBoxId === String(key)"
               :isSuccess="store.successBoxId === String(key)"
-              :polyatomicId="value.polyatomicId"
+              :atomicId="value.atomicId"
               :components="value.components"
             />
           </Box>
@@ -615,15 +615,15 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       <!-- Controls Row (inside canvas, floats at bottom-right on mobile) -->
       <div class="mobile-controls-row">
       <button 
-        @click="(e) => { store.togglePolyatomicMode(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }"
+        @click="(e) => { store.toggleAtomicMode(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }"
         class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 104}px` }" 
-        :title="store.isPolyatomicModeActive ? 'Mode Atomik (Aktif)' : 'Mode Atomik'"
+        :title="store.isAtomicModeActive ? 'Mode Atomik (Aktif)' : 'Mode Atomik'"
       >
         <img 
           src="@/assets/icons/flask.svg" 
           class="w-6 h-6 transition-all" 
-          :class="store.isPolyatomicModeActive ? 'opacity-100' : 'grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100'"
+          :class="store.isAtomicModeActive ? 'opacity-100' : 'grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100'"
           alt="Experiment" 
         />
       </button>

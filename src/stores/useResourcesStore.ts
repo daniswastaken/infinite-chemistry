@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { elements } from '@/utils/elements'
-import { polyatomics } from '@/utils/polyatomics'
+import { atomicIons } from '@/utils/atomicIons'
 import { formatFormula } from '@/utils/chemistryEngine'
 
 export type ResourceType = 'Elemen' | 'Ion' | 'Kovalen'
@@ -15,7 +15,7 @@ export interface ResourceStoreEntry {
   type: ResourceType
   formula?: string
   components?: Record<string, number>
-  polyatomicId?: string
+  atomicId?: string
 }
 
 export const useResourcesStore = defineStore('resources', () => {

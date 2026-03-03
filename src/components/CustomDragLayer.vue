@@ -53,7 +53,7 @@ watch([() => store.successStartTime, () => item.value?.id], () => {
         :emoji="item.emoji"
         :symbol="item.symbol"
         :icon="item.icon"
-        :polyatomicId="item.polyatomicId"
+        :atomicId="item.atomicId"
         :components="item.components"
       />
     </div>

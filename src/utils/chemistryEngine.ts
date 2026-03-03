@@ -1,7 +1,7 @@
 import { elements } from '@/utils/elements'
-import type { ElementInfo, PolyatomicIon } from '@/utils/elements'
+import type { ElementInfo, AtomicIon } from '@/utils/elements'
 import { getGreekPrefix } from '@/utils/prefixes'
-import { polyatomics } from '@/utils/polyatomics'
+import { atomicIons } from '@/utils/atomicIons'
 
 // ─── Result Type ─────────────────────────────────────────────────────────────
 
@@ -14,8 +14,8 @@ export interface BondAttemptResult {
     icon: string
     components: Record<string, number>
     current_occupied_slots: number
-    bondType: 'covalent' | 'ionic' | 'pre-bond-cluster' | 'ionic-polyatomic'
-    polyatomicId?: string
+    bondType: 'covalent' | 'ionic' | 'pre-bond-cluster' | 'ionic-atomic'
+    atomicId?: string
   }
 }
 
@@ -270,7 +270,7 @@ function handleIonicBond(
 
 // ─── Main Entry Point ────────────────────────────────────────────────────────
 
-const polyatomicResolutionMap: Record<string, string> = {
+const atomicResolutionMap: Record<string, string> = {
   'O,S': 'sulfite',
   'N,O': 'nitrite',
   'C,O': 'carbonate',
@@ -290,10 +290,10 @@ const polyatomicResolutionMap: Record<string, string> = {
 }
 
 /**
- * Mapping for polyatomic 'evolution'.
+ * Mapping for atomic 'evolution'.
  * Keys can be just the ionId (assumes +O) or "ionId:element" for specific additions.
  */
-const polyatomicEvolutionMap: Record<string, string> = {
+const atomicEvolutionMap: Record<string, string> = {
   sulfite: 'sulfate',
   nitrite: 'nitrate',
   phosphite: 'phosphate',
@@ -322,24 +322,24 @@ const polyatomicEvolutionMap: Record<string, string> = {
 export function attemptBond(
   targetComps: Record<string, number>,
   attachmentComps: Record<string, number>,
-  isPolyatomicModeActive = false
+  isAtomicModeActive = false
 ): BondAttemptResult {
   // Collection keys for intercept logic
   const targetKeys = Object.keys(targetComps)
   const attachmentKeys = Object.keys(attachmentComps)
 
-  // ─── [NEW] Experiment Mode: Polyatomic Resolution Intercept ─────────────
-  if (isPolyatomicModeActive) {
+  // ─── [NEW] Experiment Mode: Atomic Resolution Intercept ─────────────
+  if (isAtomicModeActive) {
     if (targetKeys.length === 1 && attachmentKeys.length === 1) {
       const keyA = targetKeys[0]
       const keyB = attachmentKeys[0]
 
       // 1. Element + Element Resolution (e.g. S + O -> Sulfit)
       const sortedKey = [keyA, keyB].sort().join(',')
-      const matchedIonId = polyatomicResolutionMap[sortedKey]
+      const matchedIonId = atomicResolutionMap[sortedKey]
 
       if (matchedIonId) {
-        const ionData = getPolyatomicById(matchedIonId)
+        const ionData = getAtomicIonById(matchedIonId)
         if (ionData) {
           return {
             success: true,
@@ -348,18 +348,18 @@ export function attemptBond(
               formula: formatFormula(ionData.formula) + formatIonCharge(ionData.charge),
               components: { [ionData.id]: 1 },
               current_occupied_slots: 0,
-              bondType: 'ionic-polyatomic',
-              polyatomicId: ionData.id,
+              bondType: 'ionic-atomic',
+              atomicId: ionData.id,
               icon: FLASK_ICON_URL
             }
           }
         }
       }
 
-      // 2. Polyatomic Ion + Element Evolution (e.g. Sulfit + O -> Sulfat)
-      const ionKey = polyatomics.find((p) => p.id === keyA)
+      // 2. Atomic Ion + Element Evolution (e.g. Sulfit + O -> Sulfat)
+      const ionKey = atomicIons.find((p) => p.id === keyA)
         ? keyA
-        : polyatomics.find((p) => p.id === keyB)
+        : atomicIons.find((p) => p.id === keyB)
           ? keyB
           : null
       const elementKey = ionKey === keyA ? keyB : ionKey === keyB ? keyA : null
@@ -367,11 +367,11 @@ export function attemptBond(
       if (ionKey && elementKey) {
         // Try specific element evolution first (e.g. sulfite:S), then fallback to default (+O)
         const evolvedIonId =
-          polyatomicEvolutionMap[`${ionKey}:${elementKey}`] ||
-          (elementKey === 'O' ? polyatomicEvolutionMap[ionKey] : null)
+          atomicEvolutionMap[`${ionKey}:${elementKey}`] ||
+          (elementKey === 'O' ? atomicEvolutionMap[ionKey] : null)
 
         if (evolvedIonId) {
-          const ionData = getPolyatomicById(evolvedIonId)
+          const ionData = getAtomicIonById(evolvedIonId)
           if (ionData) {
             return {
               success: true,
@@ -380,8 +380,8 @@ export function attemptBond(
                 formula: formatFormula(ionData.formula) + formatIonCharge(ionData.charge),
                 components: { [ionData.id]: 1 },
                 current_occupied_slots: 0,
-                bondType: 'ionic-polyatomic',
-                polyatomicId: ionData.id,
+                bondType: 'ionic-atomic',
+                atomicId: ionData.id,
                 icon: FLASK_ICON_URL
               }
             }
@@ -761,15 +761,15 @@ function isStrictDimerException(comps: Record<string, number>): boolean {
   return false
 }
 
-// ─── Polyatomic Bonding ───────────────────────────────────────────────────────
+// ─── Atomic Bonding ───────────────────────────────────────────────────────
 
 function lcm(a: number, b: number): number {
   return (a * b) / gcd(a, b)
 }
 
 /**
- * Builds a formula string for a polyatomic ionic compound.
- * Wraps a polyatomic component's formula in parentheses when its count > 1.
+ * Builds a formula string for an atomic ionic compound.
+ * Wraps an atomic component's formula in parentheses when its count > 1.
  *
  * Format: {CationPart}{AnionPart}
  * Examples:
@@ -777,24 +777,24 @@ function lcm(a: number, b: number): number {
  *   Mg (1) + OH (2)  → Mg(OH)₂
  *   NH4 (2) + SO4 (1) → (NH4)₂SO₄
  */
-export function generatePolyFormula(
+export function generateAtomicFormula(
   cationFormula: string,
   cationCount: number,
-  cationIsPolyatomic: boolean,
+  cationIsAtomic: boolean,
   anionFormula: string,
   anionCount: number,
-  anionIsPolyatomic: boolean
+  anionIsAtomic: boolean
 ): string {
   const formattedCation = formatFormula(cationFormula)
   const formattedAnion = formatFormula(anionFormula)
 
   const catPart =
-    cationIsPolyatomic && cationCount > 1
+    cationIsAtomic && cationCount > 1
       ? `(${formattedCation})${toSubscript(cationCount)}`
       : `${formattedCation}${toSubscript(cationCount)}`
 
   const anPart =
-    anionIsPolyatomic && anionCount > 1
+    anionIsAtomic && anionCount > 1
       ? `(${formattedAnion})${toSubscript(anionCount)}`
       : `${formattedAnion}${toSubscript(anionCount)}`
 
@@ -802,15 +802,15 @@ export function generatePolyFormula(
 }
 
 /**
- * Builds an Indonesian-language name for a polyatomic ionic compound.
+ * Builds an Indonesian-language name for an atomic ionic compound.
  *
  * Rules:
  *  - Fixed-charge metal: "Natrium Hidroksida" (no Roman numeral)
  *  - Variable-charge metal: "Besi(III) Sulfat" (Roman numeral appended to metal name, no space)
  *  - Ammonium cation: "Amonium Klorida"
- *  - Polyatomic anion used as-is: "Natrium Sulfat"
+ *  - Atomic anion used as-is: "Natrium Sulfat"
  */
-export function generatePolyName(
+export function generateAtomicName(
   cationName: string,
   anionName: string,
   metalOxidationState?: number
@@ -822,20 +822,20 @@ export function generatePolyName(
 }
 
 /**
- * Core polyatomic bond handler.
+ * Core atomic bond handler.
  *
- * Accepts either an ElementInfo or PolyatomicIon for each side.
+ * Accepts either an ElementInfo or AtomicIon for each side.
  * Identifies cation (+) vs anion (-), auto-balances via LCM,
  * optionally back-calculates transition metal oxidation state.
  */
-function bondPolyatomic(
-  inputA: { data: ElementInfo | PolyatomicIon; isPolyatomic: boolean },
-  inputB: { data: ElementInfo | PolyatomicIon; isPolyatomic: boolean }
+function bondAtomic(
+  inputA: { data: ElementInfo | AtomicIon; isAtomic: boolean },
+  inputB: { data: ElementInfo | AtomicIon; isAtomic: boolean }
 ): BondAttemptResult {
   // ── Classify each input as cation or anion ──────────────────────────────
-  function isCation(item: { data: ElementInfo | PolyatomicIon; isPolyatomic: boolean }): boolean {
-    if (item.isPolyatomic) {
-      return (item.data as PolyatomicIon).is_cation
+  function isCation(item: { data: ElementInfo | AtomicIon; isAtomic: boolean }): boolean {
+    if (item.isAtomic) {
+      return (item.data as AtomicIon).is_cation
     }
     const el = item.data as ElementInfo
     return el.is_metal
@@ -853,19 +853,19 @@ function bondPolyatomic(
   const anionInput = aCation ? inputB : inputA
 
   // ── Extract charge, formula, and name for each side ─────────────────────
-  function getCharge(item: { data: ElementInfo | PolyatomicIon; isPolyatomic: boolean }): number {
-    if (item.isPolyatomic) return (item.data as PolyatomicIon).charge
+  function getCharge(item: { data: ElementInfo | AtomicIon; isAtomic: boolean }): number {
+    if (item.isAtomic) return (item.data as AtomicIon).charge
     const el = item.data as ElementInfo
     return el.fixed_ionic_charge ?? el.primary_ionic_charge ?? 0
   }
 
-  function getFormula(item: { data: ElementInfo | PolyatomicIon; isPolyatomic: boolean }): string {
-    if (item.isPolyatomic) return (item.data as PolyatomicIon).formula
+  function getFormula(item: { data: ElementInfo | AtomicIon; isAtomic: boolean }): string {
+    if (item.isAtomic) return (item.data as AtomicIon).formula
     return (item.data as ElementInfo).symbol
   }
 
-  function getName(item: { data: ElementInfo | PolyatomicIon; isPolyatomic: boolean }): string {
-    if (item.isPolyatomic) return capitalize((item.data as PolyatomicIon).name)
+  function getName(item: { data: ElementInfo | AtomicIon; isAtomic: boolean }): string {
+    if (item.isAtomic) return capitalize((item.data as AtomicIon).name)
     return capitalize((item.data as ElementInfo).name)
   }
 
@@ -886,7 +886,7 @@ function bondPolyatomic(
   // ── Determine transition metal oxidation state (if applicable) ──────────
   let metalOxidationState: number | undefined
 
-  if (!cationInput.isPolyatomic) {
+  if (!cationInput.isAtomic) {
     const el = cationInput.data as ElementInfo
     if (el.is_metal && el.fixed_ionic_charge === undefined) {
       // Variable-charge metal: oxidation state = total anion charge / cation count
@@ -896,23 +896,23 @@ function bondPolyatomic(
 
   // ── Get anion Indonesian name ────────────────────────────────────────────
   let anionName: string
-  if (anionInput.isPolyatomic) {
-    anionName = capitalize((anionInput.data as PolyatomicIon).name)
+  if (anionInput.isAtomic) {
+    anionName = capitalize((anionInput.data as AtomicIon).name)
   } else {
     const el = anionInput.data as ElementInfo
     anionName = capitalize(el.anion_name || el.name.toLowerCase() + 'ida')
   }
 
-  const finalFormula = generatePolyFormula(
+  const finalFormula = generateAtomicFormula(
     getFormula(cationInput),
     cationCount,
-    cationInput.isPolyatomic,
+    cationInput.isAtomic,
     getFormula(anionInput),
     anionCount,
-    anionInput.isPolyatomic
+    anionInput.isAtomic
   )
 
-  const finalName = generatePolyName(getName(cationInput), anionName, metalOxidationState)
+  const finalName = generateAtomicName(getName(cationInput), anionName, metalOxidationState)
 
   return {
     success: true,
@@ -920,9 +920,9 @@ function bondPolyatomic(
       name: finalName,
       formula: finalFormula,
       icon: FLASK_ICON_URL,
-      components: {}, // polyatomic compounds don't expose sub-components for further bonding
+      components: {}, // atomic compounds don't expose sub-components for further bonding
       current_occupied_slots: 999,
-      bondType: 'ionic-polyatomic'
+      bondType: 'ionic-atomic'
     }
   }
 }
@@ -930,56 +930,56 @@ function bondPolyatomic(
 // ─── Public Lookup Helper ────────────────────────────────────────────────────
 
 /**
- * Look up a PolyatomicIon by its id string.
- * Used by Container.vue to resolve a polyatomicId from a box into structured data.
+ * Look up an AtomicIon by its id string.
+ * Used by Container.vue to resolve an atomicId from a box into structured data.
  */
-export function getPolyatomicById(id: string): PolyatomicIon | undefined {
-  return polyatomics.find((p) => p.id === id)
+export function getAtomicIonById(id: string): AtomicIon | undefined {
+  return atomicIons.find((p) => p.id === id)
 }
 
-// ─── Public Entry Point for Polyatomic Bonding ───────────────────────────────
+// ─── Public Entry Point for Atomic Bonding ───────────────────────────────
 
 /**
- * Attempts to form a polyatomic ionic compound from two box descriptors.
- * At least one side must be a polyatomic ion (identified by polyatomicId).
- * The other side may be a plain element (symbol) or another polyatomic ion.
+ * Attempts to form an atomic ionic compound from two box descriptors.
+ * At least one side must be an atomic ion (identified by atomicId).
+ * The other side may be a plain element (symbol) or another atomic ion.
  *
- * @param targetPolyId  - polyatomicId of the target box (or null if elemental)
- * @param targetSymbol  - element symbol of the target box (or null if polyatomic)
- * @param attachPolyId  - polyatomicId of the attachment box (or null if elemental)
- * @param attachSymbol  - element symbol of the attachment box (or null if polyatomic)
+ * @param targetAtomicId  - atomicId of the target box (or null if elemental)
+ * @param targetSymbol  - element symbol of the target box (or null if atomic)
+ * @param attachAtomicId  - atomicId of the attachment box (or null if elemental)
+ * @param attachSymbol  - element symbol of the attachment box (or null if atomic)
  */
-export function attemptPolyatomicBond(
-  targetPolyId: string | null,
+export function attemptAtomicBond(
+  targetAtomicId: string | null,
   targetSymbol: string | null,
-  attachPolyId: string | null,
+  attachAtomicId: string | null,
   attachSymbol: string | null
 ): BondAttemptResult {
   function resolveInput(
-    polyId: string | null,
+    atomicId: string | null,
     symbol: string | null
-  ): { data: ElementInfo | PolyatomicIon; isPolyatomic: boolean } | null {
-    if (polyId) {
-      const poly = polyatomics.find((p) => p.id === polyId)
+  ): { data: ElementInfo | AtomicIon; isAtomic: boolean } | null {
+    if (atomicId) {
+      const poly = atomicIons.find((p) => p.id === atomicId)
       if (!poly) return null
-      return { data: poly, isPolyatomic: true }
+      return { data: poly, isAtomic: true }
     }
     if (symbol) {
       const el = elements.find((e) => e.symbol === symbol)
       if (!el) return null
-      // Only metals and ions support ionic bonding with polyatomics
+      // Only metals and ions support ionic bonding with atomic ions
       if (!el.supports_ionic) return null
-      return { data: el, isPolyatomic: false }
+      return { data: el, isAtomic: false }
     }
     return null
   }
 
-  const inputA = resolveInput(targetPolyId, targetSymbol)
-  const inputB = resolveInput(attachPolyId, attachSymbol)
+  const inputA = resolveInput(targetAtomicId, targetSymbol)
+  const inputB = resolveInput(attachAtomicId, attachSymbol)
 
   if (!inputA || !inputB) {
     return { success: false, reason: 'incompatible' }
   }
 
-  return bondPolyatomic(inputA, inputB)
+  return bondAtomic(inputA, inputB)
 }

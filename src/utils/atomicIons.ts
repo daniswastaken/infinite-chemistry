@@ -1,6 +1,6 @@
-import type { PolyatomicIon } from '@/utils/elements'
+import type { AtomicIon } from '@/utils/elements'
 
-export const polyatomics: PolyatomicIon[] = [
+export const atomicIons: AtomicIon[] = [
   // Existing
   { id: 'hydroxide', formula: 'OH', name: 'Hidroksida', charge: -1, is_cation: false },
   { id: 'sulfate', formula: 'SO4', name: 'Sulfat', charge: -2, is_cation: false },

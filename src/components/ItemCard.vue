@@ -17,7 +17,7 @@ const props = defineProps<{
   isHovered?: boolean;
   isRejected?: boolean;
   isSuccess?: boolean;
-  polyatomicId?: string;
+  atomicId?: string;
   components?: Record<string, number>;
 }>()
 
@@ -32,9 +32,9 @@ watch(() => props.isSuccess, (val) => {
 }, { immediate: true })
 const displayTitle = computed(() => {
   // Only transform if it's explicitly a single element (has symbol, no multi-components, no polyId)
-  const isSingleElement = props.symbol && !props.polyatomicId && (!props.components || Object.keys(props.components).length <= 1);
+  const isSingleElement = props.symbol && !props.atomicId && (!props.components || Object.keys(props.components).length <= 1);
   
-  if (store.isPolyatomicModeActive && isSingleElement) {
+  if (store.isAtomicModeActive && isSingleElement) {
     const element = elements.find(e => e.symbol === props.symbol)
     if (element) {
       const ionic = getElementIonicForm(element)
@@ -45,9 +45,9 @@ const displayTitle = computed(() => {
 })
 
 const displayFormula = computed(() => {
-  const isSingleElement = props.symbol && !props.polyatomicId && (!props.components || Object.keys(props.components).length <= 1);
+  const isSingleElement = props.symbol && !props.atomicId && (!props.components || Object.keys(props.components).length <= 1);
 
-  if (store.isPolyatomicModeActive && isSingleElement) {
+  if (store.isAtomicModeActive && isSingleElement) {
     const element = elements.find(e => e.symbol === props.symbol)
     if (element) {
       const ionic = getElementIonicForm(element)
