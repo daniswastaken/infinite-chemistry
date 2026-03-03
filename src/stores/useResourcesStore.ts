@@ -31,13 +31,6 @@ export const useResourcesStore = defineStore('resources', () => {
 
   function addResource(box: ResourceStoreEntry) {
     resources.value.push(box)
-    // Optional: Sort after adding
-    resources.value.sort((a, b) => {
-      if (a.atomicNumber && b.atomicNumber) return a.atomicNumber - b.atomicNumber
-      if (a.atomicNumber) return -1
-      if (b.atomicNumber) return 1
-      return a.title.localeCompare(b.title)
-    })
   }
 
   function clearSearch() {
