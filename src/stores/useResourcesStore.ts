@@ -27,6 +27,8 @@ export const useResourcesStore = defineStore('resources', () => {
   }))
 
   const resources = ref<ResourceStoreEntry[]>([...initialElements])
+  const searchTerm = ref('')
+
   function addResource(box: ResourceStoreEntry) {
     resources.value.push(box)
     // Optional: Sort after adding
@@ -38,5 +40,9 @@ export const useResourcesStore = defineStore('resources', () => {
     })
   }
 
-  return { resources, addResource }
+  function clearSearch() {
+    searchTerm.value = ''
+  }
+
+  return { resources, addResource, searchTerm, clearSearch }
 })

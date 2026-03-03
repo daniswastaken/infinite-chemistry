@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useDragLayer } from 'vue3-dnd'
 import { ItemTypes } from '@/components/ItemTypes'
-import { getElementIcon } from '@/utils/elements'
+import ItemCard from '@/components/ItemCard.vue'
 import { twMerge } from 'tailwind-merge'
 import { useBoxesStore } from '@/stores/useBoxesStore'
 
@@ -44,34 +44,18 @@ watch([() => store.successStartTime, () => item.value?.id], () => {
     :style="layerStyle"
   >
     <div v-if="store.successBoxId === item?.id" class="sunburst-effect" :style="{ animationDelay: animationOffset }"></div>
-    <!-- Mirror of the small ItemCard appearance -->
-    <div
-      :class="twMerge(
-        'relative',
-        'text-[15px] space-x-1.5 px-2 py-1.5', 
-        'border-[#999] bg-gradient-to-b from-white to-[#e0f2fe] shadow-md inline-flex items-center font-medium border rounded-[5px] select-none opacity-95 whitespace-nowrap scale-[1.03]'
-      )"
-    >
-      <span v-if="item?.emoji">{{ item.emoji }}</span>
-      <img
-        v-else-if="item?.symbol"
-        :src="getElementIcon(item.symbol)"
-        class="w-6 h-6 flex-shrink-0 pointer-events-none"
-        :alt="item.symbol"
-        draggable="false"
-        @contextmenu.prevent
+    
+    <div :class="twMerge('relative scale-[1.03] opacity-95')">
+      <ItemCard 
+        size="small"
+        :title="item.title"
+        :formula="item.formula"
+        :emoji="item.emoji"
+        :symbol="item.symbol"
+        :icon="item.icon"
+        :polyatomicId="item.polyatomicId"
+        :components="item.components"
       />
-      <img
-        v-else-if="item?.icon"
-        :src="item.icon"
-        class="h-[18px] w-auto flex-shrink-0 pointer-events-none"
-        :alt="item.title"
-        draggable="false"
-        @contextmenu.prevent
-      />
-      <span>
-        {{ store.showFormulas ? (item?.formula || item?.symbol || item?.title) : item?.title }}
-      </span>
     </div>
   </div>
 </template>

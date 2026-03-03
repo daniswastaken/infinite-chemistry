@@ -3,16 +3,17 @@ import Resource from "@/components/Resource.vue";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {storeToRefs} from "pinia";
-import {computed, ref} from "vue";
+import { computed, ref } from "vue";
 import { playSound } from "@/utils/audio";
+import { elements, getElementIonicForm } from "@/utils/elements";
 
 const resourcesStore = useResourcesStore()
-const {resources} = storeToRefs(resourcesStore)
+const {resources, searchTerm} = storeToRefs(resourcesStore)
+const {clearSearch} = resourcesStore
 
 const boxesStore = useBoxesStore()
 const {showFormulas} = storeToRefs(boxesStore)
 
-const searchTerm = ref('')
 const activeTab = ref('Elemen')
 
 const normalizeFormula = (text: string) => {
@@ -43,7 +44,21 @@ const filteredResources = computed(() => {
     }
     
     // Regular search by Indonesian title
-    return resource.title.toLowerCase().includes(query)
+    const nameMatch = resource.title.toLowerCase().includes(query)
+    
+    // Also search by ionic name if in Atomic Mode and it's a single element
+    let ionicMatch = false
+    if (boxesStore.isPolyatomicModeActive && resource.symbol && !resource.polyatomicId) {
+      const element = elements.find(e => e.symbol === resource.symbol)
+      if (element) {
+        const ionic = getElementIonicForm(element)
+        if (ionic && ionic.name.toLowerCase().includes(query)) {
+          ionicMatch = true
+        }
+      }
+    }
+    
+    return nameMatch || ionicMatch
   })
 })
 
@@ -131,10 +146,16 @@ const chunkedResources = computed(() => {
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
       </div>
-      <input v-model="searchTerm" type="text" class="block w-full py-3 md:py-3 pl-10 md:pl-10 pr-10 text-[15px] md:text-[16px] text-[#b0b0b0] bg-white focus:outline-none transition placeholder-[#b0b0b0]" :placeholder="`Search (${filteredResources.length}) items...`">
+      <input 
+        v-model="searchTerm" 
+        type="text" 
+        @keydown.tab.prevent="clearSearch"
+        class="block w-full py-3 md:py-3 pl-10 md:pl-10 pr-10 text-[15px] md:text-[16px] text-[#b0b0b0] bg-white focus:outline-none transition placeholder-[#b0b0b0]" 
+        :placeholder="`Search (${filteredResources.length}) items...`"
+      >
       <button 
         v-if="searchTerm" 
-        @click="(e) => { searchTerm = ''; playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
+        @click="(e) => { clearSearch(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
         class="absolute inset-y-0 right-0 flex items-center px-3 group cursor-pointer h-full"
         title="Clear search"
       >

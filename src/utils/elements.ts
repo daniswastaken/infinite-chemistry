@@ -1205,3 +1205,24 @@ export const elementMap: Record<string, string> = elements.reduce(
 export const getElementIcon = (symbol: string) => {
   return new URL(`../assets/elements/${symbol.toLowerCase()}.svg`, import.meta.url).href
 }
+
+export const getElementIonicForm = (element: ElementInfo) => {
+  const charge = element.primary_ionic_charge || 0
+  if (charge === 0) return null
+
+  // For name: metals get 'Ion [Name]', non-metals get 'anion_name' or 'ide_name'
+  let ionicName = element.name
+  if (element.is_metal) {
+    ionicName = `Ion ${element.name}`
+  } else {
+    ionicName = element.anion_name || element.ide_name || `${element.name}ida`
+    // Capitalize first letter
+    ionicName = ionicName.charAt(0).toUpperCase() + ionicName.slice(1)
+  }
+
+  return {
+    name: ionicName,
+    charge: charge,
+    symbol: element.symbol
+  }
+}

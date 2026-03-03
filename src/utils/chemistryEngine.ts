@@ -271,21 +271,49 @@ function handleIonicBond(
 // ─── Main Entry Point ────────────────────────────────────────────────────────
 
 const polyatomicResolutionMap: Record<string, string> = {
-  'O,S': 'sulfite', // S + O -> SO3 (Sulfit)
-  'N,O': 'nitrite', // N + O -> NO2 (Nitrit)
-  'C,O': 'carbonate', // C + O -> CO3 (Karbonat)
-  'O,P': 'phosphite', // P + O -> PO3 (Fosfit)
-  'H,O': 'hydroxide', // H + O -> OH (Hidroksida)
-  'H,N': 'ammonium' // N + H -> NH4 (Amonium)
+  'O,S': 'sulfite',
+  'N,O': 'nitrite',
+  'C,O': 'carbonate',
+  'O,P': 'phosphite',
+  'H,O': 'hydroxide',
+  'H,N': 'ammonium',
+  'Cl,O': 'hypochlorite',
+  'Br,O': 'hypobromite',
+  'I,O': 'hypoiodite',
+  'Mn,O': 'permanganate',
+  'Cr,O': 'chromate',
+  'C,N': 'cyanide',
+  'O,Si': 'silicate',
+  'B,O': 'borate',
+  'Al,O': 'aluminate',
+  'O,Zn': 'zincate'
 }
 
 /**
- * Mapping for polyatomic 'evolution' (e.g. Sulfit + O -> Sulfat)
+ * Mapping for polyatomic 'evolution'.
+ * Keys can be just the ionId (assumes +O) or "ionId:element" for specific additions.
  */
 const polyatomicEvolutionMap: Record<string, string> = {
   sulfite: 'sulfate',
   nitrite: 'nitrate',
-  phosphite: 'phosphate'
+  phosphite: 'phosphate',
+  hypochlorite: 'chlorite',
+  chlorite: 'chlorate',
+  chlorate: 'perchlorate',
+  hypobromite: 'bromite',
+  bromite: 'bromate',
+  bromate: 'perbromate',
+  hypoiodite: 'iodite',
+  iodite: 'iodate',
+  iodate: 'periodate',
+  chromate: 'dichromate',
+  'sulfite:S': 'thiosulfate',
+  'carbonate:H': 'bicarbonate',
+  'sulfate:H': 'bisulfate',
+  'phosphate:H': 'hydrogen_phosphate',
+  'hydrogen_phosphate:H': 'dihydrogen_phosphate',
+  'permanganate:O': 'manganate', // Just for fun/symmetry
+  'manganate:O': 'permanganate'
 }
 
 /**
@@ -336,8 +364,12 @@ export function attemptBond(
           : null
       const elementKey = ionKey === keyA ? keyB : ionKey === keyB ? keyA : null
 
-      if (ionKey && elementKey === 'O') {
-        const evolvedIonId = polyatomicEvolutionMap[ionKey]
+      if (ionKey && elementKey) {
+        // Try specific element evolution first (e.g. sulfite:S), then fallback to default (+O)
+        const evolvedIonId =
+          polyatomicEvolutionMap[`${ionKey}:${elementKey}`] ||
+          (elementKey === 'O' ? polyatomicEvolutionMap[ionKey] : null)
+
         if (evolvedIonId) {
           const ionData = getPolyatomicById(evolvedIonId)
           if (ionData) {

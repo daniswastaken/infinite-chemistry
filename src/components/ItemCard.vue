@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {twMerge} from "tailwind-merge";
-import {getElementIcon} from "@/utils/elements";
-import {useBoxesStore} from "@/stores/useBoxesStore";
-import {computed, ref, watch} from "vue";
+import { getElementIcon, getElementIonicForm, elements } from "@/utils/elements";
+import { formatIonCharge } from "@/utils/chemistryEngine";
+import { useBoxesStore } from "@/stores/useBoxesStore";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   title: string;
@@ -16,6 +17,8 @@ const props = defineProps<{
   isHovered?: boolean;
   isRejected?: boolean;
   isSuccess?: boolean;
+  polyatomicId?: string;
+  components?: Record<string, number>;
 }>()
 
 const store = useBoxesStore()
@@ -27,6 +30,32 @@ watch(() => props.isSuccess, (val) => {
     animationOffset.value = `-${elapsed}s`
   }
 }, { immediate: true })
+const displayTitle = computed(() => {
+  // Only transform if it's explicitly a single element (has symbol, no multi-components, no polyId)
+  const isSingleElement = props.symbol && !props.polyatomicId && (!props.components || Object.keys(props.components).length <= 1);
+  
+  if (store.isPolyatomicModeActive && isSingleElement) {
+    const element = elements.find(e => e.symbol === props.symbol)
+    if (element) {
+      const ionic = getElementIonicForm(element)
+      if (ionic) return ionic.name
+    }
+  }
+  return props.title
+})
+
+const displayFormula = computed(() => {
+  const isSingleElement = props.symbol && !props.polyatomicId && (!props.components || Object.keys(props.components).length <= 1);
+
+  if (store.isPolyatomicModeActive && isSingleElement) {
+    const element = elements.find(e => e.symbol === props.symbol)
+    if (element) {
+      const ionic = getElementIonicForm(element)
+      if (ionic) return ionic.symbol + formatIonCharge(ionic.charge)
+    }
+  }
+  return props.formula || props.symbol || props.title
+})
 
 </script>
 <template>
@@ -47,7 +76,7 @@ watch(() => props.isSuccess, (val) => {
       <img v-else-if="symbol" :src="getElementIcon(symbol)" class="w-6 h-6 flex-shrink-0 pointer-events-none" :alt="symbol" draggable="false" @contextmenu.prevent />
       <img v-else-if="icon" :src="icon" class="h-[18px] w-auto flex-shrink-0 pointer-events-none" :alt="title" draggable="false" @contextmenu.prevent />
       <span>
-        {{ store.showFormulas ? (props.formula || props.symbol || props.title) : props.title }}
+        {{ store.showFormulas ? displayFormula : displayTitle }}
       </span>
   </div>
 

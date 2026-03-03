@@ -35,7 +35,7 @@ const { isDragging } = toRefs(collect)
       role="Box"
       data-testid="box"
   >
-    <ItemCard :title="title" :formula="formula" :emoji="emoji" :symbol="symbol" :icon="icon" size="small"></ItemCard>
+    <ItemCard :title="title" :formula="formula" :emoji="emoji" :symbol="symbol" :icon="icon" :polyatomicId="polyatomicId" :components="components" size="small"></ItemCard>
   </div>
 </template>
 

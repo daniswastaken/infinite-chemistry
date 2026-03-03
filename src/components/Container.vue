@@ -19,8 +19,8 @@ const { boxes, selectedIds } = storeToRefs(store)
 const { setSelectedIds, clearSelection, clearBoxes, removeSelected } = store
 
 const resourcesStore = useResourcesStore()
-const { resources } = storeToRefs(resourcesStore)
-const { addResource } = resourcesStore
+const { resources, searchTerm } = storeToRefs(resourcesStore)
+const { addResource, clearSearch } = resourcesStore
 
 // Collision detection helper
 function getOverlappingBox(left: number, top: number, excludeId?: string) {
@@ -232,6 +232,15 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Backspace' || e.key === 'Delete') {
     e.preventDefault()
     removeSelected()
+    return
+  }
+
+  if (e.key === 'Tab') {
+    e.preventDefault()
+    if (searchTerm.value) {
+      clearSearch()
+      playSound('click', 0.3, 1.0)
+    }
   }
 }
 
@@ -528,7 +537,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
     @mouseup="finishSelection"
     @mouseleave="finishSelection"
   >
-    <!-- Polyatomic Mode Glow Overlay (Screen edges) -->
+    <!-- Atomic Mode Glow Overlay (Screen edges) -->
     <div 
       class="absolute inset-0 pointer-events-none transition-opacity duration-700 z-[5] overflow-hidden"
       :class="store.isPolyatomicModeActive ? 'opacity-100' : 'opacity-0'"
@@ -579,6 +588,8 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
               :isHovered="overlappingId === String(key)"
               :isRejected="store.rejectedBoxId === String(key)"
               :isSuccess="store.successBoxId === String(key)"
+              :polyatomicId="value.polyatomicId"
+              :components="value.components"
             />
           </Box>
         </TransitionGroup>
@@ -607,7 +618,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         @click="(e) => { store.togglePolyatomicMode(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }"
         class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 104}px` }" 
-        :title="store.isPolyatomicModeActive ? 'Mode Poliatomik (Aktif)' : 'Mode Poliatomik'"
+        :title="store.isPolyatomicModeActive ? 'Mode Atomik (Aktif)' : 'Mode Atomik'"
       >
         <img 
           src="@/assets/icons/flask.svg" 
