@@ -10,6 +10,7 @@ import AvailableResources from "@/components/AvailableResources.vue";
 import CustomDragLayer from "@/components/CustomDragLayer.vue";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
+import {useRreStore} from "@/stores/useRreStore";
 import {storeToRefs} from "pinia";
 import {attemptBond, attemptAtomicBond} from "@/utils/chemistryEngine";
 import {playSound} from "@/utils/audio";
@@ -17,6 +18,8 @@ import {playSound} from "@/utils/audio";
 const store = useBoxesStore()
 const { boxes, selectedIds } = storeToRefs(store)
 const { setSelectedIds, clearSelection, clearBoxes, removeSelected } = store
+
+const rreStore = useRreStore()
 
 const resourcesStore = useResourcesStore()
 const { resources, searchTerm } = storeToRefs(resourcesStore)
@@ -332,6 +335,7 @@ const [collect, drop] = useDrop(() => ({
               })
               store.triggerSuccessAnimation(newId)
             }
+            rreStore.checkWinCondition(result.newCompound!)
             playSound('fusion')
             return
           } else if (!result.success && store.isAtomicModeActive) {
@@ -369,6 +373,7 @@ const [collect, drop] = useDrop(() => ({
                 })
                 store.triggerSuccessAnimation(newId)
               }
+              rreStore.checkWinCondition(fallbackResult.newCompound!)
               playSound('fusion')
               return
             }
@@ -415,6 +420,7 @@ const [collect, drop] = useDrop(() => ({
               })
               store.triggerSuccessAnimation(newId)
             }
+            rreStore.checkWinCondition(result.newCompound!)
             playSound('fusion')
             return
           } else if (!result.success) {
@@ -612,8 +618,64 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px]" alt="Infinite Chemistry Logo" />
       </div>
 
+      <!-- RRE Target Info Overlay -->
+      <Transition name="fade" mode="out-in">
+        <!-- Target Active -->
+        <div v-if="rreStore.isActive && rreStore.targetCompound" :key="'target'" class="absolute top-[15px] right-[15px] z-[50] pointer-events-none">
+          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] px-5 py-4 min-w-[210px] flex flex-col items-center gap-2" :style="{ marginRight: `${sidebarWidth}px` }">
+            <div class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa]">Mode Tantangan</div>
+            <div class="text-[34px] leading-none font-black text-[#1d2331] font-outfit" v-html="rreStore.targetCompound.formula"></div>
+            <div class="flex items-center gap-1.5 mt-1 px-3 py-1 rounded-[5px] text-[13px] font-semibold transition-colors" :class="rreStore.timeLeft <= 10 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-[#f4f4fa] text-[#6b66fa] border border-[#e5e5f5]'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              {{ rreStore.timeLeft }} detik
+            </div>
+          </div>
+        </div>
+
+        <!-- Success Notification -->
+        <div v-else-if="rreStore.showSuccessPopup" :key="'success'" class="absolute top-[15px] right-[15px] z-[50] pointer-events-none">
+          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-green-200 p-4 min-w-[210px] flex flex-col items-center gap-2 justify-center" :style="{ marginRight: `${sidebarWidth}px`, minHeight: '136px' }">
+            <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-green-500 border border-green-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <h3 class="text-[13px] font-bold text-slate-800 uppercase tracking-widest mt-1">Berhasil!</h3>
+          </div>
+        </div>
+
+        <!-- Fail Notification -->
+        <div v-else-if="rreStore.showFailPopup" :key="'fail'" class="absolute top-[15px] right-[15px] z-[50] pointer-events-none">
+          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-red-200 p-4 min-w-[210px] flex flex-col items-center gap-2 justify-center" :style="{ marginRight: `${sidebarWidth}px`, minHeight: '136px' }">
+            <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-red-500 border border-red-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <h3 class="text-[13px] font-bold text-slate-800 uppercase tracking-widest mt-1">Waktu Habis</h3>
+          </div>
+        </div>
+      </Transition>
+
       <!-- Controls Row (inside canvas, floats at bottom-right on mobile) -->
       <div class="mobile-controls-row">
+      <button 
+        @click="(e) => { rreStore.toggleGame(); (e.currentTarget as HTMLElement).blur() }"
+        class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        :style="{ right: `${sidebarWidth + 148}px` }" 
+        :title="rreStore.isActive ? 'Berhenti Tantangan' : 'Mode Tantangan'"
+      >
+        <img 
+          src="@/assets/icons/rre.svg" 
+          class="w-6 h-6 transition-all" 
+          :class="rreStore.isActive ? 'opacity-100' : 'grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100'"
+          alt="RRE Mode" 
+        />
+      </button>
+
       <button 
         @click="(e) => { store.toggleAtomicMode(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }"
         class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
@@ -691,6 +753,8 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         </div>
       </div>
     </Transition>
+
+
 
     <!-- Sidebar (desktop) / Bottom Tray (mobile) -->
     <div 
