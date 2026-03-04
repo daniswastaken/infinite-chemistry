@@ -274,13 +274,13 @@ const atomicResolutionMap: Record<string, string> = {
   'O,S': 'sulfite',
   'N,O': 'nitrite',
   'C,O': 'carbonate',
-  'O,P': 'phosphite',
+  'O,P': 'hypophosphite',
   'H,O': 'hydroxide',
   'H,N': 'ammonium',
   'Cl,O': 'hypochlorite',
   'Br,O': 'hypobromite',
   'I,O': 'hypoiodite',
-  'Mn,O': 'permanganate',
+  'Mn,O': 'manganate',
   'Cr,O': 'chromate',
   'C,N': 'cyanide',
   'O,Si': 'silicate',
@@ -296,6 +296,7 @@ const atomicResolutionMap: Record<string, string> = {
 const atomicEvolutionMap: Record<string, string> = {
   sulfite: 'sulfate',
   nitrite: 'nitrate',
+  hypophosphite: 'phosphite',
   phosphite: 'phosphate',
   hypochlorite: 'chlorite',
   chlorite: 'chlorate',
@@ -307,13 +308,12 @@ const atomicEvolutionMap: Record<string, string> = {
   iodite: 'iodate',
   iodate: 'periodate',
   chromate: 'dichromate',
+  manganate: 'permanganate',
   'sulfite:S': 'thiosulfate',
   'carbonate:H': 'bicarbonate',
   'sulfate:H': 'bisulfate',
   'phosphate:H': 'hydrogen_phosphate',
-  'hydrogen_phosphate:H': 'dihydrogen_phosphate',
-  'permanganate:O': 'manganate', // Just for fun/symmetry
-  'manganate:O': 'permanganate'
+  'hydrogen_phosphate:H': 'dihydrogen_phosphate'
 }
 
 /**

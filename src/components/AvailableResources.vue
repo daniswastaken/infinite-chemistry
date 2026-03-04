@@ -62,6 +62,14 @@ const filteredResources = computed(() => {
   })
 })
 
+const searchInput = ref<HTMLInputElement | null>(null)
+
+defineExpose({
+  focusSearch: () => {
+    searchInput.value?.focus()
+  }
+})
+
 const chunkedResources = computed(() => {
   const isMobile = window.innerWidth <= 768;
   const numRows = isMobile ? 3 : 1; // On mobile use 3 rows, desktop use 1 (standard wrap)
@@ -147,9 +155,15 @@ const chunkedResources = computed(() => {
         </svg>
       </div>
       <input 
+        ref="searchInput"
         v-model="searchTerm" 
         type="text" 
-        @keydown.tab.prevent="clearSearch"
+        @keydown.tab.prevent="() => { 
+          if (searchTerm) {
+            clearSearch(); 
+            playSound('click', 0.3, 1.0);
+          }
+        }"
         class="block w-full py-3 md:py-3 pl-10 md:pl-10 pr-10 text-[15px] md:text-[16px] text-[#b0b0b0] bg-white focus:outline-none transition placeholder-[#b0b0b0]" 
         :placeholder="`Search (${filteredResources.length}) items...`"
       >

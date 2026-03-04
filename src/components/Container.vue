@@ -25,6 +25,8 @@ const resourcesStore = useResourcesStore()
 const { resources, searchTerm } = storeToRefs(resourcesStore)
 const { addResource, clearSearch } = resourcesStore
 
+const resourcesRef = ref<any>(null)
+
 // Collision detection helper
 function getOverlappingBox(left: number, top: number, excludeId?: string) {
   // Use actual DOM measurements if available, otherwise fallback
@@ -244,6 +246,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
       clearSearch()
       playSound('click', 0.3, 1.0)
     }
+    resourcesRef.value?.focusSearch()
   }
 }
 
@@ -614,48 +617,63 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       </div>
 
       <!-- Background branding like Infinite Craft -->
-      <div class="mobile-logo absolute top-[15px] left-[15px] z-0 pointer-events-none opacity-80">
+      <!-- Logo -->
+      <div 
+        class="mobile-logo absolute top-[15px] left-[15px] z-0 pointer-events-none opacity-80 transition-opacity duration-300"
+        :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup) }"
+      >
         <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px]" alt="Infinite Chemistry Logo" />
       </div>
 
       <!-- RRE Target Info Overlay -->
-      <Transition name="fade" mode="out-in">
+      <Transition name="slide-fade" mode="out-in">
         <!-- Target Active -->
-        <div v-if="rreStore.isActive && rreStore.targetCompound" :key="'target'" class="absolute top-[15px] right-[15px] z-[50] pointer-events-none">
-          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] px-5 py-4 min-w-[210px] flex flex-col items-center gap-2" :style="{ marginRight: `${sidebarWidth}px` }">
-            <div class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa]">Mode Tantangan</div>
-            <div class="text-[34px] leading-none font-black text-[#1d2331] font-outfit" v-html="rreStore.targetCompound.formula"></div>
-            <div class="flex items-center gap-1.5 mt-1 px-3 py-1 rounded-[5px] text-[13px] font-semibold transition-colors" :class="rreStore.timeLeft <= 10 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-[#f4f4fa] text-[#6b66fa] border border-[#e5e5f5]'">
+        <div v-if="rreStore.isActive && rreStore.targetCompound" :key="'target'" class="absolute top-[15px] z-[50] pointer-events-none transition-all duration-300" :class="isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]'">
+          <div 
+            class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] px-5 py-3 md:py-4 flex flex-row md:flex-col items-center gap-3 md:gap-2" 
+            :class="isMobile ? 'justify-between' : 'min-w-[210px]'"
+            :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px` }"
+          >
+            <!-- Timer (on left on mobile) -->
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-[5px] text-[13px] font-semibold transition-colors order-1 md:order-2" :class="rreStore.timeLeft <= 10 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-[#f4f4fa] text-[#6b66fa] border border-[#e5e5f5]'">
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
               </svg>
-              {{ rreStore.timeLeft }} detik
+              {{ rreStore.timeLeft }}<span class="md:inline ml-0.5">detik</span>
             </div>
+
+            <div class="flex flex-col items-center md:items-center order-2 md:order-1 flex-1 md:flex-none">
+              <div class="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-0.5">Mode Tantangan</div>
+              <div class="text-[24px] md:text-[34px] leading-none font-black text-[#1d2331] font-outfit" v-html="rreStore.targetCompound.formula"></div>
+            </div>
+            
+            <!-- Spacer for mobile centering if needed -->
+            <div v-if="isMobile" class="w-[15px] order-3 lg:hidden"></div>
           </div>
         </div>
 
         <!-- Success Notification -->
-        <div v-else-if="rreStore.showSuccessPopup" :key="'success'" class="absolute top-[15px] right-[15px] z-[50] pointer-events-none">
-          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-green-200 p-4 min-w-[210px] flex flex-col items-center gap-2 justify-center" :style="{ marginRight: `${sidebarWidth}px`, minHeight: '136px' }">
-            <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-green-500 border border-green-100">
+        <div v-else-if="rreStore.showSuccessPopup" :key="'success'" class="absolute top-[15px] z-[50] pointer-events-none" :class="isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]'">
+          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-green-200 p-4 md:min-w-[210px] flex flex-row md:flex-col items-center gap-3 justify-center" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px`, minHeight: isMobile ? 'auto' : '136px' }">
+            <div class="w-10 h-10 bg-green-50 rounded-full flex-shrink-0 flex items-center justify-center text-green-500 border border-green-100">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
-            <h3 class="text-[13px] font-bold text-slate-800 uppercase tracking-widest mt-1">Berhasil!</h3>
+            <h3 class="text-[13px] font-bold text-slate-800 uppercase tracking-widest">Berhasil!</h3>
           </div>
         </div>
 
         <!-- Fail Notification -->
-        <div v-else-if="rreStore.showFailPopup" :key="'fail'" class="absolute top-[15px] right-[15px] z-[50] pointer-events-none">
-          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-red-200 p-4 min-w-[210px] flex flex-col items-center gap-2 justify-center" :style="{ marginRight: `${sidebarWidth}px`, minHeight: '136px' }">
-            <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-red-500 border border-red-100">
+        <div v-else-if="rreStore.showFailPopup" :key="'fail'" class="absolute top-[15px] z-[50] pointer-events-none" :class="isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]'">
+          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-red-200 p-4 md:min-w-[210px] flex flex-row md:flex-col items-center gap-3 justify-center" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px`, minHeight: isMobile ? 'auto' : '136px' }">
+            <div class="w-10 h-10 bg-red-50 rounded-full flex-shrink-0 flex items-center justify-center text-red-500 border border-red-100">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </div>
-            <h3 class="text-[13px] font-bold text-slate-800 uppercase tracking-widest mt-1">Waktu Habis</h3>
+            <h3 class="text-[13px] font-bold text-slate-800 uppercase tracking-widest">Waktu Habis</h3>
           </div>
         </div>
       </Transition>
@@ -767,7 +785,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
           class="mobile-resize-handle absolute left-0 top-0 bottom-0 w-[5px] cursor-col-resize hover:bg-[#f0f0f0] transition-colors z-[11]"
           @mousedown="startResize"
       ></div>
-      <AvailableResources></AvailableResources>
+      <AvailableResources ref="resourcesRef"></AvailableResources>
     </div>
 
     <!-- Delete animation ghosts: Teleported to <body> so they render above the sidebar z-index -->
@@ -829,6 +847,20 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
 
 .fade-enter-from,
 .fade-leave-to {
+  opacity: 0;
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-20px);
   opacity: 0;
 }
 
