@@ -1,1 +1,1 @@
-NH4+ poliatomik harusnya gabisa berdiri sendiri tanpa sulfat tapi sekarang bisa
+No TODO
