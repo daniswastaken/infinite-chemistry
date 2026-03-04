@@ -13,9 +13,7 @@ import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {useRreStore} from "@/stores/useRreStore";
 import {useSettingsStore} from "@/stores/useSettingsStore";
-import ionicIcon from "@/assets/icons/ionic.svg";
-import covalentIcon from "@/assets/icons/covalent.svg";
-import elementsIcon from "@/assets/icons/elements.svg";
+
 import {storeToRefs} from "pinia";
 import {attemptBond, attemptAtomicBond} from "@/utils/chemistryEngine";
 import {playSound} from "@/utils/audio";
@@ -27,12 +25,7 @@ const { setSelectedIds, clearSelection, clearBoxes, removeSelected } = store
 const rreStore = useRreStore()
 const settingsStore = useSettingsStore()
 
-const clueIcon = computed(() => {
-  const bt = rreStore.targetCompound?.bondType
-  if (bt === 'ionic' || bt === 'ionic-atomic') return ionicIcon
-  if (bt === 'covalent') return covalentIcon
-  return elementsIcon
-})
+
 
 const resourcesStore = useResourcesStore()
 const { resources, searchTerm } = storeToRefs(resourcesStore)
@@ -664,7 +657,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
                 <Transition name="fade">
                   <img
                     v-if="settingsStore.hasClue && rreStore.timeLeft <= 30"
-                    :src="clueIcon"
+                    :src="rreStore.targetCompound?.icon"
                     class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0"
                     alt="Clue"
                   />
