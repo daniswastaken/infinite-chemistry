@@ -12,6 +12,10 @@ import SettingsModal from "@/components/SettingsModal.vue";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {useRreStore} from "@/stores/useRreStore";
+import {useSettingsStore} from "@/stores/useSettingsStore";
+import ionicIcon from "@/assets/icons/ionic.svg";
+import covalentIcon from "@/assets/icons/covalent.svg";
+import elementsIcon from "@/assets/icons/elements.svg";
 import {storeToRefs} from "pinia";
 import {attemptBond, attemptAtomicBond} from "@/utils/chemistryEngine";
 import {playSound} from "@/utils/audio";
@@ -21,6 +25,14 @@ const { boxes, selectedIds } = storeToRefs(store)
 const { setSelectedIds, clearSelection, clearBoxes, removeSelected } = store
 
 const rreStore = useRreStore()
+const settingsStore = useSettingsStore()
+
+const clueIcon = computed(() => {
+  const bt = rreStore.targetCompound?.bondType
+  if (bt === 'ionic' || bt === 'ionic-atomic') return ionicIcon
+  if (bt === 'covalent') return covalentIcon
+  return elementsIcon
+})
 
 const resourcesStore = useResourcesStore()
 const { resources, searchTerm } = storeToRefs(resourcesStore)
@@ -647,8 +659,20 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
 
             <div class="flex flex-col items-center md:items-center order-2 md:order-1 flex-1 md:flex-none">
               <div class="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-0.5">Mode Tantangan</div>
-              <div class="text-[24px] md:text-[34px] leading-none font-black text-[#1d2331] font-outfit" v-html="rreStore.targetCompound.formula"></div>
+              <!-- Formula row with optional inline clue icon -->
+              <div class="flex items-center gap-2">
+                <Transition name="fade">
+                  <img
+                    v-if="settingsStore.hasClue && rreStore.timeLeft <= 30"
+                    :src="clueIcon"
+                    class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0"
+                    alt="Clue"
+                  />
+                </Transition>
+                <div class="text-[22px] md:text-[30px] leading-none font-extrabold text-[#1d2331] font-outfit" v-html="rreStore.targetCompound.formula"></div>
+              </div>
             </div>
+
             
             <!-- Spacer for mobile centering if needed -->
             <div v-if="isMobile" class="w-[15px] order-3 lg:hidden"></div>

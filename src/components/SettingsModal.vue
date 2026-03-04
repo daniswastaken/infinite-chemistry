@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useSettingsStore } from '@/stores/useSettingsStore'
+import type { Difficulty } from '@/stores/useSettingsStore'
 
 const props = defineProps<{
   isOpen: boolean
@@ -21,10 +23,17 @@ const tabs = computed(() => {
 })
 
 // Reset to first tab when opening
-import { watch } from 'vue'
 watch(() => props.isOpen, (val) => {
   if (val) activeTab.value = 'Pengaturan'
 })
+
+const settingsStore = useSettingsStore()
+
+const difficultyOptions: { id: Difficulty; label: string; time: string; clue: boolean }[] = [
+  { id: 'alkemis', label: 'Alkemis', time: '15 detik', clue: false },
+  { id: 'sepuh',   label: 'Sepuh',   time: '30 detik', clue: false },
+  { id: 'pemula',  label: 'Pemula',  time: '60 detik', clue: true },
+]
 
 const shortcuts = [
   { keys: ['Tab'], description: 'Search' },
@@ -75,9 +84,29 @@ const shortcuts = [
             class="[grid-area:1/1] transition-opacity duration-200"
             :class="activeTab === 'Pengaturan' ? 'opacity-100' : 'opacity-0 pointer-events-none'"
           >
-            <!-- Content wrapper to ensure centering for placeholder -->
-            <div class="flex flex-col gap-3 min-h-[200px] justify-center">
-              <p class="text-[13px] text-[#aaa] text-center">Pengaturan akan segera hadir.</p>
+            <div class="flex flex-col gap-4 min-h-[200px] justify-center">
+              <!-- Section Header -->
+              <div>
+                <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-3">Mode Tantangan</p>
+                <!-- Segmented Control -->
+                <div class="flex flex-col gap-2">
+                  <button
+                    v-for="opt in difficultyOptions"
+                    :key="opt.id"
+                    @click="settingsStore.setDifficulty(opt.id)"
+                    class="flex items-center justify-between px-4 py-2.5 rounded-[6px] border text-left transition-all cursor-pointer outline-none"
+                    :class="settingsStore.difficulty === opt.id
+                      ? 'bg-[#6b66fa] border-[#6b66fa] text-white shadow-sm'
+                      : 'bg-white border-[#d8d8d8] text-slate-700 hover:border-[#6b66fa] hover:bg-[#f4f4fa]'"
+                  >
+                    <span class="font-semibold text-[13px]">{{ opt.label }}</span>
+                    <div class="flex items-center gap-2 text-[12px] opacity-80">
+                      <span>⏱ {{ opt.time }}</span>
+                      <span v-if="opt.clue" class="px-1.5 py-0.5 rounded-[3px] text-[10px] font-bold tracking-wide" :class="settingsStore.difficulty === opt.id ? 'bg-white/20 text-white' : 'bg-[#eef]  text-[#6b66fa]'">+ CLUE</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 

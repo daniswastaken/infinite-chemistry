@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { generateRandomTarget } from '@/utils/rreLogic'
 import { playSound } from '@/utils/audio'
 import type { BondAttemptResult } from '@/utils/chemistryEngine'
+import { useSettingsStore } from '@/stores/useSettingsStore'
 
 type TargetCompound = NonNullable<BondAttemptResult['newCompound']>
 
@@ -27,7 +28,8 @@ export const useRreStore = defineStore('rre', () => {
 
     // Initialize timer
     isActive.value = true
-    timeLeft.value = 30
+    const settingsStore = useSettingsStore()
+    timeLeft.value = settingsStore.timeLimit
 
     timerInterval = window.setInterval(() => {
       timeLeft.value--
