@@ -32,6 +32,13 @@ body {
   z-index: 10;
 }
 
+.desktop-settings-btn {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 10;
+}
+
 /* ============================================================
    MOBILE RESPONSIVE LAYOUT  (max-width: 768px)
    Converts the desktop right-sidebar into a bottom tray.
@@ -70,10 +77,25 @@ body {
     z-index: 10;
   }
 
-  /* Override the desktop fixed-position buttons inside the row */
   .mobile-controls-row .desktop-control-btn {
     position: static !important;
     right: auto !important;
+  }
+
+  .mobile-left-controls .desktop-settings-btn {
+    position: static !important;
+    left: auto !important;
+  }
+
+  /* Match the right-side controls row layout */
+  .mobile-left-controls {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    z-index: 10;
   }
 
   /* --- Sidebar → Bottom Tray ------------------------------ */

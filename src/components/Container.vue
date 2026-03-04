@@ -8,6 +8,7 @@ import {reactive, ref, onMounted, computed, onUnmounted} from 'vue'
 import ItemCard from "@/components/ItemCard.vue";
 import AvailableResources from "@/components/AvailableResources.vue";
 import CustomDragLayer from "@/components/CustomDragLayer.vue";
+import SettingsModal from "@/components/SettingsModal.vue";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {useRreStore} from "@/stores/useRreStore";
@@ -26,6 +27,7 @@ const { resources, searchTerm } = storeToRefs(resourcesStore)
 const { addResource, clearSearch } = resourcesStore
 
 const resourcesRef = ref<any>(null)
+const showSettings = ref(false)
 
 // Collision detection helper
 function getOverlappingBox(left: number, top: number, excludeId?: string) {
@@ -618,8 +620,9 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
 
       <!-- Background branding like Infinite Craft -->
       <!-- Logo -->
+      <!-- Logo -->
       <div 
-        class="mobile-logo absolute top-[15px] left-[15px] z-0 pointer-events-none opacity-80 transition-opacity duration-300"
+        class="mobile-logo absolute top-[1rem] left-[1rem] z-0 pointer-events-none opacity-80 transition-opacity duration-300"
         :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup) }"
       >
         <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px]" alt="Infinite Chemistry Logo" />
@@ -677,6 +680,21 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
           </div>
         </div>
       </Transition>
+      
+      <!-- Left Corner Controls -->
+      <div class="mobile-left-controls absolute bottom-[4px] left-[4px] md:bottom-auto md:left-auto z-10">
+        <button 
+          @click="showSettings = !showSettings; playSound('click', 0.3, 1.0)"
+          class="desktop-settings-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+          title="Pengaturan"
+        >
+          <img 
+            src="@/assets/icons/settings.svg" 
+            class="w-6 h-6 grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100 transition-all" 
+            alt="Settings" 
+          />
+        </button>
+      </div>
 
       <!-- Controls Row (inside canvas, floats at bottom-right on mobile) -->
       <div class="mobile-controls-row">
@@ -773,6 +791,9 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
     </Transition>
 
 
+
+    <!-- Settings Modal -->
+    <SettingsModal :is-open="showSettings" :is-mobile="isMobile" @close="showSettings = false" />
 
     <!-- Sidebar (desktop) / Bottom Tray (mobile) -->
     <div 
