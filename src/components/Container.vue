@@ -347,8 +347,9 @@ const [collect, drop] = useDrop(() => ({
               })
               store.triggerSuccessAnimation(newId)
             }
-            rreStore.checkWinCondition(result.newCompound!)
-            playSound('fusion')
+              achievementStore.checkComponentAchievements(result.newCompound!.components)
+              rreStore.checkWinCondition(result.newCompound!)
+              playSound('fusion')
             return
           } else if (!result.success && store.isAtomicModeActive) {
             // FALLBACK: If ionic bonding failed but we are in Experiment Mode,
@@ -385,6 +386,7 @@ const [collect, drop] = useDrop(() => ({
                 })
                 store.triggerSuccessAnimation(newId)
               }
+              achievementStore.checkComponentAchievements(fallbackResult.newCompound!.components)
               rreStore.checkWinCondition(fallbackResult.newCompound!)
               playSound('fusion')
               return
@@ -441,6 +443,7 @@ const [collect, drop] = useDrop(() => ({
               })
               store.triggerSuccessAnimation(newId)
             }
+            achievementStore.checkComponentAchievements(result.newCompound!.components)
             rreStore.checkWinCondition(result.newCompound!)
             playSound('fusion')
             return

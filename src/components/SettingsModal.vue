@@ -172,12 +172,12 @@ const sortedAchievements = computed(() => {
             class="transition-all duration-300 transform absolute inset-4"
             :class="activeTab === 'Info' ? 'opacity-100 translate-x-0 scale-100 z-10' : 'opacity-0 translate-x-4 scale-95 pointer-events-none z-0'"
           >
-            <div class="flex flex-col gap-1">
-              <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-2">Shortcut Keyboard</p>
+            <div class="flex flex-col">
+              <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-3 mt-1">Shortcut Keyboard</p>
               <div
                 v-for="shortcut in shortcuts"
                 :key="shortcut.description"
-                class="flex items-center justify-between py-1.5 border-b border-[#f0f0f0] last:border-b-0"
+                class="flex items-center justify-between py-3 border-b border-[#f0f0f0] last:border-b-0"
               >
                 <span class="text-[13px] text-slate-600">{{ shortcut.description }}</span>
                 <div class="flex items-center gap-1">

@@ -220,6 +220,17 @@ export const useAchievementStore = defineStore('achievements', () => {
     }
   }
 
+  // Called when a compound is formed to check for large component counts
+  function checkComponentAchievements(components: Record<string, number>) {
+    for (const count of Object.values(components)) {
+      if (count >= 1000) {
+        unlock('big_element_1000')
+      } else if (count >= 100) {
+        unlock('big_element_100')
+      }
+    }
+  }
+
   return {
     achievements,
     pendingToast,
@@ -227,6 +238,7 @@ export const useAchievementStore = defineStore('achievements', () => {
     isUnlocked,
     onChallengeWin,
     onChallengeLose,
-    recordButtonPress
+    recordButtonPress,
+    checkComponentAchievements
   }
 })
