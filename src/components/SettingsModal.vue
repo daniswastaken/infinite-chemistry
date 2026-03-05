@@ -77,26 +77,26 @@ const sortedAchievements = computed(() => {
     >
       <!-- Modal -->
       <div 
-        class="relative bg-white rounded-[8px] border border-[#c8c8c8] shadow-[0_8px_30px_rgb(0,0,0,0.1)] flex flex-col overflow-hidden transition-all duration-300 max-w-[calc(100vw-32px)]"
+        class="relative bg-white dark:bg-[#262626] rounded-[8px] border border-[#c8c8c8] dark:border-neutral-700 shadow-[0_8px_30px_rgb(0,0,0,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] flex flex-col overflow-hidden transition-all duration-300 max-w-[calc(100vw-32px)] text-[#262626] dark:text-neutral-100"
         :class="activeTab === 'Achievement' ? 'w-[550px]' : 'w-[380px]'"
       >
         
         <!-- Header / Tabs -->
-        <div class="flex items-end px-2 pt-2 gap-1 border-b border-[#c8c8c8]">
+        <div class="flex items-end px-2 pt-2 gap-1 border-b border-[#c8c8c8] dark:border-neutral-700">
           <button
             v-for="tab in tabs"
             :key="tab.id"
             @click="activeTab = tab.id"
-            class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium text-[13px] rounded-t-md border border-[#c8c8c8] transition-colors whitespace-nowrap outline-none cursor-pointer"
+            class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium text-[13px] rounded-t-md border border-[#c8c8c8] dark:border-neutral-700 transition-colors whitespace-nowrap outline-none cursor-pointer"
             :class="activeTab === tab.id
-              ? 'bg-white text-black z-10 border-b-white -mb-[1px]'
-              : 'bg-[#fafafa] text-black hover:bg-[#f4f4f4] active:bg-[#f4f4f4] border-b-transparent'"
+              ? 'bg-white dark:bg-[#262626] text-black dark:text-neutral-100 z-10 border-b-white dark:border-b-[#262626] -mb-[1px]'
+              : 'bg-[#fafafa] dark:bg-[#262626] text-black dark:text-neutral-300 hover:bg-[#f4f4f4] dark:hover:bg-neutral-700 active:bg-[#f4f4f4] dark:active:bg-neutral-700 border-b-transparent'"
           >
             {{ tab.label }}
           </button>
           <button
             @click="$emit('close')"
-            class="ml-auto mb-1 p-1.5 rounded-md hover:bg-[#f4f4f4] active:bg-[#ebebeb] transition-colors text-[#aaa] hover:text-black cursor-pointer outline-none"
+            class="ml-auto mb-1 p-1.5 rounded-md hover:bg-[#f4f4f4] dark:hover:bg-neutral-700 active:bg-[#ebebeb] dark:active:bg-neutral-600 transition-colors text-[#aaa] dark:text-neutral-400 hover:text-black dark:hover:text-white cursor-pointer outline-none"
             title="Tutup"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -115,8 +115,28 @@ const sortedAchievements = computed(() => {
             :class="activeTab === 'Pengaturan' ? 'opacity-100 translate-x-0 scale-100 z-10' : 'opacity-0 -translate-x-4 scale-95 pointer-events-none z-0'"
           >
             <div class="flex flex-col gap-4 h-full">
+              <!-- Dark Mode Toggle -->
               <div>
-                <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-3">Mode Tantangan</p>
+                <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] dark:text-[#8b86fa] mb-3">Tampilan</p>
+                <button 
+                  @click="settingsStore.toggleDarkMode()"
+                  class="w-full flex items-center justify-between px-4 py-2.5 rounded-[6px] border text-left transition-all cursor-pointer outline-none bg-white dark:bg-[#262626] border-[#d8d8d8] dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 hover:border-[#6b66fa] dark:hover:border-[#8b86fa] hover:bg-[#f4f4fa] dark:hover:bg-neutral-700"
+                >
+                  <span class="font-semibold text-[13px]">Dark Mode</span>
+                  <div 
+                    class="w-10 h-5 rounded-full relative transition-colors"
+                    :class="settingsStore.isDarkMode ? 'bg-[#6b66fa] dark:bg-[#8b86fa]' : 'bg-[#e0e0e0] dark:bg-neutral-600'"
+                  >
+                    <div 
+                      class="absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                      :class="settingsStore.isDarkMode ? 'translate-x-[22px]' : 'translate-x-[2px]'"
+                    ></div>
+                  </div>
+                </button>
+              </div>
+
+              <div>
+                <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] dark:text-[#8b86fa] mb-3">Mode Tantangan</p>
                 <div class="flex flex-col gap-2">
                   <button
                     v-for="opt in difficultyOptions"
@@ -124,13 +144,13 @@ const sortedAchievements = computed(() => {
                     @click="settingsStore.setDifficulty(opt.id)"
                     class="flex items-center justify-between px-4 py-2.5 rounded-[6px] border text-left transition-all cursor-pointer outline-none"
                     :class="settingsStore.difficulty === opt.id
-                      ? 'bg-[#6b66fa] border-[#6b66fa] text-white shadow-sm'
-                      : 'bg-white border-[#d8d8d8] text-slate-700 hover:border-[#6b66fa] hover:bg-[#f4f4fa]'"
+                      ? 'bg-[#6b66fa] dark:bg-[#8b86fa] border-[#6b66fa] dark:border-[#8b86fa] text-white shadow-sm'
+                      : 'bg-white dark:bg-[#262626] border-[#d8d8d8] dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 hover:border-[#6b66fa] dark:hover:border-[#8b86fa] hover:bg-[#f4f4fa] dark:hover:bg-neutral-700'"
                   >
                     <span class="font-semibold text-[13px]">{{ opt.label }}</span>
                     <div class="flex items-center gap-2 text-[12px] opacity-80">
                       <span>⏱ {{ opt.time }}</span>
-                      <span v-if="opt.clue" class="px-1.5 py-0.5 rounded-[3px] text-[10px] font-bold tracking-wide" :class="settingsStore.difficulty === opt.id ? 'bg-white/20 text-white' : 'bg-[#eef]  text-[#6b66fa]'">+ CLUE</span>
+                      <span v-if="opt.clue" class="px-1.5 py-0.5 rounded-[3px] text-[10px] font-bold tracking-wide" :class="settingsStore.difficulty === opt.id ? 'bg-white/20 text-white' : 'bg-[#eef] dark:bg-[#8b86fa]/20 text-[#6b66fa] dark:text-[#8b86fa]'">+ CLUE</span>
                     </div>
                   </button>
                 </div>
@@ -144,26 +164,26 @@ const sortedAchievements = computed(() => {
             :class="activeTab === 'Achievement' ? 'opacity-100 translate-y-0 scale-100 z-10' : 'opacity-0 translate-y-4 scale-95 pointer-events-none z-0'"
           >
             <div class="grid grid-cols-1 gap-2 py-4">
-              <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-1">Daftar Achievement</p>
+              <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] dark:text-[#8b86fa] mb-1">Daftar Achievement</p>
               <div
                 v-for="ach in sortedAchievements"
                 :key="ach.id"
                 class="flex items-center gap-3 p-2.5 rounded-[6px] border transition-all"
                 :class="ach.unlocked 
-                  ? 'bg-white border-[#6b66fa]/30 shadow-sm' 
-                  : 'bg-[#fafafa] border-[#eee] grayscale opacity-60'"
+                  ? 'bg-white dark:bg-[#262626] border-[#6b66fa]/30 dark:border-neutral-700 shadow-sm' 
+                  : 'bg-[#fafafa] dark:bg-[#262626] border-[#eee] dark:border-neutral-700 grayscale opacity-60'"
               >
                 <div 
                   class="flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 transition-colors"
-                  :class="ach.unlocked ? 'bg-yellow-200' : 'bg-gray-200'"
+                  :class="ach.unlocked ? 'bg-yellow-200 dark:bg-amber-400' : 'bg-gray-200 dark:bg-neutral-700'"
                 >
                   <img src="@/assets/icons/achievement.svg" alt="Achievement" class="w-6 h-6" />
                 </div>
                 <div class="flex flex-col">
-                  <div class="text-[13px] font-bold" :class="ach.unlocked ? 'text-slate-800' : 'text-slate-500'">
+                  <div class="text-[13px] font-bold" :class="ach.unlocked ? 'text-[#262626] dark:text-neutral-100' : 'text-neutral-500 dark:text-neutral-400'">
                     {{ ach.unlocked ? ach.title : '???' }}
                   </div>
-                  <div class="text-[11px] leading-tight" :class="ach.unlocked ? 'text-slate-500' : 'text-slate-400'">
+                  <div class="text-[11px] leading-tight" :class="ach.unlocked ? 'text-neutral-500 dark:text-neutral-400' : 'text-neutral-400 dark:text-neutral-500'">
                     {{ ach.unlocked ? ach.description : 'Selesaikan misi rahasia untuk membuka achievement ini.' }}
                   </div>
                 </div>
@@ -177,18 +197,18 @@ const sortedAchievements = computed(() => {
             class="transition-all duration-300 transform absolute inset-4 flex flex-col"
             :class="activeTab === 'Info' ? 'opacity-100 translate-x-0 scale-100 z-10' : 'opacity-0 translate-x-4 scale-95 pointer-events-none z-0'"
           >
-            <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-3 mt-1 flex-shrink-0">Shortcut Keyboard</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] dark:text-[#8b86fa] mb-3 mt-1 flex-shrink-0">Shortcut Keyboard</p>
             <div class="flex-1 overflow-y-auto pr-4 custom-scrollbar achievement-scroll-mask">
               <div
                 v-for="shortcut in shortcuts"
                 :key="shortcut.description"
-                class="flex items-center justify-between py-3 border-b border-[#f0f0f0] last:border-b-0"
+                class="flex items-center justify-between py-3 border-b border-[#f0f0f0] dark:border-neutral-700 last:border-b-0"
               >
-                <span class="text-[13px] text-slate-600">{{ shortcut.description }}</span>
+                <span class="text-[13px] text-neutral-600 dark:text-neutral-300">{{ shortcut.description }}</span>
                 <div class="flex items-center gap-1">
                   <template v-for="(key, idx) in shortcut.keys" :key="key">
-                    <span v-if="idx > 0" class="text-[11px] text-[#bbb]">{{ (shortcut as any).separator || ' + ' }}</span>
-                    <kbd class="px-2 py-0.5 text-[11px] font-medium bg-[#f4f4f4] border border-[#d8d8d8] rounded-[4px] text-slate-700 shadow-[0_1px_0_#c8c8c8] font-mono">
+                    <span v-if="idx > 0" class="text-[11px] text-[#bbb] dark:text-neutral-500">{{ (shortcut as any).separator || ' + ' }}</span>
+                    <kbd class="px-2 py-0.5 text-[11px] font-medium bg-[#f4f4f4] dark:bg-[#262626] border border-[#d8d8d8] dark:border-neutral-600 rounded-[4px] text-neutral-700 dark:text-neutral-200 shadow-[0_1px_0_#c8c8c8] dark:shadow-[0_1px_0_#475569] font-mono">
                       {{ key }}
                     </kbd>
                   </template>

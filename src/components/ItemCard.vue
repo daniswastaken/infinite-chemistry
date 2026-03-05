@@ -65,16 +65,16 @@ const displayFormula = computed(() => {
         :class="twMerge(
           props.size === 'large' ? 'text-[18px] space-x-2 py-1 px-3' : 'text-[15px] space-x-1.5 px-2 py-1.5',
           'cursor-pointer transition-all duration-100 inline-flex items-center font-medium border rounded-[5px] select-none whitespace-nowrap',
-          'border-[#c9c9c9] bg-white shadow-sm hover:bg-gradient-to-b hover:from-white hover:to-[#e0f2fe] hover:border-[#999] hover:shadow-md text-slate-800',
-          (props.selected || props.isHovered) && 'bg-gradient-to-b from-white to-[#e0f2fe] border-[#999] shadow-md',
+          'border-[#c9c9c9] dark:border-neutral-700 bg-white dark:bg-[#313131] shadow-sm hover:bg-gradient-to-b hover:from-white hover:to-[#e0f2fe] dark:hover:from-[#313131] dark:hover:to-neutral-700 hover:border-[#999] dark:hover:border-neutral-500 hover:shadow-md text-neutral-800 dark:text-neutral-100',
+          (props.selected || props.isHovered) && 'bg-gradient-to-b from-white to-[#e0f2fe] dark:from-[#313131] dark:to-neutral-700 border-[#999] dark:border-neutral-500 shadow-md',
           props.isHovered && 'scale-[1.03]',
-          props.isRejected && 'border-red-500 !bg-red-50 shadow-md animate-shake'
+          props.isRejected && 'border-red-500 dark:border-red-500 !bg-red-50 dark:!bg-red-900/30 shadow-md animate-shake'
         )">
       <span v-if="emoji">
           {{ emoji }}
       </span>
       <img v-else-if="symbol" :src="getElementIcon(symbol)" class="w-6 h-6 flex-shrink-0 pointer-events-none" :alt="symbol" draggable="false" @contextmenu.prevent />
-      <img v-else-if="icon" :src="icon" class="h-[18px] w-auto flex-shrink-0 pointer-events-none" :alt="title" draggable="false" @contextmenu.prevent />
+      <img v-else-if="icon" :src="icon" class="h-[18px] w-auto flex-shrink-0 pointer-events-none dark:invert dark:opacity-[0.871]" :alt="title" draggable="false" @contextmenu.prevent />
       <span>
         {{ store.showFormulas ? displayFormula : displayTitle }}
       </span>
@@ -117,6 +117,17 @@ const displayFormula = computed(() => {
   /* Optional: Mask to fade out the edges and make it a cleaner circle */
   -webkit-mask-image: radial-gradient(circle, black 0%, transparent 70%);
   mask-image: radial-gradient(circle, black 0%, transparent 70%);
+}
+
+:global(.dark) .sunburst-effect {
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.2) 2deg,
+    rgba(255, 255, 255, 0.2) 33deg,
+    transparent 35deg,
+    transparent 60deg
+  );
 }
 
 @keyframes sunburst-anim {

@@ -2,6 +2,7 @@
 import {RouterLink, RouterView} from 'vue-router'
 import { onMounted, onUnmounted } from 'vue'
 import { useAchievementStore } from '@/stores/useAchievementStore'
+import { useSettingsStore } from '@/stores/useSettingsStore'
 
 const DEBUG_SEQUENCE = 'dwstkn'
 let keyBuffer = ''
@@ -25,6 +26,14 @@ const handleGlobalKeyDown = (e: KeyboardEvent) => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleGlobalKeyDown)
+  
+  // Initialize dark mode
+  const settingsStore = useSettingsStore()
+  if (settingsStore.isDarkMode) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
 })
 
 onUnmounted(() => {
@@ -33,7 +42,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-[100dvh] w-screen overflow-hidden bg-white select-none" @contextmenu.prevent>
+  <div class="h-[100dvh] w-screen overflow-hidden bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 select-none" @contextmenu.prevent>
     <RouterView/>
     
     <!-- Preload SVG assets directly in DOM to eliminate the first-render pop-in delay -->

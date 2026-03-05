@@ -108,6 +108,11 @@ body {
     flex-shrink: 0;
   }
 
+  /* Dark mode override for the sidebar top border */
+  :root.dark .mobile-sidebar {
+    border-top-color: #262626 !important; /* neutral-800 */
+  }
+
   /* Hide the drag-to-resize handle on mobile */
   .mobile-resize-handle {
     display: none !important;
@@ -164,11 +169,6 @@ body {
     bottom: auto !important;
     right: 0 !important;
     left: auto !important;
-    background: linear-gradient(
-      to right,
-      transparent,
-      rgba(255, 255, 255, 0.5),
-      rgba(255, 255, 255, 1)
-    ) !important;
+    /* Removed hardcoded white gradient here to allow Tailwind classes in component to take effect */
   }
 }

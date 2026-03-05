@@ -686,10 +686,10 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       <!-- Background branding like Infinite Craft -->
       <!-- Logo -->
       <div 
-        class="mobile-logo absolute top-[1rem] left-[1rem] z-0 pointer-events-none opacity-80 transition-opacity duration-300"
+        class="mobile-logo absolute top-[1rem] left-[1rem] z-0 pointer-events-none opacity-80 dark:opacity-[0.871] transition-opacity duration-300"
         :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup || !!achievementStore.pendingToast) }"
       >
-        <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px]" alt="Infinite Chemistry Logo" />
+        <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px] dark:invert" alt="Infinite Chemistry Logo" />
       </div>
 
       <!-- RRE Target Info Overlay -->
@@ -698,12 +698,12 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
              class="absolute z-[50] pointer-events-none transition-all duration-300" 
              :class="[isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]', achievementStore.pendingToast ? (isMobile ? 'top-[90px]' : 'top-[105px]') : 'top-[15px]']">
           <div 
-            class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] px-5 py-3 md:py-4 flex flex-row md:flex-col items-center gap-3 md:gap-2" 
+            class="bg-white dark:bg-[#262626] rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] dark:border-neutral-700 px-5 py-3 md:py-4 flex flex-row md:flex-col items-center gap-3 md:gap-2 text-[#262626] dark:text-neutral-100" 
             :class="isMobile ? 'justify-between' : 'min-w-[210px]'"
             :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px` }"
           >
             <!-- Timer (on left on mobile) -->
-            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-[5px] text-[13px] font-semibold transition-colors order-1 md:order-2" :class="rreStore.timeLeft <= 10 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-[#f4f4fa] text-[#6b66fa] border border-[#e5e5f5]'">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-[5px] text-[13px] font-semibold transition-colors order-1 md:order-2" :class="rreStore.timeLeft <= 10 ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900' : 'bg-[#f4f4fa] dark:bg-neutral-700 text-[#6b66fa] dark:text-[#8b86fa] border border-[#e5e5f5] dark:border-neutral-600'">
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
               </svg>
@@ -711,7 +711,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
             </div>
 
             <div class="flex flex-col items-center md:items-center order-2 md:order-1 flex-1 md:flex-none">
-              <div class="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-0.5">Mode Tantangan</div>
+              <div class="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] dark:text-[#8b86fa] mb-0.5">Mode Tantangan</div>
               <!-- Formula row with optional inline clue icon -->
               <div class="flex items-center gap-2">
                 <Transition name="fade">
@@ -722,7 +722,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
                     alt="Clue"
                   />
                 </Transition>
-                <div class="text-[22px] md:text-[30px] leading-none font-extrabold text-[#1d2331] font-outfit" v-html="rreStore.targetCompound.formula"></div>
+                <div class="text-[22px] md:text-[30px] leading-none font-extrabold text-[#1d2331] dark:text-neutral-100 font-outfit" v-html="rreStore.targetCompound.formula"></div>
               </div>
             </div>
 
@@ -736,13 +736,13 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         <div v-else-if="rreStore.showSuccessPopup" :key="'success'" 
              class="absolute z-[50] pointer-events-none transition-all duration-300" 
              :class="[isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]', achievementStore.pendingToast ? (isMobile ? 'top-[90px]' : 'top-[105px]') : 'top-[15px]']">
-          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-green-200 p-4 md:min-w-[210px] flex flex-row md:flex-col items-center gap-3 justify-center" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px`, minHeight: isMobile ? 'auto' : '136px' }">
-            <div class="w-10 h-10 bg-green-50 rounded-full flex-shrink-0 flex items-center justify-center text-green-500 border border-green-100">
+          <div class="bg-white dark:bg-[#262626] rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-green-200 dark:border-green-800 p-4 md:min-w-[210px] flex flex-row md:flex-col items-center gap-3 justify-center" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px`, minHeight: isMobile ? 'auto' : '136px' }">
+            <div class="w-10 h-10 bg-green-50 dark:bg-green-900/30 rounded-full flex-shrink-0 flex items-center justify-center text-green-500 dark:text-green-400 border border-green-100 dark:border-green-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
-            <h3 class="text-[13px] font-bold text-slate-800 uppercase tracking-widest">Berhasil!</h3>
+            <h3 class="text-[13px] font-bold text-[#262626] dark:text-neutral-100 uppercase tracking-widest">Berhasil!</h3>
           </div>
         </div>
 
@@ -750,14 +750,14 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         <div v-else-if="rreStore.showFailPopup" :key="'fail'" 
              class="absolute z-[50] pointer-events-none transition-all duration-300" 
              :class="[isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]', achievementStore.pendingToast ? (isMobile ? 'top-[90px]' : 'top-[105px]') : 'top-[15px]']">
-          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-red-200 p-4 md:min-w-[210px] flex flex-row md:flex-col items-center gap-3 justify-center" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px`, minHeight: isMobile ? 'auto' : '136px' }">
-            <div class="w-10 h-10 bg-red-50 rounded-full flex-shrink-0 flex items-center justify-center text-red-500 border border-red-100">
+          <div class="bg-white dark:bg-[#262626] rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-red-200 dark:border-red-800 p-4 md:min-w-[210px] flex flex-row md:flex-col items-center gap-3 justify-center" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px`, minHeight: isMobile ? 'auto' : '136px' }">
+            <div class="w-10 h-10 bg-red-50 dark:bg-red-900/30 rounded-full flex-shrink-0 flex items-center justify-center text-red-500 dark:text-red-400 border border-red-100 dark:border-red-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </div>
-            <h3 class="text-[13px] font-bold text-slate-800 uppercase tracking-widest">Waktu Habis</h3>
+            <h3 class="text-[13px] font-bold text-[#262626] dark:text-neutral-100 uppercase tracking-widest">Waktu Habis</h3>
           </div>
         </div>
       </Transition>
@@ -779,13 +779,13 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
                isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]',
                'top-[15px]'
              ]">
-          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] px-5 py-3 md:py-4 flex items-center gap-4" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px` }">
-            <div class="flex items-center justify-center bg-yellow-200 rounded-full w-10 h-10 flex-shrink-0">
+          <div class="bg-white dark:bg-[#262626] rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] dark:border-neutral-700 px-5 py-3 md:py-4 flex items-center gap-4" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px` }">
+            <div class="flex items-center justify-center bg-yellow-200 dark:bg-amber-400 rounded-full w-10 h-10 flex-shrink-0">
               <img src="@/assets/icons/achievement.svg" alt="Achievement" class="w-6 h-6" />
             </div>
             <div class="flex flex-col flex-1 items-center pr-10 md:pr-10">
-              <div class="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-0.5">Achievement Unlocked</div>
-              <div class="text-[14px] md:text-[16px] font-bold text-slate-800 text-center">{{ achievementStore.pendingToast.title }}</div>
+              <div class="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] dark:text-[#8b86fa] mb-0.5">Achievement Unlocked</div>
+              <div class="text-[14px] md:text-[16px] font-bold text-[#262626] dark:text-neutral-100 text-center">{{ achievementStore.pendingToast.title }}</div>
             </div>
           </div>
         </div>
@@ -795,12 +795,12 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       <div class="mobile-left-controls absolute bottom-[4px] left-[4px] md:bottom-auto md:left-auto z-10">
         <button 
           @click="showSettings = !showSettings; playSound('click', 0.3, 1.0)"
-          class="desktop-settings-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+          class="desktop-settings-btn p-2 md:hover:bg-gray-100 dark:md:hover:bg-[#262626] active:bg-gray-100 dark:active:bg-neutral-700 rounded-lg transition-colors group cursor-pointer" 
           title="Pengaturan"
         >
           <img 
             src="@/assets/icons/settings.svg" 
-            class="w-6 h-6 grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100 transition-all" 
+            class="w-6 h-6 grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100 dark:opacity-[0.431] dark:invert dark:md:group-hover:opacity-100 transition-all" 
             alt="Settings" 
           />
         </button>
@@ -810,52 +810,53 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       <div class="mobile-controls-row">
       <button 
         @click="(e) => { rreStore.toggleGame(); (e.currentTarget as HTMLElement).blur() }"
-        class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        class="desktop-control-btn p-2 md:hover:bg-gray-100 dark:md:hover:bg-[#262626] active:bg-gray-100 dark:active:bg-neutral-700 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 148}px` }" 
         :title="rreStore.isActive ? 'Berhenti Tantangan' : 'Mode Tantangan'"
       >
         <img 
           src="@/assets/icons/rre.svg" 
           class="w-6 h-6 transition-all" 
-          :class="rreStore.isActive ? 'opacity-100' : 'grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100'"
+          :class="rreStore.isActive ? 'opacity-100 dark:invert' : 'grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100 dark:opacity-[0.431] dark:invert dark:md:group-hover:opacity-100'"
           alt="RRE Mode" 
         />
       </button>
 
       <button 
         @click="(e) => { achievementStore.recordButtonPress(); store.toggleAtomicMode(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }"
-        class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        class="desktop-control-btn p-2 md:hover:bg-gray-100 dark:md:hover:bg-[#262626] active:bg-gray-100 dark:active:bg-neutral-700 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 104}px` }" 
         :title="store.isAtomicModeActive ? 'Mode Atomik (Aktif)' : 'Mode Atomik'"
       >
         <img 
           src="@/assets/icons/flask.svg" 
-          class="w-6 h-6 transition-all" 
-          :class="store.isAtomicModeActive ? 'opacity-100' : 'grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100'"
+          class="w-6 h-6 transition-all border border-transparent rounded-[4px]" 
+          :class="store.isAtomicModeActive ? 'opacity-100 dark:invert' : 'grayscale opacity-70 md:group-hover:grayscale-0 md:group-hover:opacity-100 dark:opacity-[0.431] dark:invert dark:md:group-hover:opacity-100'"
           alt="Experiment" 
         />
       </button>
 
       <button 
         @click="(e) => { achievementStore.recordButtonPress(); store.toggleFormulas(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
-        class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        class="desktop-control-btn p-2 md:hover:bg-gray-100 dark:md:hover:bg-[#262626] active:bg-gray-100 dark:active:bg-neutral-700 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 60}px` }" 
         :title="store.showFormulas ? 'Tampilkan Nama' : 'Tampilkan Rumus'"
       >
         <img 
           src="@/assets/icons/show-elements.svg" 
-          class="w-6 h-6 grayscale md:hover:grayscale-0 transition-all opacity-70 md:group-hover:opacity-100" 
+          class="w-6 h-6 transition-all" 
+          :class="store.showFormulas ? 'opacity-100 dark:invert' : 'grayscale opacity-70 md:hover:grayscale-0 md:group-hover:opacity-100 dark:opacity-[0.431] dark:invert dark:md:group-hover:opacity-100'"
           alt="Show Elements" 
         />
       </button>
 
       <button 
         @click="(e) => { handleClearClick(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
-        class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
+        class="desktop-control-btn p-2 md:hover:bg-gray-100 dark:md:hover:bg-[#262626] active:bg-gray-100 dark:active:bg-neutral-700 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 16}px` }" 
         title="Bersihkan Kanvas"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 opacity-70 md:group-hover:opacity-100 transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 opacity-70 md:group-hover:opacity-100 dark:opacity-[0.431] dark:md:group-hover:opacity-100 transition-all text-black dark:text-white">
           <path d="m16 22-1-4"/>
           <path d="M19 14a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1"/>
           <path d="M19 14H5l-1.973 6.767A1 1 0 0 0 4 22h16a1 1 0 0 0 .973-1.233z"/>
@@ -867,30 +868,30 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
 
     <!-- Confirmation Modal -->
     <Transition name="fade">
-      <div v-if="isConfirming" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/5 backdrop-blur-md" @click.self="isConfirming = false">
-        <div class="bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-6 max-w-[340px] w-full mx-4 transform transition-all border border-[#c9c9c9] animate-in fade-in zoom-in duration-300">
+      <div v-if="isConfirming" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/5 dark:bg-black/50 backdrop-blur-md" @click.self="isConfirming = false">
+        <div class="bg-white dark:bg-[#262626] rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-6 max-w-[340px] w-full mx-4 transform transition-all border border-[#c9c9c9] dark:border-neutral-700 animate-in fade-in zoom-in duration-300">
           <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-red-50/50 rounded-full flex items-center justify-center mb-5 border border-red-100">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="w-14 h-14 bg-red-50/50 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-5 border border-red-100 dark:border-red-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-500 dark:text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 6h18"></path>
                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
               </svg>
             </div>
             
-            <h3 class="text-lg font-bold text-slate-800 mb-2 font-outfit uppercase tracking-wide">Bersihkan Kanvas?</h3>
-            <p class="text-[15px] text-slate-500 mb-6 leading-relaxed">Apakah Anda yakin ingin menghapus semua elemen dari kanvas?</p>
+            <h3 class="text-lg font-bold text-[#262626] dark:text-neutral-100 mb-2 font-outfit uppercase tracking-wide">Bersihkan Kanvas?</h3>
+            <p class="text-[15px] text-neutral-500 dark:text-neutral-400 mb-6 leading-relaxed">Apakah Anda yakin ingin menghapus semua elemen dari kanvas?</p>
             
             <div class="flex gap-2.5 w-full">
               <button 
                 @click="isConfirming = false; playSound('click', 0.3, 1.2)"
-                class="flex-1 px-4 py-2.5 rounded-[5px] bg-white border border-[#c9c9c9] text-slate-600 font-medium hover:bg-slate-50 active:bg-slate-100 transition-all text-sm"
+                class="flex-1 px-4 py-2.5 rounded-[5px] bg-white dark:bg-neutral-700 border border-[#c9c9c9] dark:border-neutral-600 text-neutral-600 dark:text-neutral-200 font-medium hover:bg-neutral-50 dark:hover:bg-neutral-600 active:bg-neutral-100 dark:active:bg-neutral-500 transition-all text-sm"
               >
                 Batal
               </button>
               <button 
                 @click="confirmClear()"
-                class="flex-1 px-4 py-2.5 rounded-[5px] bg-red-500 text-white font-semibold hover:bg-red-600 active:bg-red-700 shadow-sm active:scale-95 transition-all text-sm"
+                class="flex-1 px-4 py-2.5 rounded-[5px] bg-red-500 dark:bg-red-600 text-white font-semibold hover:bg-red-600 dark:hover:bg-red-500 active:bg-red-700 shadow-sm active:scale-95 transition-all text-sm"
               >
                 Hapus Semua
               </button>
@@ -909,11 +910,11 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
     <div 
       :ref="dropSidebar" 
       :style="{ width: `${sidebarWidth}px` }" 
-      class="mobile-sidebar fixed right-0 top-0 bottom-0 bg-white border-l border-[#c8c8c8] flex flex-col z-[10] transition-colors duration-200"
-      :class="{ 'bg-red-50/50': collectSidebar.isOver && collectSidebar.canDrop }"
+      class="mobile-sidebar fixed right-0 top-0 bottom-0 bg-white dark:bg-neutral-900 border-l border-[#c8c8c8] dark:border-neutral-800 flex flex-col z-[10] transition-colors duration-200"
+      :class="{ 'bg-red-50/50 dark:bg-red-900/30': collectSidebar.isOver && collectSidebar.canDrop }"
     >
       <div
-          class="mobile-resize-handle absolute left-0 top-0 bottom-0 w-[5px] cursor-col-resize hover:bg-[#f0f0f0] transition-colors z-[11]"
+          class="mobile-resize-handle absolute left-0 top-0 bottom-0 w-[5px] cursor-col-resize hover:bg-[#f0f0f0] dark:hover:bg-neutral-800 transition-colors z-[11]"
           @mousedown="startResize"
       ></div>
       <AvailableResources ref="resourcesRef"></AvailableResources>
