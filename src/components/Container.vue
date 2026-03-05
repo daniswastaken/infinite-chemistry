@@ -13,6 +13,7 @@ import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {useRreStore} from "@/stores/useRreStore";
 import {useSettingsStore} from "@/stores/useSettingsStore";
+import {useAchievementStore} from "@/stores/useAchievementStore"
 
 import {storeToRefs} from "pinia";
 import {attemptBond, attemptAtomicBond} from "@/utils/chemistryEngine";
@@ -24,6 +25,7 @@ const { setSelectedIds, clearSelection, clearBoxes, removeSelected } = store
 
 const rreStore = useRreStore()
 const settingsStore = useSettingsStore()
+const achievementStore = useAchievementStore()
 
 
 
@@ -458,6 +460,12 @@ const [collect, drop] = useDrop(() => ({
         store.moveBox(item.id, left, top)
       } else {
         store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon, item.formula, item.components, item.atomicId)
+        achievementStore.unlock('first_drop')
+      }
+      // Check for messy canvas
+      const threshold = isMobile.value ? 11 : 25
+      if (Object.keys(store.boxes).length >= threshold) {
+        achievementStore.unlock('messy_canvas')
       }
     }
     return undefined
@@ -639,18 +647,18 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
 
       <!-- Background branding like Infinite Craft -->
       <!-- Logo -->
-      <!-- Logo -->
       <div 
         class="mobile-logo absolute top-[1rem] left-[1rem] z-0 pointer-events-none opacity-80 transition-opacity duration-300"
-        :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup) }"
+        :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup || !!achievementStore.pendingToast) }"
       >
         <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px]" alt="Infinite Chemistry Logo" />
       </div>
 
       <!-- RRE Target Info Overlay -->
       <Transition name="slide-fade" mode="out-in">
-        <!-- Target Active -->
-        <div v-if="rreStore.isActive && rreStore.targetCompound" :key="'target'" class="absolute top-[15px] z-[50] pointer-events-none transition-all duration-300" :class="isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]'">
+        <div v-if="rreStore.isActive && rreStore.targetCompound" :key="'target'" 
+             class="absolute z-[50] pointer-events-none transition-all duration-300" 
+             :class="[isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]', achievementStore.pendingToast ? (isMobile ? 'top-[90px]' : 'top-[105px]') : 'top-[15px]']">
           <div 
             class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] px-5 py-3 md:py-4 flex flex-row md:flex-col items-center gap-3 md:gap-2" 
             :class="isMobile ? 'justify-between' : 'min-w-[210px]'"
@@ -687,7 +695,9 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         </div>
 
         <!-- Success Notification -->
-        <div v-else-if="rreStore.showSuccessPopup" :key="'success'" class="absolute top-[15px] z-[50] pointer-events-none" :class="isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]'">
+        <div v-else-if="rreStore.showSuccessPopup" :key="'success'" 
+             class="absolute z-[50] pointer-events-none transition-all duration-300" 
+             :class="[isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]', achievementStore.pendingToast ? (isMobile ? 'top-[90px]' : 'top-[105px]') : 'top-[15px]']">
           <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-green-200 p-4 md:min-w-[210px] flex flex-row md:flex-col items-center gap-3 justify-center" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px`, minHeight: isMobile ? 'auto' : '136px' }">
             <div class="w-10 h-10 bg-green-50 rounded-full flex-shrink-0 flex items-center justify-center text-green-500 border border-green-100">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -699,7 +709,9 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         </div>
 
         <!-- Fail Notification -->
-        <div v-else-if="rreStore.showFailPopup" :key="'fail'" class="absolute top-[15px] z-[50] pointer-events-none" :class="isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]'">
+        <div v-else-if="rreStore.showFailPopup" :key="'fail'" 
+             class="absolute z-[50] pointer-events-none transition-all duration-300" 
+             :class="[isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]', achievementStore.pendingToast ? (isMobile ? 'top-[90px]' : 'top-[105px]') : 'top-[15px]']">
           <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-red-200 p-4 md:min-w-[210px] flex flex-row md:flex-col items-center gap-3 justify-center" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px`, minHeight: isMobile ? 'auto' : '136px' }">
             <div class="w-10 h-10 bg-red-50 rounded-full flex-shrink-0 flex items-center justify-center text-red-500 border border-red-100">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -717,6 +729,26 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         <div v-if="store.debugError" class="absolute bottom-[80px] left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
           <div class="bg-black/80 backdrop-blur-sm text-red-400 border border-red-500/30 px-4 py-2 rounded-lg text-sm font-mono shadow-lg whitespace-nowrap">
             🚧 DEBUG: {{ store.debugError }}
+          </div>
+        </div>
+      </Transition>
+
+      <!-- Achievement Notification Modal -->
+      <Transition name="slide-fade" mode="out-in">
+        <div v-if="achievementStore.pendingToast" :key="achievementStore.pendingToast.id" 
+             class="absolute z-[60] pointer-events-none transition-all duration-300" 
+             :class="[
+               isMobile ? 'left-[15px] right-[15px]' : 'right-[15px]',
+               'top-[15px]'
+             ]">
+          <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] px-5 py-3 md:py-4 flex items-center gap-4" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px` }">
+            <div class="flex items-center justify-center bg-yellow-100 rounded-full w-10 h-10 flex-shrink-0">
+              <img src="@/assets/icons/achievement.svg" alt="Achievement" class="w-6 h-6" />
+            </div>
+            <div class="flex flex-col flex-1 items-center pr-10 md:pr-10">
+              <div class="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-0.5">Achievement Unlocked</div>
+              <div class="text-[14px] md:text-[16px] font-bold text-slate-800 text-center">{{ achievementStore.pendingToast.title }}</div>
+            </div>
           </div>
         </div>
       </Transition>
@@ -753,7 +785,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       </button>
 
       <button 
-        @click="(e) => { store.toggleAtomicMode(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }"
+        @click="(e) => { achievementStore.recordButtonPress(); store.toggleAtomicMode(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }"
         class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 104}px` }" 
         :title="store.isAtomicModeActive ? 'Mode Atomik (Aktif)' : 'Mode Atomik'"
@@ -767,7 +799,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       </button>
 
       <button 
-        @click="(e) => { store.toggleFormulas(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
+        @click="(e) => { achievementStore.recordButtonPress(); store.toggleFormulas(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
         class="desktop-control-btn p-2 md:hover:bg-gray-100 active:bg-gray-100 rounded-lg transition-colors group cursor-pointer" 
         :style="{ right: `${sidebarWidth + 60}px` }" 
         :title="store.showFormulas ? 'Tampilkan Nama' : 'Tampilkan Rumus'"

@@ -15,7 +15,8 @@ const soundUrls = {
   delete: new URL('../assets/music/delete.mp3', import.meta.url).href,
   put: new URL('../assets/music/put.mp3', import.meta.url).href,
   success: new URL('../assets/music/success.mp3', import.meta.url).href,
-  click: new URL('../assets/music/click.mp3', import.meta.url).href
+  click: new URL('../assets/music/click.mp3', import.meta.url).href,
+  achievement: new URL('../assets/music/achievement.mp3', import.meta.url).href
 }
 
 export type SoundType = keyof typeof soundUrls

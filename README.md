@@ -55,7 +55,7 @@ To run this project locally:
 ## Credits & Attribution
 
 - **Original Concept:** Inspired by [Infinite Craft](https://neal.fun/infinite-craft/) by [Neal Agarwal](https://neal.fun/).
-- **SFX Assets:** Sourced from the original Infinite Craft for educational prototyping purposes.
+- **SFX Assets:** SFX assets are sourced from both Pixabay and the original Infinite Craft website for educational prototyping purposes.
 
 ## License
 

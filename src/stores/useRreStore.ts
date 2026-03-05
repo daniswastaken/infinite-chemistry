@@ -4,6 +4,7 @@ import { generateRandomTarget } from '@/utils/rreLogic'
 import { playSound } from '@/utils/audio'
 import type { BondAttemptResult } from '@/utils/chemistryEngine'
 import { useSettingsStore } from '@/stores/useSettingsStore'
+import { useAchievementStore } from '@/stores/useAchievementStore'
 
 type TargetCompound = NonNullable<BondAttemptResult['newCompound']>
 
@@ -51,8 +52,14 @@ export const useRreStore = defineStore('rre', () => {
 
   function loseGame() {
     stopGame()
+    const settingsStore = useSettingsStore()
+    const achievementStore = useAchievementStore()
+    achievementStore.onChallengeLose(settingsStore.difficulty)
+
     showFailPopup.value = true
-    playSound('failed', 0.8)
+    if (!achievementStore.pendingToast) {
+      playSound('failed', 0.8)
+    }
 
     setTimeout(() => {
       showFailPopup.value = false
@@ -62,8 +69,14 @@ export const useRreStore = defineStore('rre', () => {
 
   function winGame() {
     stopGame()
+    const settingsStore = useSettingsStore()
+    const achievementStore = useAchievementStore()
+    achievementStore.onChallengeWin(settingsStore.difficulty, timeLeft.value)
+
     showSuccessPopup.value = true
-    playSound('success', 0.8)
+    if (!achievementStore.pendingToast) {
+      playSound('success', 0.8)
+    }
 
     setTimeout(() => {
       showSuccessPopup.value = false

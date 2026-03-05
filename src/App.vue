@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {RouterLink, RouterView} from 'vue-router'
 import { onMounted, onUnmounted } from 'vue'
+import { useAchievementStore } from '@/stores/useAchievementStore'
 
 const DEBUG_SEQUENCE = 'dwstkn'
 let keyBuffer = ''
@@ -16,6 +17,8 @@ const handleGlobalKeyDown = (e: KeyboardEvent) => {
       localStorage.clear()
       sessionStorage.clear()
       console.warn("Debug mode activated. Storage cleared.")
+      const achievementStore = useAchievementStore()
+      achievementStore.unlock('dev_debug')
     }
   }
 }
@@ -37,6 +40,7 @@ onUnmounted(() => {
     <div style="position: absolute; width: 0; height: 0; overflow: hidden; opacity: 0; pointer-events: none;" aria-hidden="true">
       <img src="@/assets/icons/covalent.svg" alt="" />
       <img src="@/assets/icons/ionic.svg" alt="" />
+      <img src="@/assets/icons/achievement.svg" alt="" />
     </div>
   </div>
 </template>
