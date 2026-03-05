@@ -120,7 +120,7 @@ const chunkedResources = computed(() => {
       <button 
         @click="(e) => { activeTab = 'Elemen'; playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
         class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium rounded-t-md border-t border-x border-[#c8c8c8] dark:border-neutral-800 transition-colors whitespace-nowrap outline-none outline-0"
-        :class="activeTab === 'Elemen' ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]' : 'bg-[#fafafa] dark:bg-neutral-800/40 text-black dark:text-neutral-400 md:hover:bg-[#f4f4f4] dark:md:hover:bg-neutral-800 active:bg-[#f4f4f4] dark:active:bg-neutral-800 border-b-transparent'"
+        :class="activeTab === 'Elemen' ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]' : 'bg-[#fafafa] dark:bg-black/20 text-black dark:text-neutral-400 md:hover:bg-[#f4f4f4] dark:md:hover:bg-black/40 active:bg-[#f4f4f4] dark:active:bg-black/40 border-b-transparent'"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"></path></svg>
         Elemen
@@ -129,7 +129,7 @@ const chunkedResources = computed(() => {
       <button 
         @click="(e) => { activeTab = 'Ion'; playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
         class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium rounded-t-md border-t border-x border-[#c8c8c8] dark:border-neutral-800 transition-colors whitespace-nowrap outline-none outline-0"
-        :class="activeTab === 'Ion' ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]' : 'bg-[#fafafa] dark:bg-neutral-800/40 text-black dark:text-neutral-400 md:hover:bg-[#f4f4f4] dark:md:hover:bg-neutral-800 active:bg-[#f4f4f4] dark:active:bg-neutral-800 border-b-transparent'"
+        :class="activeTab === 'Ion' ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]' : 'bg-[#fafafa] dark:bg-black/20 text-black dark:text-neutral-400 md:hover:bg-[#f4f4f4] dark:md:hover:bg-black/40 active:bg-[#f4f4f4] dark:active:bg-black/40 border-b-transparent'"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,61.66l-144,144a8,8,0,0,1-11.32-11.32l144-144a8,8,0,0,1,11.32,11.32ZM64,112a8,8,0,0,0,16,0V80h32a8,8,0,0,0,0-16H80V32a8,8,0,0,0-16,0V64H32a8,8,0,0,0,0,16H64Zm160,64H144a8,8,0,0,0,0,16h80a8,8,0,0,0,0-16Z"></path></svg>
         Ion
@@ -138,7 +138,7 @@ const chunkedResources = computed(() => {
       <button 
         @click="(e) => { activeTab = 'Kovalen'; playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
         class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium rounded-t-md border-t border-x border-[#c8c8c8] dark:border-neutral-800 transition-colors whitespace-nowrap outline-none outline-0"
-        :class="activeTab === 'Kovalen' ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]' : 'bg-[#fafafa] dark:bg-neutral-800/40 text-black dark:text-neutral-400 md:hover:bg-[#f4f4f4] dark:md:hover:bg-neutral-800 active:bg-[#f4f4f4] dark:active:bg-neutral-800 border-b-transparent'"
+        :class="activeTab === 'Kovalen' ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]' : 'bg-[#fafafa] dark:bg-black/20 text-black dark:text-neutral-400 md:hover:bg-[#f4f4f4] dark:md:hover:bg-black/40 active:bg-[#f4f4f4] dark:active:bg-black/40 border-b-transparent'"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/></svg>
         Kovalen

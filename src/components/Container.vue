@@ -686,7 +686,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       <!-- Background branding like Infinite Craft -->
       <!-- Logo -->
       <div 
-        class="mobile-logo absolute top-[1rem] left-[1rem] z-0 pointer-events-none opacity-80 dark:opacity-[0.871] transition-opacity duration-300"
+        class="mobile-logo absolute top-[1rem] left-[1rem] z-0 pointer-events-none opacity-80 dark:opacity-[0.935] transition-opacity duration-300"
         :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup || !!achievementStore.pendingToast) }"
       >
         <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px] dark:invert" alt="Infinite Chemistry Logo" />
@@ -718,7 +718,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
                   <img
                     v-if="settingsStore.hasClue && rreStore.timeLeft <= 30"
                     :src="rreStore.targetCompound?.icon"
-                    class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0"
+                    class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 dark:invert dark:opacity-[0.871]"
                     alt="Clue"
                   />
                 </Transition>

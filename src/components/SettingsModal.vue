@@ -41,7 +41,7 @@ const difficultyOptions: { id: Difficulty; label: string; time: string; clue: bo
 ]
 
 const shortcuts = [
-  { keys: ['Tab'], description: 'Cari Elemen' },
+  { keys: ['Tab'], description: 'Search' },
   { keys: ['Ctrl', 'Z'], description: 'Undo' },
   { keys: ['Klik Kanan'], description: 'Hapus elemen' },
   { keys: ['Esc'], description: 'Buka Pengaturan' },
@@ -77,20 +77,20 @@ const sortedAchievements = computed(() => {
     >
       <!-- Modal -->
       <div 
-        class="relative bg-white dark:bg-[#262626] rounded-[8px] border border-[#c8c8c8] dark:border-neutral-700 shadow-[0_8px_30px_rgb(0,0,0,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] flex flex-col overflow-hidden transition-all duration-300 max-w-[calc(100vw-32px)] text-[#262626] dark:text-neutral-100"
+        class="relative bg-white dark:bg-neutral-900 rounded-[8px] border border-[#c8c8c8] dark:border-neutral-800 shadow-[0_8px_30px_rgb(0,0,0,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] flex flex-col overflow-hidden transition-all duration-300 max-w-[calc(100vw-32px)] text-[#262626] dark:text-neutral-100"
         :class="activeTab === 'Achievement' ? 'w-[550px]' : 'w-[380px]'"
       >
         
         <!-- Header / Tabs -->
-        <div class="flex items-end px-2 pt-2 gap-1 border-b border-[#c8c8c8] dark:border-neutral-700">
+        <div class="flex items-end px-2 pt-2 gap-1 border-b border-[#c8c8c8] dark:border-neutral-800">
           <button
             v-for="tab in tabs"
             :key="tab.id"
             @click="activeTab = tab.id"
-            class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium text-[13px] rounded-t-md border border-[#c8c8c8] dark:border-neutral-700 transition-colors whitespace-nowrap outline-none cursor-pointer"
+            class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium text-[13px] rounded-t-md border-t border-x border-[#c8c8c8] dark:border-neutral-800 transition-colors whitespace-nowrap outline-none cursor-pointer"
             :class="activeTab === tab.id
-              ? 'bg-white dark:bg-[#262626] text-black dark:text-neutral-100 z-10 border-b-white dark:border-b-[#262626] -mb-[1px]'
-              : 'bg-[#fafafa] dark:bg-[#262626] text-black dark:text-neutral-300 hover:bg-[#f4f4f4] dark:hover:bg-neutral-700 active:bg-[#f4f4f4] dark:active:bg-neutral-700 border-b-transparent'"
+              ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]'
+              : 'bg-[#fafafa] dark:bg-black/20 text-black dark:text-neutral-400 hover:bg-[#f4f4f4] dark:hover:bg-black/40 active:bg-[#f4f4f4] dark:active:bg-black/40 border-b-transparent'"
           >
             {{ tab.label }}
           </button>
@@ -160,34 +160,38 @@ const sortedAchievements = computed(() => {
 
           <!-- Achievement Tab Stack -->
           <div 
-            class="transition-all duration-300 transform absolute inset-4 overflow-y-auto pr-3 custom-scrollbar achievement-scroll-mask"
+            class="transition-all duration-300 transform absolute inset-4 flex flex-col"
             :class="activeTab === 'Achievement' ? 'opacity-100 translate-y-0 scale-100 z-10' : 'opacity-0 translate-y-4 scale-95 pointer-events-none z-0'"
           >
-            <div class="grid grid-cols-1 gap-2 py-4">
-              <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] dark:text-[#8b86fa] mb-1">Daftar Achievement</p>
-              <div
-                v-for="ach in sortedAchievements"
-                :key="ach.id"
-                class="flex items-center gap-3 p-2.5 rounded-[6px] border transition-all"
-                :class="ach.unlocked 
-                  ? 'bg-white dark:bg-[#262626] border-[#6b66fa]/30 dark:border-neutral-700 shadow-sm' 
-                  : 'bg-[#fafafa] dark:bg-[#262626] border-[#eee] dark:border-neutral-700 grayscale opacity-60'"
-              >
-                <div 
-                  class="flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 transition-colors"
-                  :class="ach.unlocked ? 'bg-yellow-200 dark:bg-amber-400' : 'bg-gray-200 dark:bg-neutral-700'"
+            <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] dark:text-[#8b86fa] mb-2 mt-1 flex-shrink-0">Daftar Achievement</p>
+            <div class="flex-1 overflow-y-auto pr-3 custom-scrollbar achievement-scroll-mask">
+              <div class="grid grid-cols-1 gap-2 pt-2 pb-4">
+                <div
+                  v-for="ach in sortedAchievements"
+                  :key="ach.id"
+                  class="flex items-center gap-3 p-2.5 rounded-[6px] border transition-all"
+                  :class="ach.unlocked 
+                    ? 'bg-white dark:bg-[#262626] border-[#6b66fa]/30 dark:border-neutral-700 shadow-sm' 
+                    : 'bg-[#fafafa] dark:bg-[#262626] border-[#ddd] dark:border-neutral-700 grayscale opacity-60'"
                 >
-                  <img src="@/assets/icons/achievement.svg" alt="Achievement" class="w-6 h-6" />
-                </div>
-                <div class="flex flex-col">
-                  <div class="text-[13px] font-bold" :class="ach.unlocked ? 'text-[#262626] dark:text-neutral-100' : 'text-neutral-500 dark:text-neutral-400'">
-                    {{ ach.unlocked ? ach.title : '???' }}
+                  <div 
+                    class="flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 transition-colors"
+                    :class="ach.unlocked ? 'bg-yellow-200 dark:bg-amber-400' : 'bg-gray-200 dark:bg-neutral-700'"
+                  >
+                    <img src="@/assets/icons/achievement.svg" alt="Achievement" class="w-6 h-6" />
                   </div>
-                  <div class="text-[11px] leading-tight" :class="ach.unlocked ? 'text-neutral-500 dark:text-neutral-400' : 'text-neutral-400 dark:text-neutral-500'">
-                    {{ ach.unlocked ? ach.description : 'Selesaikan misi rahasia untuk membuka achievement ini.' }}
+                  <div class="flex flex-col">
+                    <div class="text-[13px] font-bold" :class="ach.unlocked ? 'text-[#262626] dark:text-neutral-100' : 'text-neutral-500 dark:text-neutral-400'">
+                      {{ ach.unlocked ? ach.title : '???' }}
+                    </div>
+                    <div class="text-[11px] leading-tight" :class="ach.unlocked ? 'text-neutral-500 dark:text-neutral-400' : 'text-neutral-400 dark:text-neutral-500'">
+                      {{ ach.unlocked ? ach.description : 'Selesaikan misi rahasia untuk membuka achievement ini.' }}
+                    </div>
                   </div>
                 </div>
               </div>
+              <!-- Bottom padding to avoid mask cutting off the last item -->
+              <div class="h-2"></div>
             </div>
           </div>
 
@@ -215,7 +219,7 @@ const sortedAchievements = computed(() => {
                 </div>
               </div>
               <!-- Bottom padding to avoid mask cutting off the last item -->
-              <div class="h-6"></div>
+              <div class="h-2"></div>
             </div>
           </div>
         </div>
@@ -255,7 +259,7 @@ const sortedAchievements = computed(() => {
 }
 
 .achievement-scroll-mask {
-  mask-image: linear-gradient(to bottom, transparent, black 25px, black calc(100% - 25px), transparent);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, black 25px, black calc(100% - 25px), transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 12px, black calc(100% - 12px), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 12px, black calc(100% - 12px), transparent);
 }
 </style>

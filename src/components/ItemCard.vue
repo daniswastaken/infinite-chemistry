@@ -65,8 +65,8 @@ const displayFormula = computed(() => {
         :class="twMerge(
           props.size === 'large' ? 'text-[18px] space-x-2 py-1 px-3' : 'text-[15px] space-x-1.5 px-2 py-1.5',
           'cursor-pointer transition-all duration-100 inline-flex items-center font-medium border rounded-[5px] select-none whitespace-nowrap',
-          'border-[#c9c9c9] dark:border-neutral-700 bg-white dark:bg-[#313131] shadow-sm hover:bg-gradient-to-b hover:from-white hover:to-[#e0f2fe] dark:hover:from-[#313131] dark:hover:to-neutral-700 hover:border-[#999] dark:hover:border-neutral-500 hover:shadow-md text-neutral-800 dark:text-neutral-100',
-          (props.selected || props.isHovered) && 'bg-gradient-to-b from-white to-[#e0f2fe] dark:from-[#313131] dark:to-neutral-700 border-[#999] dark:border-neutral-500 shadow-md',
+          'border-[#c9c9c9] dark:border-neutral-700 bg-white dark:bg-[#262626] shadow-sm hover:bg-gradient-to-b hover:from-white hover:to-[#e0f2fe] dark:hover:from-[#262626] dark:hover:to-neutral-700 hover:border-[#999] dark:hover:border-neutral-500 hover:shadow-md text-neutral-800 dark:text-neutral-100',
+          (props.selected || props.isHovered) && 'bg-gradient-to-b from-white to-[#e0f2fe] dark:from-[#262626] dark:to-neutral-700 border-[#999] dark:border-neutral-500 shadow-md',
           props.isHovered && 'scale-[1.03]',
           props.isRejected && 'border-red-500 dark:border-red-500 !bg-red-50 dark:!bg-red-900/30 shadow-md animate-shake'
         )">
