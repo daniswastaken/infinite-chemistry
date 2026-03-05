@@ -742,7 +742,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
                'top-[15px]'
              ]">
           <div class="bg-white rounded-[5px] shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-[#c8c8c8] px-5 py-3 md:py-4 flex items-center gap-4" :style="{ marginRight: isMobile ? '0' : `${sidebarWidth}px` }">
-            <div class="flex items-center justify-center bg-yellow-100 rounded-full w-10 h-10 flex-shrink-0">
+            <div class="flex items-center justify-center bg-yellow-200 rounded-full w-10 h-10 flex-shrink-0">
               <img src="@/assets/icons/achievement.svg" alt="Achievement" class="w-6 h-6" />
             </div>
             <div class="flex flex-col flex-1 items-center pr-10 md:pr-10">

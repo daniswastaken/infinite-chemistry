@@ -5,45 +5,115 @@ import { playSound } from '@/utils/audio'
 export interface Achievement {
   id: string
   title: string
+  description: string
   unlocked: boolean
+  unlockedAt?: number
 }
 
 const STORAGE_KEY = 'ic_achievements'
 
-const ACHIEVEMENTS_DEFINITION: { id: string; title: string }[] = [
-  { id: 'dev_debug', title: 'Developer atau Hacker?' },
-  { id: 'first_drop', title: 'Pena Sang Alkemis' },
-  { id: 'messy_canvas', title: 'Berantakan, ya.' },
-  { id: 'big_element_100', title: 'Dedikasi Tinggi' },
-  { id: 'big_element_1000', title: 'How Did We Get Here?' },
-  { id: 'win_pemula_first', title: 'Eh, aku murid teladan?' },
-  { id: 'win_sepuh_first', title: 'Ajarin dong~' },
-  { id: 'win_alkemis_first', title: 'Rhinedottir?' },
-  { id: 'win_pemula_25', title: '"Iya, pertahankan ya!"' },
-  { id: 'win_sepuh_25', title: '"Sombong ya~"' },
-  { id: 'win_alkemis_25', title: 'Atau Naberius?' },
-  { id: 'win_streak_5', title: 'I Understand It Now' },
-  { id: 'close_call', title: 'Huft, hampir saja' },
-  { id: 'fail_pemula_first', title: '"Apaan sih ini?"' },
-  { id: 'gabut', title: 'Gabut, ya?' }
+const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string }[] = [
+  {
+    id: 'dev_debug',
+    title: 'Developer atau Hacker?',
+    description: 'Aktifkan mode debug dengan kode rahasia.'
+  },
+  {
+    id: 'first_drop',
+    title: 'Pena Sang Alkemis',
+    description: 'Letakkan elemen pertama di kanvas.'
+  },
+  {
+    id: 'messy_canvas',
+    title: 'Berantakan, ya.',
+    description: 'Miliki setidaknya 25 elemen di kanvas (10 di mobile).'
+  },
+  {
+    id: 'big_element_100',
+    title: 'Dedikasi Tinggi',
+    description: 'Buat senyawa dengan salah satu komponen mencapai 100x.'
+  },
+  {
+    id: 'big_element_1000',
+    title: 'How Did We Get Here?',
+    description: 'Buat senyawa dengan salah satu komponen mencapai 1000x.'
+  },
+  {
+    id: 'win_pemula_first',
+    title: 'Eh, aku murid teladan?',
+    description: 'Selesaikan tantangan tingkat Pemula untuk pertama kalinya.'
+  },
+  {
+    id: 'win_sepuh_first',
+    title: 'Ajarin dong~',
+    description: 'Selesaikan tantangan tingkat Sepuh untuk pertama kalinya.'
+  },
+  {
+    id: 'win_alkemis_first',
+    title: 'Rhinedottir?',
+    description: 'Selesaikan tantangan tingkat Alkemis untuk pertama kalinya.'
+  },
+  {
+    id: 'win_pemula_25',
+    title: '"Iya, pertahankan ya!"',
+    description: 'Selesaikan tantangan tingkat Pemula sebanyak 25 kali.'
+  },
+  {
+    id: 'win_sepuh_25',
+    title: '"Sombong ya~"',
+    description: 'Selesaikan tantangan tingkat Sepuh sebanyak 25 kali.'
+  },
+  {
+    id: 'win_alkemis_25',
+    title: 'Atau Naberius?',
+    description: 'Selesaikan tantangan tingkat Alkemis sebanyak 25 kali.'
+  },
+  {
+    id: 'win_streak_5',
+    title: 'I Understand It Now',
+    description: 'Capai 5 kemenangan beruntun dalam mode tantangan.'
+  },
+  {
+    id: 'close_call',
+    title: 'Huft, hampir saja',
+    description: 'Selesaikan tantangan dengan waktu kurang dari 2 detik.'
+  },
+  {
+    id: 'fail_pemula_first',
+    title: '"Apaan sih ini?"',
+    description: 'Gagal dalam tantangan tingkat Pemula untuk pertama kalinya.'
+  },
+  {
+    id: 'gabut',
+    title: 'Gabut, ya?',
+    description: 'Tekan tombol mode berulang kali dalam waktu singkat.'
+  }
 ]
 
-function loadUnlockedFromStorage(): Set<string> {
+function loadUnlockedFromStorage(): Record<string, number> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed)) return new Set<string>(parsed)
+      // Migration: if it's an old array format, convert to object with current timestamp
+      if (Array.isArray(parsed)) {
+        const obj: Record<string, number> = {}
+        parsed.forEach((id) => {
+          obj[id] = Date.now()
+        })
+        return obj
+      }
+      return parsed
     }
   } catch (_) {
     /* ignore */
   }
-  return new Set()
+  return {}
 }
 
-function saveUnlockedToStorage(ids: Set<string>) {
+function saveUnlockedToStorage(unlockedMap: Record<string, number>) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(unlockedMap))
   } catch (_) {
     /* ignore */
   }
@@ -51,12 +121,13 @@ function saveUnlockedToStorage(ids: Set<string>) {
 
 export const useAchievementStore = defineStore('achievements', () => {
   // Load persisted unlock state
-  const unlockedIds = new Set<string>(loadUnlockedFromStorage())
+  const unlockedMap = ref<Record<string, number>>(loadUnlockedFromStorage())
 
   const achievements = ref<Achievement[]>(
     ACHIEVEMENTS_DEFINITION.map((def) => ({
       ...def,
-      unlocked: unlockedIds.has(def.id)
+      unlocked: !!unlockedMap.value[def.id],
+      unlockedAt: unlockedMap.value[def.id]
     }))
   )
 
@@ -78,7 +149,7 @@ export const useAchievementStore = defineStore('achievements', () => {
   const buttonPressTimestamps = ref<number[]>([])
 
   function isUnlocked(id: string): boolean {
-    return unlockedIds.has(id)
+    return !!unlockedMap.value[id]
   }
 
   function unlock(id: string) {
@@ -86,9 +157,11 @@ export const useAchievementStore = defineStore('achievements', () => {
     const achievement = achievements.value.find((a) => a.id === id)
     if (!achievement) return
 
+    const now = Date.now()
     achievement.unlocked = true
-    unlockedIds.add(id)
-    saveUnlockedToStorage(unlockedIds)
+    achievement.unlockedAt = now
+    unlockedMap.value[id] = now
+    saveUnlockedToStorage(unlockedMap.value)
 
     showToast(achievement)
   }
