@@ -387,10 +387,19 @@ const [collect, drop] = useDrop(() => ({
               playSound('fusion')
               return
             }
-            
+            if ((window as any).__DEBUG_MODE__) {
+              const msg = `Atomic fallback bond failed. Reason: ${fallbackResult.reason || result.reason}`
+              console.error(msg);
+              store.showDebugError(msg);
+            }
             store.triggerRejectAnimation(overlapping.id)
             playSound('failed')
           } else if (!result.success) {
+            if ((window as any).__DEBUG_MODE__) {
+              const msg = `Atomic bond failed. Reason: ${result.reason}`
+              console.error(msg);
+              store.showDebugError(msg);
+            }
             store.triggerRejectAnimation(overlapping.id)
             playSound('failed')
           }
@@ -434,6 +443,11 @@ const [collect, drop] = useDrop(() => ({
             playSound('fusion')
             return
           } else if (!result.success) {
+            if ((window as any).__DEBUG_MODE__) {
+              const msg = `Bond failed. Reason: ${result.reason}`
+              console.error(msg);
+              store.showDebugError(msg);
+            }
             store.triggerRejectAnimation(overlapping.id)
             playSound('failed')
           }
@@ -694,6 +708,15 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
               </svg>
             </div>
             <h3 class="text-[13px] font-bold text-slate-800 uppercase tracking-widest">Waktu Habis</h3>
+          </div>
+        </div>
+      </Transition>
+
+      <!-- Debug Error Toast -->
+      <Transition name="fade">
+        <div v-if="store.debugError" class="absolute bottom-[80px] left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
+          <div class="bg-black/80 backdrop-blur-sm text-red-400 border border-red-500/30 px-4 py-2 rounded-lg text-sm font-mono shadow-lg whitespace-nowrap">
+            🚧 DEBUG: {{ store.debugError }}
           </div>
         </div>
       </Transition>

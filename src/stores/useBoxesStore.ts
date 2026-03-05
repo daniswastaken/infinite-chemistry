@@ -36,6 +36,14 @@ export const useBoxesStore = defineStore('counter', () => {
   const successStartTime = ref<number>(0)
   const highestZIndex = ref(1)
 
+  const debugError = ref<string | null>(null)
+  function showDebugError(message: string) {
+    debugError.value = message
+    setTimeout(() => {
+      if (debugError.value === message) debugError.value = null
+    }, 3000)
+  }
+
   function bringToFront(id: string) {
     if (boxes[id]) {
       highestZIndex.value++
@@ -182,6 +190,8 @@ export const useBoxesStore = defineStore('counter', () => {
     successBoxId,
     successStartTime,
     triggerSuccessAnimation,
-    bringToFront
+    bringToFront,
+    debugError,
+    showDebugError
   }
 })

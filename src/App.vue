@@ -1,5 +1,32 @@
 <script setup lang="ts">
 import {RouterLink, RouterView} from 'vue-router'
+import { onMounted, onUnmounted } from 'vue'
+
+const DEBUG_SEQUENCE = 'dwstkn'
+let keyBuffer = ''
+
+const handleGlobalKeyDown = (e: KeyboardEvent) => {
+  if (e.key.length === 1) {
+    keyBuffer += e.key
+    if (keyBuffer.length > DEBUG_SEQUENCE.length) {
+      keyBuffer = keyBuffer.slice(keyBuffer.length - DEBUG_SEQUENCE.length)
+    }
+    if (keyBuffer === DEBUG_SEQUENCE) {
+      (window as any).__DEBUG_MODE__ = true
+      localStorage.clear()
+      sessionStorage.clear()
+      console.warn("Debug mode activated. Storage cleared.")
+    }
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeyDown)
+})
 </script>
 
 <template>
