@@ -41,9 +41,14 @@ const difficultyOptions: { id: Difficulty; label: string; time: string; clue: bo
 ]
 
 const shortcuts = [
-  { keys: ['Tab'], description: 'Search' },
+  { keys: ['Tab'], description: 'Cari Elemen' },
   { keys: ['Ctrl', 'Z'], description: 'Undo' },
   { keys: ['Klik Kanan'], description: 'Hapus elemen' },
+  { keys: ['Esc'], description: 'Buka Pengaturan' },
+  { keys: ['1'], description: 'Mode Tantangan' },
+  { keys: ['2'], description: 'Mode Atomik' },
+  { keys: ['3'], description: 'Tampilkan Rumus' },
+  { keys: ['4'], description: 'Hapus Semua' },
 ]
 
 const sortedAchievements = computed(() => {
@@ -169,11 +174,11 @@ const sortedAchievements = computed(() => {
           <!-- Info Tab Stack -->
           <div 
             v-if="!isMobile"
-            class="transition-all duration-300 transform absolute inset-4"
+            class="transition-all duration-300 transform absolute inset-4 flex flex-col"
             :class="activeTab === 'Info' ? 'opacity-100 translate-x-0 scale-100 z-10' : 'opacity-0 translate-x-4 scale-95 pointer-events-none z-0'"
           >
-            <div class="flex flex-col">
-              <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-3 mt-1">Shortcut Keyboard</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] mb-3 mt-1 flex-shrink-0">Shortcut Keyboard</p>
+            <div class="flex-1 overflow-y-auto pr-4 custom-scrollbar achievement-scroll-mask">
               <div
                 v-for="shortcut in shortcuts"
                 :key="shortcut.description"
@@ -189,6 +194,8 @@ const sortedAchievements = computed(() => {
                   </template>
                 </div>
               </div>
+              <!-- Bottom padding to avoid mask cutting off the last item -->
+              <div class="h-6"></div>
             </div>
           </div>
         </div>

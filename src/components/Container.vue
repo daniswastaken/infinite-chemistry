@@ -257,6 +257,41 @@ const handleKeyDown = (e: KeyboardEvent) => {
     }
     resourcesRef.value?.focusSearch()
   }
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    showSettings.value = !showSettings.value
+    playSound('click', 0.3, 1.0)
+    return
+  }
+
+  if (e.key === '1') {
+    e.preventDefault()
+    rreStore.toggleGame()
+    return
+  }
+
+  if (e.key === '2') {
+    e.preventDefault()
+    achievementStore.recordButtonPress()
+    store.toggleAtomicMode()
+    playSound('click', 0.3, 1.0)
+    return
+  }
+
+  if (e.key === '3') {
+    e.preventDefault()
+    achievementStore.recordButtonPress()
+    store.toggleFormulas()
+    playSound('click', 0.3, 1.0)
+    return
+  }
+
+  if (e.key === '4') {
+    e.preventDefault()
+    handleClearClick()
+    playSound('click', 0.3, 1.0)
+    return
+  }
 }
 
 onMounted(() => {

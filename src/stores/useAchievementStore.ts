@@ -213,8 +213,8 @@ export const useAchievementStore = defineStore('achievements', () => {
   function recordButtonPress() {
     const now = Date.now()
     buttonPressTimestamps.value.push(now)
-    // Prune timestamps older than 10 seconds
-    buttonPressTimestamps.value = buttonPressTimestamps.value.filter((ts) => now - ts <= 10000)
+    // Prune timestamps older than 5 seconds
+    buttonPressTimestamps.value = buttonPressTimestamps.value.filter((ts) => now - ts <= 5000)
     if (buttonPressTimestamps.value.length >= 10) {
       unlock('gabut')
     }
