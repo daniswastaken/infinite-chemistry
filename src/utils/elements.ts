@@ -60,24 +60,6 @@ export const elements: ElementInfo[] = [
     group_number: 1
   },
   {
-    atomicNumber: 2,
-    symbol: 'He',
-    name: 'Helium',
-    supports_covalent: true,
-    supports_ionic: true,
-    primary_covalent_valency: 1,
-    max_covalent_slots: 1,
-    valence_requirement: 1,
-    electronegativity: 4.5,
-    primary_ionic_charge: -1,
-    fixed_ionic_charge: -1,
-    ide_name: 'heliumida',
-    anion_name: 'heliumida',
-    is_diatomic_element: false,
-    is_metal: false,
-    group_number: 18
-  },
-  {
     atomicNumber: 3,
     symbol: 'Li',
     name: 'Litium',
@@ -199,24 +181,6 @@ export const elements: ElementInfo[] = [
     fixed_ionic_charge: -1,
     is_metal: false,
     group_number: 17
-  },
-  {
-    atomicNumber: 10,
-    symbol: 'Ne',
-    name: 'Neon',
-    supports_covalent: true,
-    supports_ionic: true,
-    primary_covalent_valency: 1,
-    max_covalent_slots: 1,
-    valence_requirement: 1,
-    electronegativity: 4.0,
-    primary_ionic_charge: -1,
-    fixed_ionic_charge: -1,
-    ide_name: 'neonida',
-    anion_name: 'neonida',
-    is_diatomic_element: false,
-    is_metal: false,
-    group_number: 18
   },
   {
     atomicNumber: 11,

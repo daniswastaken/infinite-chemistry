@@ -6,7 +6,9 @@ import {storeToRefs} from "pinia";
 import { computed, ref } from "vue";
 import { playSound } from "@/utils/audio";
 import { elements, getElementIonicForm } from "@/utils/elements";
+import { useAchievementStore } from "@/stores/useAchievementStore";
 
+const achievementStore = useAchievementStore()
 const resourcesStore = useResourcesStore()
 const {resources, searchTerm} = storeToRefs(resourcesStore)
 const {clearSearch} = resourcesStore
@@ -118,7 +120,7 @@ const chunkedResources = computed(() => {
     <!-- Tabs -->
     <div class="flex items-end px-2 pt-2 gap-1 w-full scroller-hide border-b border-[#c8c8c8] dark:border-neutral-800">
       <button 
-        @click="(e) => { activeTab = 'Elemen'; playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
+        @click="(e) => { activeTab = 'Elemen'; playSound('click', 0.3, 1.0); achievementStore.recordElementTabOpen(); (e.currentTarget as HTMLElement).blur() }" 
         class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium rounded-t-md border-t border-x border-[#c8c8c8] dark:border-neutral-800 transition-colors whitespace-nowrap outline-none outline-0"
         :class="activeTab === 'Elemen' ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]' : 'bg-[#fafafa] dark:bg-black/20 text-black dark:text-neutral-400 md:hover:bg-[#f4f4f4] dark:md:hover:bg-black/40 active:bg-[#f4f4f4] dark:active:bg-black/40 border-b-transparent'"
       >

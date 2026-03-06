@@ -32,12 +32,13 @@ export const useRreStore = defineStore('rre', () => {
     const settingsStore = useSettingsStore()
     timeLeft.value = settingsStore.timeLimit
 
+    // Using 100ms interval for <0.1s achievement support
     timerInterval = window.setInterval(() => {
-      timeLeft.value--
+      timeLeft.value = Number(Math.max(0, timeLeft.value - 0.1).toFixed(1))
       if (timeLeft.value <= 0) {
         loseGame()
       }
-    }, 1000)
+    }, 100)
 
     playSound('click', 0.5, 1.0)
   }
@@ -94,6 +95,9 @@ export const useRreStore = defineStore('rre', () => {
   }
 
   function toggleGame() {
+    const achievementStore = useAchievementStore()
+    achievementStore.recordChallengeModeClick()
+
     if (isActive.value) {
       stopGame()
       targetCompound.value = null

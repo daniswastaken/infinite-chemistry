@@ -32,6 +32,18 @@ watch(() => props.isOpen, (val) => {
   if (val) activeTab.value = 'Pengaturan'
 })
 
+function handleTabClick(id: string) {
+  activeTab.value = id
+  if (id === 'Achievement') {
+    achievementStore.recordAchievementTabOpen()
+  }
+}
+
+function handleDarkModeToggle() {
+  settingsStore.toggleDarkMode()
+  achievementStore.recordDarkModeToggle()
+}
+
 const settingsStore = useSettingsStore()
 
 const difficultyOptions: { id: Difficulty; label: string; time: string; clue: boolean }[] = [
@@ -86,7 +98,7 @@ const sortedAchievements = computed(() => {
           <button
             v-for="tab in tabs"
             :key="tab.id"
-            @click="activeTab = tab.id"
+            @click="handleTabClick(tab.id)"
             class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium text-[13px] rounded-t-md border-t border-x border-[#c8c8c8] dark:border-neutral-800 transition-colors whitespace-nowrap outline-none cursor-pointer"
             :class="activeTab === tab.id
               ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]'
@@ -119,7 +131,7 @@ const sortedAchievements = computed(() => {
               <div>
                 <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6b66fa] dark:text-[#8b86fa] mb-3">Tampilan</p>
                 <button 
-                  @click="settingsStore.toggleDarkMode()"
+                  @click="handleDarkModeToggle"
                   class="w-full flex items-center justify-between px-4 py-2.5 rounded-[6px] border text-left transition-all cursor-pointer outline-none bg-white dark:bg-[#262626] border-[#d8d8d8] dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 hover:border-[#6b66fa] dark:hover:border-[#8b86fa] hover:bg-[#f4f4fa] dark:hover:bg-neutral-700"
                 >
                   <span class="font-semibold text-[13px]">Dark Mode</span>

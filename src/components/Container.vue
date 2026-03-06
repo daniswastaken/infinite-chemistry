@@ -194,6 +194,8 @@ const handleClearClick = () => {
 }
 
 const confirmClear = () => {
+  achievementStore.recordShortcutUse('clear')
+  achievementStore.recordClearCanvas()
   clearBoxes()
   isConfirming.value = false
 }
@@ -239,18 +241,25 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
   if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault()
+    achievementStore.recordShortcutUse('undo')
     store.undo()
     return
   }
 
   if (e.key === 'Backspace' || e.key === 'Delete') {
     e.preventDefault()
-    removeSelected()
+    if (selectedIds.value.length > 0) {
+      achievementStore.recordShortcutUse('delete')
+      // Count each deleted element towards the deletion achievements
+      selectedIds.value.forEach(() => achievementStore.recordSidebarDelete())
+      removeSelected()
+    }
     return
   }
 
   if (e.key === 'Tab') {
     e.preventDefault()
+    achievementStore.recordShortcutUse('search')
     if (searchTerm.value) {
       clearSearch()
       playSound('click', 0.3, 1.0)
@@ -259,6 +268,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   }
   if (e.key === 'Escape') {
     e.preventDefault()
+    achievementStore.recordShortcutUse('settings')
     showSettings.value = !showSettings.value
     playSound('click', 0.3, 1.0)
     return
@@ -266,12 +276,14 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
   if (e.key === '1') {
     e.preventDefault()
+    achievementStore.recordShortcutUse('challenge')
     rreStore.toggleGame()
     return
   }
 
   if (e.key === '2') {
     e.preventDefault()
+    achievementStore.recordShortcutUse('atomic_mode')
     achievementStore.recordButtonPress()
     store.toggleAtomicMode()
     playSound('click', 0.3, 1.0)
@@ -280,6 +292,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
   if (e.key === '3') {
     e.preventDefault()
+    achievementStore.recordShortcutUse('formula_info')
     achievementStore.recordButtonPress()
     store.toggleFormulas()
     playSound('click', 0.3, 1.0)
@@ -288,6 +301,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
   if (e.key === '4') {
     e.preventDefault()
+    achievementStore.recordShortcutUse('clear_canvas')
     handleClearClick()
     playSound('click', 0.3, 1.0)
     return
@@ -382,6 +396,7 @@ const [collect, drop] = useDrop(() => ({
               })
               store.triggerSuccessAnimation(newId)
             }
+              achievementStore.recordBond(result.newCompound!)
               achievementStore.checkComponentAchievements(result.newCompound!.components)
               rreStore.checkWinCondition(result.newCompound!)
               playSound('fusion')
@@ -421,11 +436,13 @@ const [collect, drop] = useDrop(() => ({
                 })
                 store.triggerSuccessAnimation(newId)
               }
+              achievementStore.recordBond(fallbackResult.newCompound!)
               achievementStore.checkComponentAchievements(fallbackResult.newCompound!.components)
               rreStore.checkWinCondition(fallbackResult.newCompound!)
               playSound('fusion')
               return
             }
+            achievementStore.recordFailedBond()
             if ((window as any).__DEBUG_MODE__) {
               const msg = `Atomic fallback bond failed. Reason: ${fallbackResult.reason || result.reason}`
               console.error(msg);
@@ -433,7 +450,10 @@ const [collect, drop] = useDrop(() => ({
             }
             store.triggerRejectAnimation(overlapping.id)
             playSound('failed')
+            store.triggerRejectAnimation(overlapping.id)
+            playSound('failed')
           } else if (!result.success) {
+            achievementStore.recordFailedBond()
             if ((window as any).__DEBUG_MODE__) {
               const msg = `Atomic bond failed. Reason: ${result.reason}`
               console.error(msg);
@@ -478,11 +498,13 @@ const [collect, drop] = useDrop(() => ({
               })
               store.triggerSuccessAnimation(newId)
             }
+            achievementStore.recordBond(result.newCompound!)
             achievementStore.checkComponentAchievements(result.newCompound!.components)
             rreStore.checkWinCondition(result.newCompound!)
             playSound('fusion')
             return
           } else if (!result.success) {
+            achievementStore.recordFailedBond()
             if ((window as any).__DEBUG_MODE__) {
               const msg = `Bond failed. Reason: ${result.reason}`
               console.error(msg);
@@ -495,10 +517,11 @@ const [collect, drop] = useDrop(() => ({
       } // end if (overlapping)
 
       if (item.id) {
+        achievementStore.recordElementMove(item.id)
         store.moveBox(item.id, left, top)
       } else {
         store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon, item.formula, item.components, item.atomicId)
-        achievementStore.unlock('first_drop')
+        achievementStore.checkFirstDrop()
       }
       // Check for messy canvas
       const threshold = isMobile.value ? 11 : 25
@@ -529,6 +552,8 @@ const ANIM_DURATION_MS = 150
 function removeBoxWithAnimation(id: string, dropPosition?: { x: number, y: number }) {
   const box = (store.boxes as any)[id]
   if (!box) return
+
+  achievementStore.recordSidebarDelete()
 
   // Get the real DOM element of the box to find its screen position
   const el = document.getElementById(id)
@@ -635,7 +660,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         <TransitionGroup name="box-list">
           <Box
               v-for="(value, key) in boxes"
-              @contextmenu.prevent="store.removeBox(String(key))"
+              @contextmenu.prevent="removeBoxWithAnimation(String(key))"
               :id="String(key)"
               :key="String(key)"
               :left="value.left"
@@ -707,7 +732,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
               </svg>
-              {{ rreStore.timeLeft }}<span class="md:inline ml-0.5">detik</span>
+              {{ Math.ceil(rreStore.timeLeft) }}<span class="md:inline ml-0.5">detik</span>
             </div>
 
             <div class="flex flex-col items-center md:items-center order-2 md:order-1 flex-1 md:flex-none">

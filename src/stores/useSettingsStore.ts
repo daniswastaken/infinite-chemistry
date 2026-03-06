@@ -6,10 +6,7 @@ export type Difficulty = 'alkemis' | 'sepuh' | 'pemula'
 export const useSettingsStore = defineStore('settings', () => {
   const difficulty = ref<Difficulty>('pemula')
 
-  const isDarkMode = ref(
-    localStorage.getItem('theme') === 'dark' ||
-      (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  )
+  const isDarkMode = ref(localStorage.getItem('theme') === 'dark')
 
   const timeLimit = computed(() => {
     if (difficulty.value === 'alkemis') return 15
