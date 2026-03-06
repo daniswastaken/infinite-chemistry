@@ -1167,7 +1167,13 @@ export const elementMap: Record<string, string> = elements.reduce(
 )
 
 export const getElementIcon = (symbol: string) => {
-  return new URL(`../assets/elements/${symbol.toLowerCase()}.svg`, import.meta.url).href
+  if (!symbol) return ''
+  try {
+    return new URL(`../assets/elements/${symbol.toLowerCase()}.svg`, import.meta.url).href
+  } catch (e) {
+    console.error(`Failed to get icon for ${symbol}:`, e)
+    return ''
+  }
 }
 
 export const getElementIonicForm = (element: ElementInfo) => {

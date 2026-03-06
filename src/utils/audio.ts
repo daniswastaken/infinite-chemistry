@@ -102,7 +102,7 @@ export const playSound = (type: SoundType, volume?: number, pitch: number = 1.0)
   }
 
   const isMobile = typeof window !== 'undefined' && 'ontouchstart' in window
-  let effectiveVolume = volume !== undefined ? volume : 1.0
+  const effectiveVolume = volume !== undefined ? volume : 1.0
 
   // SPECIAL CASE: The failed.mp3 is extremely quiet on mobile speakers.
   // Stack 3 playbacks with tiny stagger to make it audible.
