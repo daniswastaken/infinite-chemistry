@@ -30,11 +30,20 @@ export const useRreStore = defineStore('rre', () => {
     // Initialize timer
     isActive.value = true
     const settingsStore = useSettingsStore()
-    timeLeft.value = settingsStore.timeLimit
+    const initialTime = settingsStore.timeLimit
+    timeLeft.value = initialTime
 
-    // Using 100ms interval for <0.1s achievement support
+    // Store start time for delta calculation
+    const startTime = Date.now()
+
+    // Using 100ms interval for <0.1s achievement support, but calculating based on real time delta
     timerInterval = window.setInterval(() => {
-      timeLeft.value = Number(Math.max(0, timeLeft.value - 0.1).toFixed(1))
+      const elapsedMs = Date.now() - startTime
+      const newTime = Math.max(0, initialTime - elapsedMs / 1000)
+
+      // Update the reactive ref with formatting
+      timeLeft.value = Number(newTime.toFixed(1))
+
       if (timeLeft.value <= 0) {
         loseGame()
       }

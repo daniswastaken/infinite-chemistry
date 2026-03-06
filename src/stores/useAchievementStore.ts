@@ -610,22 +610,38 @@ export const useAchievementStore = defineStore('achievements', () => {
   }
 
   // Time tracking
+  // Prevent HMR interval stacking during development
+  if ((window as any).__playtimeInterval) {
+    clearInterval((window as any).__playtimeInterval)
+  }
+
   let lastPlaytimeCheck = Date.now()
-  setInterval(() => {
+  let lastSavedMinutes = Math.floor((stats.value?.playDurationSecs || 0) / 60)
+
+  ;(window as any).__playtimeInterval = setInterval(() => {
     const now = Date.now()
-    const deltaMs = now - lastPlaytimeCheck
+    let deltaMs = now - lastPlaytimeCheck
     lastPlaytimeCheck = now
 
-    // Accumulate duration in seconds (handle as float to be precise, then check milestones)
-    stats.value.playDurationSecs += deltaMs / 1000
+    // Cap delta at 5 seconds to prevent huge jumps from sleep/background throttling
+    if (deltaMs > 5000) {
+      deltaMs = 1000
+    }
 
-    // Check milestones and save every ~60s
-    if (Math.floor(stats.value.playDurationSecs) % 60 === 0 && deltaMs > 0) {
-      saveStats()
-      const totalMins = Math.floor(stats.value.playDurationSecs / 60)
-      if (totalMins >= 30) unlock('playtime_30m')
-      if (totalMins >= 60) unlock('playtime_60m')
-      if (totalMins >= 118) unlock('playtime_118m')
+    if (deltaMs > 0) {
+      stats.value.playDurationSecs += deltaMs / 1000
+
+      const currentMinutes = Math.floor(stats.value.playDurationSecs / 60)
+
+      // Check milestones and save only when a new minute starts
+      if (currentMinutes > lastSavedMinutes) {
+        lastSavedMinutes = currentMinutes
+        saveStats()
+
+        if (currentMinutes >= 30) unlock('playtime_30m')
+        if (currentMinutes >= 60) unlock('playtime_60m')
+        if (currentMinutes >= 118) unlock('playtime_118m')
+      }
     }
   }, 1000)
 
