@@ -9,6 +9,7 @@ import ItemCard from "@/components/ItemCard.vue";
 import AvailableResources from "@/components/AvailableResources.vue";
 import CustomDragLayer from "@/components/CustomDragLayer.vue";
 import SettingsModal from "@/components/SettingsModal.vue";
+import CreditsOverlay from "@/components/CreditsOverlay.vue";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {useRreStore} from "@/stores/useRreStore";
@@ -35,6 +36,29 @@ const { addResource, clearSearch } = resourcesStore
 
 const resourcesRef = ref<any>(null)
 const showSettings = ref(false)
+
+// Easter Egg Logic
+const logoClickCount = ref(0)
+const showCredits = ref(false)
+let logoClickTimeout: number | undefined
+
+const handleLogoClick = (...args: any[]) => {
+  logoClickCount.value++
+  playSound('click', 0.4, 1.0 + (logoClickCount.value * 0.05)) // Increasing pitch for fun
+  console.log('Logo click count:', logoClickCount.value)
+  if (logoClickCount.value >= 8) {
+    logoClickCount.value = 0
+    showCredits.value = true
+    const achievementStore = useAchievementStore()
+    // Optional: unlock an achievement for finding it
+  }
+  
+  // Reset sequence if they stop clicking for > 2 seconds
+  clearTimeout(logoClickTimeout)
+  logoClickTimeout = window.setTimeout(() => {
+    logoClickCount.value = 0
+  }, 2000)
+}
 
 // Collision detection helper
 function getOverlappingBox(left: number, top: number, excludeId?: string) {
@@ -657,6 +681,21 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       <CustomDragLayer />
 
       <div :ref="drop" class="container">
+        <!-- Background branding like Infinite Craft -->
+        <!-- Logo -->
+        <div 
+          class="mobile-logo absolute top-[1rem] left-[1rem] z-0 opacity-80 dark:opacity-[0.935] transition-all duration-300 pointer-events-auto cursor-pointer active:scale-95 transform-gpu"
+          :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup || !!achievementStore.pendingToast) }"
+          @click.stop="handleLogoClick"
+          @mousedown.stop
+        >
+          <img 
+            src="@/assets/icons/infinite-chemistry-logo.svg" 
+            class="w-[150px] dark:invert hover:opacity-100 transition-opacity pointer-events-none" 
+            alt="Infinite Chemistry Logo" 
+          />
+        </div>
+
         <TransitionGroup name="box-list">
           <Box
               v-for="(value, key) in boxes"
@@ -708,14 +747,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         ></div>
       </div>
 
-      <!-- Background branding like Infinite Craft -->
-      <!-- Logo -->
-      <div 
-        class="mobile-logo absolute top-[1rem] left-[1rem] z-0 pointer-events-none opacity-80 dark:opacity-[0.935] transition-opacity duration-300"
-        :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup || !!achievementStore.pendingToast) }"
-      >
-        <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px] dark:invert" alt="Infinite Chemistry Logo" />
-      </div>
+
 
       <!-- RRE Target Info Overlay -->
       <Transition name="slide-fade" mode="out-in">
@@ -931,12 +963,15 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
     <!-- Settings Modal -->
     <SettingsModal :is-open="showSettings" :is-mobile="isMobile" @close="showSettings = false" />
 
-    <!-- Sidebar (desktop) / Bottom Tray (mobile) -->
+    <!-- Credits Overlay (Easter Egg) -->
+    <Teleport to="body">
+      <CreditsOverlay :is-open="showCredits" @close="showCredits = false" />
+    </Teleport>
+
     <div 
       :ref="dropSidebar" 
       :style="{ width: `${sidebarWidth}px` }" 
       class="mobile-sidebar fixed right-0 top-0 bottom-0 bg-white dark:bg-neutral-900 border-l border-[#c8c8c8] dark:border-neutral-800 flex flex-col z-[10] transition-colors duration-200"
-      :class="{ 'bg-red-50/50 dark:bg-red-900/30': collectSidebar.isOver && collectSidebar.canDrop }"
     >
       <div
           class="mobile-resize-handle absolute left-0 top-0 bottom-0 w-[5px] cursor-col-resize hover:bg-[#f0f0f0] dark:hover:bg-neutral-800 transition-colors z-[11]"

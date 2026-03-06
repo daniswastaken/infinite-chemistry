@@ -12,7 +12,7 @@ const collect = useDragLayer((monitor) => ({
   item: monitor.getItem(),
   itemType: monitor.getItemType(),
   currentOffset: monitor.getSourceClientOffset(),
-  isDragging: monitor.isDragging(),
+  isDragging: monitor.isDragging()
 }))
 
 const isDragging = computed(() => collect.value.isDragging)
@@ -24,17 +24,21 @@ const layerStyle = computed(() => {
   if (!currentOffset.value) return { display: 'none' }
   const { x, y } = currentOffset.value
   return {
-    transform: `translate(${x}px, ${y}px)`,
+    transform: `translate(${x}px, ${y}px)`
   }
 })
 
 const animationOffset = ref('0s')
-watch([() => store.successStartTime, () => item.value?.id], () => {
-  if (store.successBoxId && store.successBoxId === item.value?.id && store.successStartTime) {
-    const elapsed = (Date.now() - store.successStartTime) / 1000
-    animationOffset.value = `-${elapsed}s`
-  }
-}, { immediate: true })
+watch(
+  [() => store.successStartTime, () => item.value?.id],
+  () => {
+    if (store.successBoxId && store.successBoxId === item.value?.id && store.successStartTime) {
+      const elapsed = (Date.now() - store.successStartTime) / 1000
+      animationOffset.value = `-${elapsed}s`
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -43,10 +47,14 @@ watch([() => store.successStartTime, () => item.value?.id], () => {
     class="fixed top-0 left-0 z-[9999] pointer-events-none"
     :style="layerStyle"
   >
-    <div v-if="store.successBoxId === item?.id" class="sunburst-effect" :style="{ animationDelay: animationOffset }"></div>
-    
+    <div
+      v-if="store.successBoxId === item?.id"
+      class="sunburst-effect"
+      :style="{ animationDelay: animationOffset }"
+    ></div>
+
     <div :class="twMerge('relative scale-[1.03] opacity-95')">
-      <ItemCard 
+      <ItemCard
         size="small"
         :title="item.title"
         :formula="item.formula"
@@ -83,6 +91,17 @@ watch([() => store.successStartTime, () => item.value?.id], () => {
   border-radius: 50%;
   -webkit-mask-image: radial-gradient(circle, black 0%, transparent 70%);
   mask-image: radial-gradient(circle, black 0%, transparent 70%);
+}
+
+:global(.dark) .sunburst-effect {
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.3) 2deg,
+    rgba(255, 255, 255, 0.3) 33deg,
+    transparent 35deg,
+    transparent 60deg
+  );
 }
 
 @keyframes sunburst-anim {

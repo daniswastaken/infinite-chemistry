@@ -100,7 +100,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   },
   {
     id: 'kok_susah_ya',
-    title: '“Kok susah , ya?”',
+    title: '“Kok susah, ya?”',
     description: 'Dalam 8 detik, tekan tombol mode tantangan setidaknya 10 kali.'
   },
   {
@@ -179,9 +179,9 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
     description: 'Tekan tombol mode gelap 10 kali dalam 5 detik.'
   },
   {
-    id: 'sidebar_delete_5',
+    id: 'sidebar_delete_15',
     title: 'Bermimpi Melalui Kanvas',
-    description: 'Hapus elemen dari kanvas sebanyak 5 kali.'
+    description: 'Hapus elemen dari kanvas sebanyak 15 kali.'
   },
   {
     id: 'total_games_50',
@@ -234,9 +234,9 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
     description: 'Buka tab Achievement di Pengaturan setidaknya 10 kali.'
   },
   {
-    id: 'sidebar_delete_10',
+    id: 'sidebar_delete_30',
     title: 'Maha Mahakarya',
-    description: 'Hapus elemen dari kanvas sebanyak 10 kali.'
+    description: 'Hapus elemen dari kanvas sebanyak 30 kali.'
   },
   {
     id: 'element_tab_10',
@@ -579,8 +579,8 @@ export const useAchievementStore = defineStore('achievements', () => {
   function recordSidebarDelete() {
     stats.value.sidebarDeletes++
     saveStats()
-    if (stats.value.sidebarDeletes >= 5) unlock('sidebar_delete_5')
-    if (stats.value.sidebarDeletes >= 10) unlock('sidebar_delete_10')
+    if (stats.value.sidebarDeletes >= 15) unlock('sidebar_delete_15')
+    if (stats.value.sidebarDeletes >= 30) unlock('sidebar_delete_30')
   }
 
   function recordShortcutUse(shortcut: string) {
