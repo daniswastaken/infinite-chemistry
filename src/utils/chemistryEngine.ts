@@ -317,6 +317,16 @@ const atomicEvolutionMap: Record<string, string> = {
 }
 
 /**
+ * The set of AtomicIon IDs that are actually synthesizable in-game.
+ * Built from the products of atomicResolutionMap and atomicEvolutionMap.
+ * Used by rreLogic to prevent the RRE system from generating unreachable targets.
+ */
+export const reachableAtomicIonIds: Set<string> = new Set([
+  ...Object.values(atomicResolutionMap),
+  ...Object.values(atomicEvolutionMap)
+])
+
+/**
  * Attempts to merge two compounds (or atoms) based on their slot capacity and electronegativity.
  */
 export function attemptBond(

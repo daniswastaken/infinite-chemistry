@@ -4,8 +4,10 @@ import {ItemTypes} from './ItemTypes'
 import {toRefs} from '@vueuse/core'
 import { playSound } from '@/utils/audio'
 import {useBoxesStore} from "@/stores/useBoxesStore";
+import {useAchievementStore} from "@/stores/useAchievementStore";
 
 const store = useBoxesStore()
+const achievementStore = useAchievementStore()
 
 const props = defineProps<{
   id: any
@@ -31,6 +33,11 @@ const [collect, drag] = useDrag(() => ({
   item: () => {
     store.bringToFront(props.id)
     playSound('put', 0.5)
+    
+    // Track drag starts for achievements
+    achievementStore.recordDragStart(props.left, props.top, window.innerWidth, window.innerHeight)
+    achievementStore.recordDragStartY(props.top, window.innerHeight)
+    
     return {
       id: props.id, 
       left: props.left, 

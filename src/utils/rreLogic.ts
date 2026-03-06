@@ -1,7 +1,7 @@
 import { elements } from '@/utils/elements'
 import type { ElementInfo, AtomicIon } from '@/utils/elements'
 import { atomicIons } from '@/utils/atomicIons'
-import { attemptBond, attemptAtomicBond } from '@/utils/chemistryEngine'
+import { attemptBond, attemptAtomicBond, reachableAtomicIonIds } from '@/utils/chemistryEngine'
 import type { BondAttemptResult } from '@/utils/chemistryEngine'
 
 function getRandomInt(max: number) {
@@ -15,7 +15,8 @@ function getRandomElement(): ElementInfo {
 }
 
 function getRandomAtomicIon(): AtomicIon {
-  return atomicIons[getRandomInt(atomicIons.length)]
+  const reachable = atomicIons.filter((ion) => reachableAtomicIonIds.has(ion.id))
+  return reachable[getRandomInt(reachable.length)]
 }
 
 export function generateRandomTarget(): NonNullable<BondAttemptResult['newCompound']> | null {

@@ -33,8 +33,12 @@ export const useRreStore = defineStore('rre', () => {
     const initialTime = settingsStore.timeLimit
     timeLeft.value = initialTime
 
+    // Set broken_cycle flag in localStorage (detected on next page load)
+    localStorage.setItem('ic_rre_was_active', 'true')
+
     // Store start time for delta calculation
     const startTime = Date.now()
+    let panicModeStarted = false
 
     // Using 100ms interval for <0.1s achievement support, but calculating based on real time delta
     timerInterval = window.setInterval(() => {
@@ -43,6 +47,13 @@ export const useRreStore = defineStore('rre', () => {
 
       // Update the reactive ref with formatting
       timeLeft.value = Number(newTime.toFixed(1))
+
+      // Panic mode: starts when time < 5 seconds
+      const achievementStore = useAchievementStore()
+      if (!panicModeStarted && timeLeft.value <= 5) {
+        panicModeStarted = true
+        achievementStore.startRrePanicMode()
+      }
 
       if (timeLeft.value <= 0) {
         loseGame()
@@ -65,6 +76,11 @@ export const useRreStore = defineStore('rre', () => {
     const settingsStore = useSettingsStore()
     const achievementStore = useAchievementStore()
     achievementStore.onChallengeLose(settingsStore.difficulty)
+    achievementStore.onChallengeLoseExtended(settingsStore.difficulty)
+    achievementStore.stopRrePanicMode()
+    achievementStore.checkIceAge(0)
+    // Clear broken_cycle flag (game ended normally)
+    localStorage.removeItem('ic_rre_was_active')
 
     showFailPopup.value = true
     if (!achievementStore.pendingToast) {
@@ -82,6 +98,14 @@ export const useRreStore = defineStore('rre', () => {
     const settingsStore = useSettingsStore()
     const achievementStore = useAchievementStore()
     achievementStore.onChallengeWin(settingsStore.difficulty, timeLeft.value)
+    achievementStore.onChallengeWinExtended(
+      settingsStore.difficulty,
+      timeLeft.value,
+      settingsStore.timeLimit
+    )
+    achievementStore.stopRrePanicMode()
+    // Clear broken_cycle flag (game ended normally)
+    localStorage.removeItem('ic_rre_was_active')
 
     showSuccessPopup.value = true
     if (!achievementStore.pendingToast) {
@@ -109,7 +133,10 @@ export const useRreStore = defineStore('rre', () => {
 
     if (isActive.value) {
       stopGame()
+      achievementStore.recordRreTargetChange()
       targetCompound.value = null
+      // Clear broken_cycle flag (game was stopped manually)
+      localStorage.removeItem('ic_rre_was_active')
       playSound('click', 0.5, 1.0)
     } else {
       startGame()

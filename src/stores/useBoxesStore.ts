@@ -146,8 +146,9 @@ export const useBoxesStore = defineStore('counter', () => {
   ) {
     if (id) {
       updateBoxPosition(id, left, top)
+      return id
     } else if (title) {
-      addBox({ top, left, title, emoji, symbol, icon, formula, components, atomicId })
+      return addBox({ top, left, title, emoji, symbol, icon, formula, components, atomicId })
     }
   }
 

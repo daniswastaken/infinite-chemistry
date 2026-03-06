@@ -4,11 +4,12 @@ import type {XYCoord} from 'vue3-dnd'
 import {ItemTypes} from './ItemTypes'
 import Box from './Box.vue'
 import type {DragItem} from './interfaces'
-import {reactive, ref, onMounted, computed, onUnmounted} from 'vue'
+import {reactive, ref, onMounted, computed, onUnmounted, nextTick} from 'vue'
 import ItemCard from "@/components/ItemCard.vue";
 import AvailableResources from "@/components/AvailableResources.vue";
 import CustomDragLayer from "@/components/CustomDragLayer.vue";
 import SettingsModal from "@/components/SettingsModal.vue";
+import CreditsOverlay from "@/components/CreditsOverlay.vue";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {useRreStore} from "@/stores/useRreStore";
@@ -35,6 +36,29 @@ const { addResource, clearSearch } = resourcesStore
 
 const resourcesRef = ref<any>(null)
 const showSettings = ref(false)
+
+// Easter Egg Logic
+const logoClickCount = ref(0)
+const showCredits = ref(false)
+let logoClickTimeout: number | undefined
+
+const handleLogoClick = (...args: any[]) => {
+  logoClickCount.value++
+  achievementStore.recordLogoClick() // first_sight: first logo click
+  playSound('click', 0.4, 1.0 + (logoClickCount.value * 0.05)) // Increasing pitch for fun
+  console.log('Logo click count:', logoClickCount.value)
+  if (logoClickCount.value >= 8) {
+    logoClickCount.value = 0
+    showCredits.value = true
+    achievementStore.recordCreditsTrigger()
+  }
+  
+  // Reset sequence if they stop clicking for > 2 seconds
+  clearTimeout(logoClickTimeout)
+  logoClickTimeout = window.setTimeout(() => {
+    logoClickCount.value = 0
+  }, 2000)
+}
 
 // Collision detection helper
 function getOverlappingBox(left: number, top: number, excludeId?: string) {
@@ -193,11 +217,49 @@ const handleClearClick = () => {
   }
 }
 
+const triggerCanvasChecks = () => {
+  const boxEntries = Object.entries(boxes.value).map(([id, b]: [string, any]) => {
+    const el = document.getElementById(id)
+    const w = el?.offsetWidth || 120
+    const h = el?.offsetHeight || 45
+    return {
+      left: b.left,
+      top: b.top,
+      centerX: b.left + w / 2,
+      centerY: b.top + h / 2,
+      formula: b.formula,
+      components: b.components,
+      atomicId: b.atomicId
+    }
+  })
+  achievementStore.checkAllCanvasAchievements(
+    boxEntries,
+    containerElement.value?.offsetWidth || 0,
+    containerElement.value?.offsetHeight || 0
+  )
+}
+
+const handleRemoveSelected = (silent = false) => {
+  if (selectedIds.value.length === 0) return
+  selectedIds.value.forEach((id) => {
+    achievementStore.recordSidebarDeleteExtended((boxes.value as any)[id])
+  })
+  removeSelected(silent)
+  triggerCanvasChecks()
+}
+
 const confirmClear = () => {
+  const elementCount = Object.keys(boxes.value).length
   achievementStore.recordShortcutUse('clear')
   achievementStore.recordClearCanvas()
+  achievementStore.recordClearCanvasExtended(elementCount)
+  // canvas-state based checks
+  const allBoxes = Object.values(boxes.value) as any[]
+  const compoundCount = allBoxes.filter((b: any) => b.components && Object.keys(b.components).length > 1).length
+  achievementStore.checkParticleRain(elementCount, compoundCount)
   clearBoxes()
   isConfirming.value = false
+  nextTick(() => triggerCanvasChecks())
 }
 
 const isMobile = ref(false)
@@ -242,6 +304,8 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault()
     achievementStore.recordShortcutUse('undo')
+    achievementStore.recordShortcutPress()
+    achievementStore.recordShortcutViolation()
     store.undo()
     return
   }
@@ -250,9 +314,9 @@ const handleKeyDown = (e: KeyboardEvent) => {
     e.preventDefault()
     if (selectedIds.value.length > 0) {
       achievementStore.recordShortcutUse('delete')
-      // Count each deleted element towards the deletion achievements
-      selectedIds.value.forEach(() => achievementStore.recordSidebarDelete())
-      removeSelected()
+      achievementStore.recordShortcutPress()
+      achievementStore.recordShortcutViolation()
+      handleRemoveSelected()
     }
     return
   }
@@ -260,6 +324,8 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Tab') {
     e.preventDefault()
     achievementStore.recordShortcutUse('search')
+    achievementStore.recordShortcutPress()
+    achievementStore.recordShortcutViolation()
     if (searchTerm.value) {
       clearSearch()
       playSound('click', 0.3, 1.0)
@@ -269,6 +335,8 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
     e.preventDefault()
     achievementStore.recordShortcutUse('settings')
+    achievementStore.recordShortcutPress()
+    achievementStore.recordShortcutViolation()
     showSettings.value = !showSettings.value
     playSound('click', 0.3, 1.0)
     return
@@ -277,6 +345,8 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === '1') {
     e.preventDefault()
     achievementStore.recordShortcutUse('challenge')
+    achievementStore.recordShortcutPress()
+    achievementStore.recordShortcutViolation()
     rreStore.toggleGame()
     return
   }
@@ -284,7 +354,10 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === '2') {
     e.preventDefault()
     achievementStore.recordShortcutUse('atomic_mode')
+    achievementStore.recordShortcutPress()
+    achievementStore.recordShortcutViolation()
     achievementStore.recordButtonPress()
+    achievementStore.recordModeChange()
     store.toggleAtomicMode()
     playSound('click', 0.3, 1.0)
     return
@@ -293,7 +366,10 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === '3') {
     e.preventDefault()
     achievementStore.recordShortcutUse('formula_info')
+    achievementStore.recordShortcutPress()
+    achievementStore.recordShortcutViolation()
     achievementStore.recordButtonPress()
+    achievementStore.recordModeChange()
     store.toggleFormulas()
     playSound('click', 0.3, 1.0)
     return
@@ -302,6 +378,8 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === '4') {
     e.preventDefault()
     achievementStore.recordShortcutUse('clear_canvas')
+    achievementStore.recordShortcutPress()
+    achievementStore.recordShortcutViolation()
     handleClearClick()
     playSound('click', 0.3, 1.0)
     return
@@ -313,6 +391,8 @@ onMounted(() => {
     (window as any).particlesJS.load('particles-js', `${import.meta.env.BASE_URL}particles.js/particles.json`);
   }
   window.addEventListener('keydown', handleKeyDown)
+  // broken_cycle: detect if RRE was active during page reload
+  achievementStore.checkBrokenCycle()
 })
 
 onUnmounted(() => {
@@ -327,6 +407,9 @@ const [collect, drop] = useDrop(() => ({
       const containerCoords = containerElement.value.getBoundingClientRect()
       const left = Math.round(offset.x - containerCoords.left)
       const top = Math.round(offset.y - containerCoords.top)
+
+      // Track drag pixels for atomic_dance achievement
+      achievementStore.recordDragMove(left, top)
 
       const overlapping = getOverlappingBox(left, top, item.id)
       overlappingId.value = overlapping?.id || null
@@ -398,6 +481,11 @@ const [collect, drop] = useDrop(() => ({
             }
               achievementStore.recordBond(result.newCompound!)
               achievementStore.checkComponentAchievements(result.newCompound!.components)
+              achievementStore.checkCompoundAchievements(result.newCompound!)
+              achievementStore.recordCompoundFormed()
+              achievementStore.recordSuccessfulReaction()
+              achievementStore.resetConsecutiveFailedBonds()
+              achievementStore.resetGreedyCollector()
               rreStore.checkWinCondition(result.newCompound!)
               playSound('fusion')
             return
@@ -438,11 +526,16 @@ const [collect, drop] = useDrop(() => ({
               }
               achievementStore.recordBond(fallbackResult.newCompound!)
               achievementStore.checkComponentAchievements(fallbackResult.newCompound!.components)
+              achievementStore.checkCompoundAchievements(fallbackResult.newCompound!)
+              achievementStore.recordCompoundFormed()
+              achievementStore.recordSuccessfulReaction()
+              achievementStore.resetConsecutiveFailedBonds()
+              achievementStore.resetGreedyCollector()
               rreStore.checkWinCondition(fallbackResult.newCompound!)
               playSound('fusion')
               return
             }
-            achievementStore.recordFailedBond()
+            achievementStore.recordFailedBondExtended()
             if ((window as any).__DEBUG_MODE__) {
               const msg = `Atomic fallback bond failed. Reason: ${fallbackResult.reason || result.reason}`
               console.error(msg);
@@ -453,7 +546,7 @@ const [collect, drop] = useDrop(() => ({
             store.triggerRejectAnimation(overlapping.id)
             playSound('failed')
           } else if (!result.success) {
-            achievementStore.recordFailedBond()
+            achievementStore.recordFailedBondExtended()
             if ((window as any).__DEBUG_MODE__) {
               const msg = `Atomic bond failed. Reason: ${result.reason}`
               console.error(msg);
@@ -500,11 +593,16 @@ const [collect, drop] = useDrop(() => ({
             }
             achievementStore.recordBond(result.newCompound!)
             achievementStore.checkComponentAchievements(result.newCompound!.components)
+            achievementStore.checkCompoundAchievements(result.newCompound!)
+            achievementStore.recordCompoundFormed()
+            achievementStore.recordSuccessfulReaction()
+            achievementStore.resetConsecutiveFailedBonds()
+            achievementStore.resetGreedyCollector()
             rreStore.checkWinCondition(result.newCompound!)
             playSound('fusion')
             return
           } else if (!result.success) {
-            achievementStore.recordFailedBond()
+            achievementStore.recordFailedBondExtended()
             if ((window as any).__DEBUG_MODE__) {
               const msg = `Bond failed. Reason: ${result.reason}`
               console.error(msg);
@@ -518,11 +616,36 @@ const [collect, drop] = useDrop(() => ({
 
       if (item.id) {
         achievementStore.recordElementMove(item.id)
+        achievementStore.recordDragDrop()
+        achievementStore.recordRrePanicDrop()
+        achievementStore.recordDragEnd(left, top, containerElement.value?.offsetWidth || 0, containerElement.value?.offsetHeight || 0)
+        achievementStore.recordDragEndY(top, containerElement.value?.offsetHeight || 0)
+        achievementStore.resetDragPixels()
         store.moveBox(item.id, left, top)
       } else {
-        store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon, item.formula, item.components, item.atomicId)
+        // From sidebar drop
+        achievementStore.recordSidebarDrop()
+        achievementStore.recordSidebarDropTimestamp()
+        achievementStore.recordDragDrop()
+        achievementStore.recordRrePanicDrop()
+        
+        const newId = store.moveBox(null, left, top, item.title, item.emoji, item.symbol, item.icon, item.formula, item.components, item.atomicId)
+        
+        nextTick(() => {
+          const el = newId ? document.getElementById(newId) : null
+          const bWidth = el?.offsetWidth || 120
+          const bHeight = el?.offsetHeight || 45
+          achievementStore.recordDropPosition(left, top, containerElement.value?.offsetWidth || 0, containerElement.value?.offsetHeight || 0, bWidth, bHeight)
+        })
+        
+        achievementStore.checkSweetDreams()
         achievementStore.checkFirstDrop()
       }
+      achievementStore.recordCanvasInteraction()
+      achievementStore.recordRreAction()
+      
+      triggerCanvasChecks()
+
       // Check for messy canvas
       const threshold = isMobile.value ? 11 : 25
       if (Object.keys(store.boxes).length >= threshold) {
@@ -553,7 +676,8 @@ function removeBoxWithAnimation(id: string, dropPosition?: { x: number, y: numbe
   const box = (store.boxes as any)[id]
   if (!box) return
 
-  achievementStore.recordSidebarDelete()
+  achievementStore.recordSidebarDeleteExtended(box)
+  achievementStore.checkResourceWaste()
 
   // Get the real DOM element of the box to find its screen position
   const el = document.getElementById(id)
@@ -593,6 +717,7 @@ function removeBoxWithAnimation(id: string, dropPosition?: { x: number, y: numbe
   // Immediately remove the real box (it vanishes from canvas)
   store.removeBox(id, true, true) // shouldSaveHistory=true, silent=true (no sound yet)
   playSound('delete')
+  triggerCanvasChecks()
 
   // On next frame, set animating=true to trigger the CSS transition.
   // Double rAF: first rAF = Vue renders ghost in DOM (scale:1),
@@ -657,6 +782,21 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
       <CustomDragLayer />
 
       <div :ref="drop" class="container">
+        <!-- Background branding like Infinite Craft -->
+        <!-- Logo -->
+        <div 
+          class="mobile-logo absolute top-[1rem] left-[1rem] z-0 opacity-80 dark:opacity-[0.935] transition-all duration-300 pointer-events-auto cursor-pointer active:scale-95 transform-gpu"
+          :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup || !!achievementStore.pendingToast) }"
+          @click.stop="handleLogoClick"
+          @mousedown.stop
+        >
+          <img 
+            src="@/assets/icons/infinite-chemistry-logo.svg" 
+            class="w-[150px] dark:invert hover:opacity-100 transition-opacity pointer-events-none" 
+            alt="Infinite Chemistry Logo" 
+          />
+        </div>
+
         <TransitionGroup name="box-list">
           <Box
               v-for="(value, key) in boxes"
@@ -708,14 +848,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         ></div>
       </div>
 
-      <!-- Background branding like Infinite Craft -->
-      <!-- Logo -->
-      <div 
-        class="mobile-logo absolute top-[1rem] left-[1rem] z-0 pointer-events-none opacity-80 dark:opacity-[0.935] transition-opacity duration-300"
-        :class="{ 'opacity-0 invisible': isMobile && (rreStore.isActive || rreStore.showSuccessPopup || rreStore.showFailPopup || !!achievementStore.pendingToast) }"
-      >
-        <img src="@/assets/icons/infinite-chemistry-logo.svg" class="w-[150px] dark:invert" alt="Infinite Chemistry Logo" />
-      </div>
+
 
       <!-- RRE Target Info Overlay -->
       <Transition name="slide-fade" mode="out-in">
@@ -931,12 +1064,13 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
     <!-- Settings Modal -->
     <SettingsModal :is-open="showSettings" :is-mobile="isMobile" @close="showSettings = false" />
 
-    <!-- Sidebar (desktop) / Bottom Tray (mobile) -->
+    <!-- Credits Overlay (Easter Egg) -->
+    <CreditsOverlay :is-open="showCredits" @close="showCredits = false" />
+
     <div 
       :ref="dropSidebar" 
       :style="{ width: `${sidebarWidth}px` }" 
       class="mobile-sidebar fixed right-0 top-0 bottom-0 bg-white dark:bg-neutral-900 border-l border-[#c8c8c8] dark:border-neutral-800 flex flex-col z-[10] transition-colors duration-200"
-      :class="{ 'bg-red-50/50 dark:bg-red-900/30': collectSidebar.isOver && collectSidebar.canDrop }"
     >
       <div
           class="mobile-resize-handle absolute left-0 top-0 bottom-0 w-[5px] cursor-col-resize hover:bg-[#f0f0f0] dark:hover:bg-neutral-800 transition-colors z-[11]"

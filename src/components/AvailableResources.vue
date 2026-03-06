@@ -3,7 +3,7 @@ import Resource from "@/components/Resource.vue";
 import {useResourcesStore} from "@/stores/useResourcesStore";
 import {useBoxesStore} from "@/stores/useBoxesStore";
 import {storeToRefs} from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { playSound } from "@/utils/audio";
 import { elements, getElementIonicForm } from "@/utils/elements";
 import { useAchievementStore } from "@/stores/useAchievementStore";
@@ -64,6 +64,9 @@ const filteredResources = computed(() => {
   })
 })
 
+// Removed watch(searchTerm) tracking because typing triggers it too many times 
+// making the achievement hard or confusing to get. Changed logic to clearing search.
+
 const searchInput = ref<HTMLInputElement | null>(null)
 
 defineExpose({
@@ -93,7 +96,7 @@ const chunkedResources = computed(() => {
   <div class="mobile-resources-wrapper flex-1 overflow-hidden relative flex flex-col">
 
     <!-- Resource List -->
-    <div class="mobile-resource-list flex-1 overflow-y-auto px-2 pt-0 pb-24 md:pt-2 md:pb-20 content-start custom-scroller">
+    <div class="mobile-resource-list flex-1 overflow-y-auto px-2 pt-0 pb-24 md:pt-2 md:pb-20 content-start custom-scroller" @scroll="achievementStore.recordSidebarScroll()">
       <template v-if="chunkedResources.length === 1">
         <!-- Desktop: Standard wrap -->
         <div class="flex gap-[6px] flex-wrap content-start">
@@ -129,7 +132,7 @@ const chunkedResources = computed(() => {
       </button>
 
       <button 
-        @click="(e) => { activeTab = 'Ion'; playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
+      @click="(e) => { activeTab = 'Ion'; playSound('click', 0.3, 1.0); achievementStore.recordTabSwitch(); (e.currentTarget as HTMLElement).blur() }" 
         class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium rounded-t-md border-t border-x border-[#c8c8c8] dark:border-neutral-800 transition-colors whitespace-nowrap outline-none outline-0"
         :class="activeTab === 'Ion' ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]' : 'bg-[#fafafa] dark:bg-black/20 text-black dark:text-neutral-400 md:hover:bg-[#f4f4f4] dark:md:hover:bg-black/40 active:bg-[#f4f4f4] dark:active:bg-black/40 border-b-transparent'"
       >
@@ -138,7 +141,7 @@ const chunkedResources = computed(() => {
       </button>
 
       <button 
-        @click="(e) => { activeTab = 'Kovalen'; playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
+        @click="(e) => { activeTab = 'Kovalen'; playSound('click', 0.3, 1.0); achievementStore.recordTabSwitch(); (e.currentTarget as HTMLElement).blur() }" 
         class="flex-1 flex items-center justify-center gap-1.5 px-3 pt-1.5 pb-1 font-medium rounded-t-md border-t border-x border-[#c8c8c8] dark:border-neutral-800 transition-colors whitespace-nowrap outline-none outline-0"
         :class="activeTab === 'Kovalen' ? 'bg-white dark:bg-neutral-900 text-black dark:text-neutral-100 z-10 border-b border-b-white dark:border-b-neutral-900 -mb-[1px]' : 'bg-[#fafafa] dark:bg-black/20 text-black dark:text-neutral-400 md:hover:bg-[#f4f4f4] dark:md:hover:bg-black/40 active:bg-[#f4f4f4] dark:active:bg-black/40 border-b-transparent'"
       >
@@ -163,6 +166,7 @@ const chunkedResources = computed(() => {
         @keydown.tab.prevent="() => { 
           if (searchTerm) {
             clearSearch(); 
+            achievementStore.recordSearchClear();
             playSound('click', 0.3, 1.0);
           }
         }"
@@ -171,7 +175,7 @@ const chunkedResources = computed(() => {
       >
       <button 
         v-if="searchTerm" 
-        @click="(e) => { clearSearch(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
+        @click="(e) => { clearSearch(); achievementStore.recordSearchClear(); playSound('click', 0.3, 1.0); (e.currentTarget as HTMLElement).blur() }" 
         class="absolute inset-y-0 right-0 flex items-center px-3 group cursor-pointer h-full"
         title="Clear search"
       >

@@ -29,13 +29,24 @@ const tabs = computed(() => {
 
 // Reset to first tab when opening
 watch(() => props.isOpen, (val) => {
-  if (val) activeTab.value = 'Pengaturan'
+  if (val) {
+    activeTab.value = 'Pengaturan'
+    achievementStore.recordSettingsOpen()
+    achievementStore.recordSettingsToggle()
+  }
 })
 
 function handleTabClick(id: string) {
   activeTab.value = id
   if (id === 'Achievement') {
     achievementStore.recordAchievementTabOpen()
+  }
+  if (id === 'Elemen') {
+    achievementStore.recordElementTabOpen()
+  }
+  // Track Ion/Kovalen resource tab switches
+  if (id === 'Ion' || id === 'Kovalen') {
+    achievementStore.recordTabSwitch()
   }
 }
 
