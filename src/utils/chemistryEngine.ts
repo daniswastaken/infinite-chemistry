@@ -286,7 +286,11 @@ const atomicResolutionMap: Record<string, string> = {
   'O,Si': 'silicate',
   'B,O': 'borate',
   'Al,O': 'aluminate',
-  'O,Zn': 'zincate'
+  'O,Zn': 'zincate',
+  'N,O,S': 'thiocyanate', // Special triple case? Current engine handles duo, adding common duo paths:
+  'C,S': 'thiocyanate', // simplified for engine
+  'N,S': 'thiocyanate', // simplified for engine
+  'O,O': 'peroxide'
 }
 
 /**
@@ -310,6 +314,10 @@ const atomicEvolutionMap: Record<string, string> = {
   chromate: 'dichromate',
   manganate: 'permanganate',
   'sulfite:S': 'thiosulfate',
+  'carbonate:O': 'oxalate',
+  'cyanide:O': 'cyanate',
+  'cyanate:S': 'thiocyanate',
+  'cyanide:S': 'thiocyanate',
   'carbonate:H': 'bicarbonate',
   'sulfate:H': 'bisulfate',
   'phosphate:H': 'hydrogen_phosphate',

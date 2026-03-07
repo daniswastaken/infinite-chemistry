@@ -2,8 +2,9 @@
 import { useDrag } from 'vue3-dnd'
 import { ItemTypes } from './ItemTypes'
 import { toRefs } from '@vueuse/core'
-import ItemCard from "@/components/ItemCard.vue";
+import ItemCard from '@/components/ItemCard.vue'
 import { playSound } from '@/utils/audio'
+import { useAchievementStore } from '@/stores/useAchievementStore'
 
 const props = defineProps<{
   emoji?: string
@@ -15,30 +16,43 @@ const props = defineProps<{
   atomicId?: string
 }>()
 
+const achievementStore = useAchievementStore()
+
 const [collect, drag] = useDrag(() => ({
   type: ItemTypes.BOX,
   item: () => {
     playSound('put', 0.5)
-    return { title: props.title, emoji: props.emoji, symbol: props.symbol, icon: props.icon, formula: props.formula, components: props.components, atomicId: props.atomicId }
+    achievementStore.recordSidebarAdd()
+    return {
+      title: props.title,
+      emoji: props.emoji,
+      symbol: props.symbol,
+      icon: props.icon,
+      formula: props.formula,
+      components: props.components,
+      atomicId: props.atomicId
+    }
   },
-  collect: monitor => ({
-    isDragging: monitor.isDragging(),
-  }),
+  collect: (monitor) => ({
+    isDragging: monitor.isDragging()
+  })
 }))
 const { isDragging } = toRefs(collect)
 </script>
 
 <template>
-  <div
-      class="inline-block flex-shrink-0 cursor-grab"
-      :ref="drag"
-      role="Box"
-      data-testid="box"
-  >
-    <ItemCard :title="title" :formula="formula" :emoji="emoji" :symbol="symbol" :icon="icon" :atomicId="atomicId" :components="components" size="small"></ItemCard>
+  <div class="inline-block flex-shrink-0 cursor-grab" :ref="drag" role="Box" data-testid="box">
+    <ItemCard
+      :title="title"
+      :formula="formula"
+      :emoji="emoji"
+      :symbol="symbol"
+      :icon="icon"
+      :atomicId="atomicId"
+      :components="components"
+      size="small"
+    ></ItemCard>
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

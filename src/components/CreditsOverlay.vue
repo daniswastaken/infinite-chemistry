@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useAchievementStore } from '@/stores/useAchievementStore'
 
 const props = defineProps<{
   isOpen: boolean
@@ -9,7 +10,9 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
+const achievementStore = useAchievementStore()
 const canClose = ref(false)
+let warmHearthTimeout: number | null = null
 
 const handleClose = () => {
   if (canClose.value) {
@@ -27,6 +30,14 @@ watch(
   () => props.isOpen,
   (newVal) => {
     if (newVal) {
+      // Achievement: Obrolan di Tepi Perapian
+      achievementStore.unlock('credits_seen')
+
+      // Achievement: Perapian yang Hangat
+      warmHearthTimeout = window.setTimeout(() => {
+        achievementStore.unlock('warm_hearth')
+      }, 30000)
+
       // Reset states
       canClose.value = false
 
@@ -34,6 +45,11 @@ watch(
       setTimeout(() => {
         canClose.value = true
       }, 1600)
+    } else {
+      if (warmHearthTimeout) {
+        clearTimeout(warmHearthTimeout)
+        warmHearthTimeout = null
+      }
     }
   },
   { immediate: true }

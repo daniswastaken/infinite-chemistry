@@ -14,14 +14,21 @@ export const useRreStore = defineStore('rre', () => {
   const timeLeft = ref(30)
   const showSuccessPopup = ref(false)
   const showFailPopup = ref(false)
+  const gameStartTime = ref<number | null>(null)
+  let lastFailedAt = 0
+  let lastFailedTargetFormula = ''
   let timerInterval: number | null = null
 
   function startGame() {
     if (isActive.value) return
+    if (timerInterval) clearInterval(timerInterval)
 
     // Clear any previous state
     showSuccessPopup.value = false
     showFailPopup.value = false
+
+    const achievementStore = useAchievementStore()
+    achievementStore.resetPanicModeDragCount()
 
     // Generate new random target
     targetCompound.value = generateRandomTarget()
@@ -35,16 +42,19 @@ export const useRreStore = defineStore('rre', () => {
 
     // Store start time for delta calculation
     const startTime = Date.now()
+    gameStartTime.value = startTime
 
-    // Using 100ms interval for <0.1s achievement support, but calculating based on real time delta
+    // Using 100ms interval for updates
     timerInterval = window.setInterval(() => {
       const elapsedMs = Date.now() - startTime
-      const newTime = Math.max(0, initialTime - elapsedMs / 1000)
+      const rawTime = initialTime - elapsedMs / 1000
 
-      // Update the reactive ref with formatting
-      timeLeft.value = Number(newTime.toFixed(1))
+      // Update the reactive ref with formatting (1 decimal place)
+      // Clamped to 0 for stable display
+      timeLeft.value = Number(Math.max(0, rawTime).toFixed(1))
 
-      if (timeLeft.value <= 0) {
+      if (rawTime <= 0) {
+        timeLeft.value = 0
         loseGame()
       }
     }, 100)
@@ -61,10 +71,14 @@ export const useRreStore = defineStore('rre', () => {
   }
 
   function loseGame() {
+    lastFailedAt = Date.now()
+    lastFailedTargetFormula = targetCompound.value?.formula || ''
+
     stopGame()
     const settingsStore = useSettingsStore()
     const achievementStore = useAchievementStore()
     achievementStore.onChallengeLose(settingsStore.difficulty)
+    achievementStore.resetPanicModeDragCount()
 
     showFailPopup.value = true
     if (!achievementStore.pendingToast) {
@@ -82,6 +96,10 @@ export const useRreStore = defineStore('rre', () => {
     const settingsStore = useSettingsStore()
     const achievementStore = useAchievementStore()
     achievementStore.onChallengeWin(settingsStore.difficulty, timeLeft.value)
+    achievementStore.resetPanicModeDragCount()
+
+    const durationSec = gameStartTime.value ? (Date.now() - gameStartTime.value) / 1000 : 999
+    achievementStore.recordRreWin(settingsStore.difficulty, durationSec)
 
     showSuccessPopup.value = true
     if (!achievementStore.pendingToast) {
@@ -95,11 +113,23 @@ export const useRreStore = defineStore('rre', () => {
   }
 
   function checkWinCondition(newCompound: TargetCompound) {
-    if (!isActive.value || !targetCompound.value) return
+    // If active, normal win check
+    if (isActive.value && targetCompound.value) {
+      if (newCompound.formula === targetCompound.value.formula) {
+        winGame()
+      }
+      return
+    }
 
-    // Compare formula string directly as they should match identically if composed from the exact same rules
-    if (newCompound.formula === targetCompound.value.formula) {
-      winGame()
+    // If inactive, check for Fortune Teller (Late completion within 1s)
+    if (!isActive.value && lastFailedAt > 0) {
+      const now = Date.now()
+      if (now - lastFailedAt < 1000 && newCompound.formula === lastFailedTargetFormula) {
+        const achievementStore = useAchievementStore()
+        achievementStore.unlock('fortune_teller')
+        // Clear failsafe to prevent double trigger
+        lastFailedAt = 0
+      }
     }
   }
 
@@ -108,6 +138,8 @@ export const useRreStore = defineStore('rre', () => {
     achievementStore.recordChallengeModeClick()
 
     if (isActive.value) {
+      // Achievement: Ilmuwan yang Ragu (switching/stopping target)
+      achievementStore.recordRreTargetSwitch()
       stopGame()
       targetCompound.value = null
       playSound('click', 0.5, 1.0)
