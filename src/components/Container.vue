@@ -228,7 +228,7 @@ const handleClearClick = () => {
 
 const confirmClear = () => {
   achievementStore.recordShortcutUse('clear')
-  achievementStore.recordClearCanvas()
+  achievementStore.recordClearCanvas(Object.keys(boxes.value).length, isMobile.value)
   clearBoxes()
   isConfirming.value = false
 }
@@ -267,6 +267,7 @@ watch(
   (newBoxes) => {
     achievementStore.checkDynamicEquilibrium(Object.values(newBoxes))
     achievementStore.checkCanvasCounts(Object.values(newBoxes))
+    achievementStore.checkGravityAnomaly(Object.values(newBoxes))
     achievementStore.checkIsolasiMandiri(
       Object.values(newBoxes),
       window.innerWidth,
@@ -320,7 +321,9 @@ const handleKeyDown = (e: KeyboardEvent) => {
     if (selectedIds.value.length > 0) {
       achievementStore.recordShortcutUse('delete')
       // Count each deleted element towards the deletion achievements
-      selectedIds.value.forEach(() => achievementStore.recordSidebarDelete())
+      selectedIds.value.forEach((id) =>
+        achievementStore.recordSidebarDelete((store.boxes as any)[id])
+      )
       removeSelected()
     }
     return
@@ -346,6 +349,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === '1') {
     e.preventDefault()
     achievementStore.recordShortcutUse('challenge')
+    achievementStore.recordPianistPress('challenge')
     rreStore.toggleGame()
     return
   }
@@ -353,6 +357,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === '2') {
     e.preventDefault()
     achievementStore.recordShortcutUse('atomic_mode')
+    achievementStore.recordPianistPress('atomic_mode')
     achievementStore.recordButtonPress()
     store.toggleAtomicMode()
     playSound('click', 0.3, 1.0)
@@ -362,6 +367,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === '3') {
     e.preventDefault()
     achievementStore.recordShortcutUse('formula_info')
+    achievementStore.recordPianistPress('formula_info')
     achievementStore.recordButtonPress()
     store.toggleFormulas()
     playSound('click', 0.3, 1.0)
@@ -371,6 +377,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === '4') {
     e.preventDefault()
     achievementStore.recordShortcutUse('clear_canvas')
+    achievementStore.recordPianistPress('clear_canvas')
     handleClearClick()
     playSound('click', 0.3, 1.0)
     return
@@ -708,7 +715,7 @@ function removeBoxWithAnimation(id: string, dropPosition?: { x: number; y: numbe
   const box = (store.boxes as any)[id]
   if (!box) return
 
-  achievementStore.recordSidebarDelete()
+  achievementStore.recordSidebarDelete(box)
 
   // Get the real DOM element of the box to find its screen position
   const el = document.getElementById(id)
@@ -1119,7 +1126,11 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
         <button
           @click="
             (e) => {
+              const wasActive = rreStore.isActive
               rreStore.toggleGame()
+              // wasActive=true means we just stopped; wasActive=false means we just started
+              achievementStore.recordRreSideEffect(!wasActive)
+              achievementStore.recordPianistPress('challenge')
               achievementStore.recordInteraction()
               ;(e.currentTarget as HTMLElement).blur()
             }
@@ -1144,6 +1155,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
           @click="
             (e) => {
               achievementStore.recordButtonPress()
+              achievementStore.recordPianistPress('atomic_mode')
               store.toggleAtomicMode()
               playSound('click', 0.3, 1.0)
               achievementStore.recordInteraction()
@@ -1171,6 +1183,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
             (e) => {
               achievementStore.recordButtonPress()
               achievementStore.recordModeToggle()
+              achievementStore.recordPianistPress('formula_info')
               store.toggleFormulas()
               playSound('click', 0.3, 1.0)
               achievementStore.recordInteraction()
@@ -1197,6 +1210,7 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
           @click="
             (e) => {
               handleClearClick()
+              achievementStore.recordPianistPress('clear_canvas')
               playSound('click', 0.3, 1.0)
               achievementStore.recordInteraction()
               ;(e.currentTarget as HTMLElement).blur()

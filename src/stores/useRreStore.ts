@@ -18,11 +18,12 @@ export const useRreStore = defineStore('rre', () => {
   let lastFailedAt = 0
   let lastFailedTargetFormula = ''
   let timerInterval: number | null = null
-  let rreInteractedThisRound = false
   let rreInitialTime = 0
+  let lastRreInteractionTime = 0
+  let iceAgeTriggeredThisRound = false
 
   function recordInteraction() {
-    rreInteractedThisRound = true
+    lastRreInteractionTime = Date.now()
   }
 
   function startGame() {
@@ -46,7 +47,8 @@ export const useRreStore = defineStore('rre', () => {
     const initialTime = settingsStore.timeLimit
     timeLeft.value = initialTime
     rreInitialTime = initialTime
-    rreInteractedThisRound = false
+    lastRreInteractionTime = Date.now()
+    iceAgeTriggeredThisRound = false
 
     // Store start time for delta calculation
     const startTime = Date.now()
@@ -61,9 +63,10 @@ export const useRreStore = defineStore('rre', () => {
       // Clamped to 0 for stable display
       timeLeft.value = Number(Math.max(0, rawTime).toFixed(1))
 
-      if (elapsedMs >= 30000 && !rreInteractedThisRound) {
-        useAchievementStore().checkIceAge(rreInitialTime, 30, rreInteractedThisRound)
-        rreInteractedThisRound = true // Prevent duplicate checks
+      // Ice Age check: 30 consecutive seconds without interaction
+      if (!iceAgeTriggeredThisRound && Date.now() - lastRreInteractionTime >= 30000) {
+        useAchievementStore().checkIceAge(rreInitialTime, 30)
+        iceAgeTriggeredThisRound = true
       }
 
       if (rawTime <= 0) {

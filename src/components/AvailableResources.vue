@@ -3,7 +3,7 @@ import Resource from '@/components/Resource.vue'
 import { useResourcesStore } from '@/stores/useResourcesStore'
 import { useBoxesStore } from '@/stores/useBoxesStore'
 import { storeToRefs } from 'pinia'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { playSound } from '@/utils/audio'
 import { elements, getElementIonicForm } from '@/utils/elements'
 import { useAchievementStore } from '@/stores/useAchievementStore'
@@ -104,6 +104,41 @@ const chunkedResources = computed(() => {
   })
   return rows
 })
+
+// scroll_lover achievement: detect full scroll passes between edges
+const resourceListRef = ref<HTMLElement | null>(null)
+let lastEdge: 'start' | 'end' | null = null
+
+const handleScroll = (e: Event) => {
+  const el = e.currentTarget as HTMLElement
+  const isMobile = window.innerWidth <= 768
+
+  // Desktop: vertical scroll. Mobile: horizontal scroll.
+  const scrollPos = isMobile ? el.scrollLeft : el.scrollTop
+  const scrollMax = isMobile ? el.scrollWidth - el.clientWidth : el.scrollHeight - el.clientHeight
+
+  if (scrollMax <= 20) return // not enough content to count
+
+  const EDGE_THRESHOLD = 10 // px from edge counts as "at edge"
+  const atStart = scrollPos <= EDGE_THRESHOLD
+  const atEnd = scrollPos >= scrollMax - EDGE_THRESHOLD
+
+  if (atStart && lastEdge !== 'start') {
+    lastEdge = 'start'
+    achievementStore.recordScrollerPass()
+  } else if (atEnd && lastEdge !== 'end') {
+    lastEdge = 'end'
+    achievementStore.recordScrollerPass()
+  }
+}
+
+onMounted(() => {
+  resourceListRef.value?.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  resourceListRef.value?.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <template>
@@ -111,6 +146,7 @@ const chunkedResources = computed(() => {
   <div class="mobile-resources-wrapper flex-1 overflow-hidden relative flex flex-col">
     <!-- Resource List -->
     <div
+      ref="resourceListRef"
       class="mobile-resource-list flex-1 overflow-y-auto px-2 pt-0 pb-24 md:pt-2 md:pb-20 content-start custom-scroller"
     >
       <template v-if="chunkedResources.length === 1">

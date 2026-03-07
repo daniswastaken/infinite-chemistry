@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { playSound } from '@/utils/audio'
+import { useRreStore } from '@/stores/useRreStore'
 
 export interface Achievement {
   id: string
@@ -446,6 +447,57 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
     id: 'alchemists_laugh',
     title: 'Tawa Alkemis',
     description: 'Menang di sisa waktu tepat 0.01 detik.'
+  },
+  {
+    id: 'gravity_anomaly',
+    title: 'Anomali Gravitasi',
+    description: 'Tumpuk 5 elemen di satu titik koordinat yang persis sama (toleransi 5px).'
+  },
+  {
+    id: 'perfect_analysis',
+    title: 'Analisis yang Sempurna',
+    description: 'Menangkan 5 RRE beruntun dengan efisiensi gerakan 100% (tanpa gagal reaksi).'
+  },
+  {
+    id: 'scroll_lover',
+    title: 'Suka Scroll',
+    description: 'Scroll sidebar dari ujung ke ujung sebanyak 5 kali dalam 8 detik.'
+  },
+  {
+    id: 'one_final_experiment',
+    title: 'Satu Eksperimen Terakhir',
+    description: 'Hapus sebuah senyawa yang memiliki total lebih dari 10 atom.'
+  },
+  {
+    id: 'the_purist',
+    title: 'Sang Puris',
+    description: 'Bermain selama 30 menit tanpa menggunakan tombol shortcut keyboard sama sekali.'
+  },
+  {
+    id: 'the_pianist',
+    title: 'Pianis',
+    description:
+      'Tekan 4 tombol kontrol (RRE, Flask, Formula, Hapus Semua) berurutan dalam < 0.5 detik.'
+  },
+  {
+    id: 'settings_lover',
+    title: 'Peneliti yang Sangat Teliti',
+    description: 'Buka modal Pengaturan sebanyak 50 kali.'
+  },
+  {
+    id: 'tri_element',
+    title: 'Simfoni Tiga Elemen',
+    description: 'Bentuk senyawa yang terdiri dari 3 unsur berbeda.'
+  },
+  {
+    id: 'broken_cycle',
+    title: 'Siklus Terputus',
+    description: 'Muat ulang halaman game di tengah-tengah tantangan RRE.'
+  },
+  {
+    id: 'particle_rain',
+    title: 'Hujan Partikel',
+    description: 'Miliki tepat 20 elemen (10 di mobile) di kanvas, lalu gunakan tombol Hapus Semua.'
   }
 ]
 
@@ -516,7 +568,12 @@ export const useAchievementStore = defineStore('achievements', () => {
       emptyCanvasClicks: 0,
       pemulaOnlyWins: 0,
       sepuhSpeedWinStreak: 0,
-      totalBonks: 0
+      totalBonks: 0,
+      perfectRreStreak: 0,
+      failedBondsInCurrentRre: 0,
+      settingsOpenedCount: 0,
+      sessionTimeNoShortcuts: 0,
+      scrollLoverTimestamps: [] as number[]
     }
     try {
       const raw = localStorage.getItem(STATS_KEY)
@@ -656,6 +713,17 @@ export const useAchievementStore = defineStore('achievements', () => {
     } else if (difficulty === 'sepuh') {
       stats.value.sepuhSpeedWinStreak = 0
     }
+
+    // perfect_analysis: 5 RRE wins in a row with 0 failed bonds
+    if (stats.value.failedBondsInCurrentRre === 0) {
+      stats.value.perfectRreStreak++
+      if (stats.value.perfectRreStreak >= 5) unlock('perfect_analysis')
+    } else {
+      stats.value.perfectRreStreak = 0
+    }
+    // Reset round tracking
+    stats.value.failedBondsInCurrentRre = 0
+
     saveStats()
   }
 
@@ -733,6 +801,11 @@ export const useAchievementStore = defineStore('achievements', () => {
       if (settingsOpenCount.value >= 10) {
         unlock('forgetful')
       }
+      stats.value.settingsOpenedCount++
+      saveStats()
+      if (stats.value.settingsOpenedCount >= 50) {
+        unlock('settings_lover')
+      }
     }
   }
 
@@ -743,14 +816,23 @@ export const useAchievementStore = defineStore('achievements', () => {
     }
   }
 
-  function recordSidebarDelete() {
+  function recordSidebarDelete(box?: any) {
     stats.value.sidebarDeletes++
     saveStats()
     if (stats.value.sidebarDeletes >= 15) unlock('sidebar_delete_15')
     if (stats.value.sidebarDeletes >= 30) unlock('sidebar_delete_30')
+
+    // one_final_experiment: deleting a compound with > 10 total atoms
+    if (box?.components) {
+      const totalAtoms = Object.values(box.components as Record<string, number>).reduce(
+        (sum, count) => sum + count,
+        0
+      )
+      if (totalAtoms > 10) unlock('one_final_experiment')
+    }
   }
 
-  function recordClearCanvas() {
+  function recordClearCanvas(boxCount: number = 0, isMobile: boolean = false) {
     unlock('clear_canvas_first')
     const now = Date.now()
     stats.value.clearAllTimestamps.push(now)
@@ -760,6 +842,13 @@ export const useAchievementStore = defineStore('achievements', () => {
     if (stats.value.clearAllTimestamps.length >= 3) {
       unlock('symphony_of_destruction')
     }
+
+    // particle_rain: must have exactly 20 boxes (10 on mobile) before clearing
+    const requiredCount = isMobile ? 10 : 20
+    if (boxCount === requiredCount) {
+      unlock('particle_rain')
+    }
+
     saveStats()
   }
 
@@ -855,6 +944,11 @@ export const useAchievementStore = defineStore('achievements', () => {
     stats.value.conventionalAlchemistStreak++
     if (stats.value.conventionalAlchemistStreak >= 10) unlock('conventional_alchemist')
 
+    // tri_element: compound made from 3 or more distinct elements
+    if (compound.components && Object.keys(compound.components).length >= 3) {
+      unlock('tri_element')
+    }
+
     saveStats()
   }
 
@@ -869,6 +963,11 @@ export const useAchievementStore = defineStore('achievements', () => {
 
     stats.value.totalBonks++
     if (stats.value.totalBonks >= 50) unlock('pollution')
+
+    // Track failed bonds within current RRE round for perfect_analysis
+    stats.value.failedBondsInCurrentRre++
+    // Reset perfect streak since there was a failed bond
+    stats.value.perfectRreStreak = 0
 
     stats.value.chainReactionStreak = 0
     stats.value.greedyCollectorCount = 0
@@ -923,6 +1022,9 @@ export const useAchievementStore = defineStore('achievements', () => {
         unlock('all_shortcuts')
       }
     }
+    // the_purist: reset no-shortcut timer
+    stats.value.sessionTimeNoShortcuts = 0
+    saveStats()
   }
 
   function recordRreTargetSwitch() {
@@ -957,6 +1059,9 @@ export const useAchievementStore = defineStore('achievements', () => {
     const now = Date.now()
     stats.value.lastInteractionTime = now
     lastSessionInteraction.value = now
+
+    // Notify RRE Store so it knows an interaction occurred (prevents 'Zaman Es' from triggering incorrectly)
+    useRreStore().recordInteraction()
 
     if (academicBlockTimeout) clearTimeout(academicBlockTimeout)
     academicBlockTimeout = window.setTimeout(
@@ -1044,6 +1149,14 @@ export const useAchievementStore = defineStore('achievements', () => {
         if (currentMinutes >= 60) unlock('playtime_60m')
         if (currentMinutes >= 118) unlock('playtime_118m')
       }
+
+      // the_purist: accumulate no-shortcut time if user is active
+      if (now - lastSessionInteraction.value < 5 * 60 * 1000) {
+        stats.value.sessionTimeNoShortcuts += deltaMs / 1000
+        if (stats.value.sessionTimeNoShortcuts >= 30 * 60) {
+          unlock('the_purist')
+        }
+      }
     }
   }, 1000)
 
@@ -1065,6 +1178,12 @@ export const useAchievementStore = defineStore('achievements', () => {
     saveStats()
   })
 
+  // broken_cycle: check if user refreshed during an RRE challenge
+  if (localStorage.getItem('ic_in_rre') === 'true') {
+    unlock('broken_cycle')
+    localStorage.removeItem('ic_in_rre')
+  }
+
   function recordEmptyCanvasClick() {
     stats.value.emptyCanvasClicks++
     saveStats()
@@ -1073,8 +1192,8 @@ export const useAchievementStore = defineStore('achievements', () => {
     }
   }
 
-  function checkIceAge(initialTime: number, rreDurationSecs: number, rreInteracted: boolean) {
-    if (initialTime >= 30 && rreDurationSecs >= 30 && !rreInteracted) {
+  function checkIceAge(initialTime: number, rreDurationSecs: number) {
+    if (initialTime >= 30 && rreDurationSecs >= 30) {
       unlock('ice_age')
     }
   }
@@ -1083,6 +1202,63 @@ export const useAchievementStore = defineStore('achievements', () => {
     if (stats.value.pemulaOnlyWins > 0) {
       stats.value.pemulaOnlyWins = 0
       saveStats()
+    }
+  }
+
+  // gravity_anomaly: check if 5+ boxes are stacked within 5px of each other
+  function checkGravityAnomaly(boxes: any[]) {
+    for (let i = 0; i < boxes.length; i++) {
+      let clusterCount = 1
+      for (let j = 0; j < boxes.length; j++) {
+        if (i === j) continue
+        const dist = Math.hypot(boxes[i].left - boxes[j].left, boxes[i].top - boxes[j].top)
+        if (dist <= 5) clusterCount++
+      }
+      if (clusterCount >= 5) {
+        unlock('gravity_anomaly')
+        return
+      }
+    }
+  }
+
+  // scroll_lover: track full scroll passes (reaching an edge) within an 8 second window
+  const scrollLoverPassTimestamps = ref<number[]>([])
+  function recordScrollerPass() {
+    const now = Date.now()
+    scrollLoverPassTimestamps.value.push(now)
+    scrollLoverPassTimestamps.value = scrollLoverPassTimestamps.value.filter(
+      (ts) => now - ts <= 8000
+    )
+    if (scrollLoverPassTimestamps.value.length >= 5) {
+      unlock('scroll_lover')
+    }
+  }
+
+  // the_pianist: track sequential button presses [1, 2, 3, 4] within 0.5s
+  // IDs: 'challenge'=1, 'atomic_mode'=2, 'formula_info'=3, 'clear_canvas'=4
+  const pianoSequence = ['challenge', 'atomic_mode', 'formula_info', 'clear_canvas']
+  const pianistBuffer = ref<{ key: string; ts: number }[]>([])
+  function recordPianistPress(key: string) {
+    const now = Date.now()
+    pianistBuffer.value.push({ key, ts: now })
+    // Keep only the last 4 presses within 0.5s
+    pianistBuffer.value = pianistBuffer.value.filter((e) => now - e.ts <= 500).slice(-4)
+    if (pianistBuffer.value.length === 4) {
+      const keys = pianistBuffer.value.map((e) => e.key)
+      const span = pianistBuffer.value[3].ts - pianistBuffer.value[0].ts
+      if (JSON.stringify(keys) === JSON.stringify(pianoSequence) && span < 500) {
+        unlock('the_pianist')
+        pianistBuffer.value = []
+      }
+    }
+  }
+
+  // recordRreSideEffect: called when RRE starts/stops to manage broken_cycle localStorage flag
+  function recordRreSideEffect(isStarting: boolean) {
+    if (isStarting) {
+      localStorage.setItem('ic_in_rre', 'true')
+    } else {
+      localStorage.removeItem('ic_in_rre')
     }
   }
 
@@ -1185,6 +1361,10 @@ export const useAchievementStore = defineStore('achievements', () => {
     recordEmptyCanvasClick,
     checkIceAge,
     resetPemulaOnlyStreak,
-    checkIsolasiMandiri
+    checkIsolasiMandiri,
+    checkGravityAnomaly,
+    recordScrollerPass,
+    recordPianistPress,
+    recordRreSideEffect
   }
 })
