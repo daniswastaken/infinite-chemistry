@@ -18,6 +18,12 @@ export const useRreStore = defineStore('rre', () => {
   let lastFailedAt = 0
   let lastFailedTargetFormula = ''
   let timerInterval: number | null = null
+  let rreInteractedThisRound = false
+  let rreInitialTime = 0
+
+  function recordInteraction() {
+    rreInteractedThisRound = true
+  }
 
   function startGame() {
     if (isActive.value) return
@@ -39,6 +45,8 @@ export const useRreStore = defineStore('rre', () => {
     const settingsStore = useSettingsStore()
     const initialTime = settingsStore.timeLimit
     timeLeft.value = initialTime
+    rreInitialTime = initialTime
+    rreInteractedThisRound = false
 
     // Store start time for delta calculation
     const startTime = Date.now()
@@ -52,6 +60,11 @@ export const useRreStore = defineStore('rre', () => {
       // Update the reactive ref with formatting (1 decimal place)
       // Clamped to 0 for stable display
       timeLeft.value = Number(Math.max(0, rawTime).toFixed(1))
+
+      if (elapsedMs >= 30000 && !rreInteractedThisRound) {
+        useAchievementStore().checkIceAge(rreInitialTime, 30, rreInteractedThisRound)
+        rreInteractedThisRound = true // Prevent duplicate checks
+      }
 
       if (rawTime <= 0) {
         timeLeft.value = 0
@@ -74,9 +87,11 @@ export const useRreStore = defineStore('rre', () => {
     lastFailedAt = Date.now()
     lastFailedTargetFormula = targetCompound.value?.formula || ''
 
-    stopGame()
     const settingsStore = useSettingsStore()
     const achievementStore = useAchievementStore()
+
+    stopGame()
+
     achievementStore.onChallengeLose(settingsStore.difficulty)
     achievementStore.resetPanicModeDragCount()
 
@@ -99,7 +114,7 @@ export const useRreStore = defineStore('rre', () => {
     achievementStore.resetPanicModeDragCount()
 
     const durationSec = gameStartTime.value ? (Date.now() - gameStartTime.value) / 1000 : 999
-    achievementStore.recordRreWin(settingsStore.difficulty, durationSec)
+    achievementStore.recordRreWin(settingsStore.difficulty, durationSec, settingsStore.timeLimit)
 
     showSuccessPopup.value = true
     if (!achievementStore.pendingToast) {
@@ -157,6 +172,7 @@ export const useRreStore = defineStore('rre', () => {
     startGame,
     stopGame,
     checkWinCondition,
-    toggleGame
+    toggleGame,
+    recordInteraction
   }
 })

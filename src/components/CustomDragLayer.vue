@@ -5,8 +5,10 @@ import { ItemTypes } from '@/components/ItemTypes'
 import ItemCard from '@/components/ItemCard.vue'
 import { twMerge } from 'tailwind-merge'
 import { useBoxesStore } from '@/stores/useBoxesStore'
+import { useAchievementStore } from '@/stores/useAchievementStore'
 
 const store = useBoxesStore()
+const achievementStore = useAchievementStore()
 
 const collect = useDragLayer((monitor) => ({
   item: monitor.getItem(),
@@ -39,6 +41,65 @@ watch(
   },
   { immediate: true }
 )
+
+let animationFrameId: number | null = null
+let lastTimeMs = 0
+let lastPosX = 0
+let lastPosY = 0
+let slowDurationMs = 0
+
+watch(isDragging, (dragging) => {
+  if (dragging) {
+    lastTimeMs = 0 // Will be initialized on first valid frame
+    lastPosX = 0
+    lastPosY = 0
+    slowDurationMs = 0
+
+    const loop = (time: number) => {
+      if (!isDragging.value) return
+
+      const offset = currentOffset.value
+      if (offset) {
+        if (lastTimeMs === 0) {
+          // First valid frame: initialize without accumulating time
+          lastTimeMs = time
+          lastPosX = offset.x
+          lastPosY = offset.y
+        } else {
+          const dtMs = time - lastTimeMs
+          // Only evaluate speed every ~200ms to avoid 1-frame micro-jitters (1px / 16ms = 62.5px/s)
+          if (dtMs >= 200) {
+            const dist = Math.hypot(offset.x - lastPosX, offset.y - lastPosY)
+            const speed = (dist / dtMs) * 1000
+
+            if (speed < 30) {
+              slowDurationMs += dtMs
+              if (slowDurationMs >= 5000) {
+                achievementStore.unlock('viscosity')
+                slowDurationMs = 0
+              }
+            } else {
+              slowDurationMs = 0
+            }
+
+            lastPosX = offset.x
+            lastPosY = offset.y
+            lastTimeMs = time
+          }
+        }
+      }
+      // If offset null, skip accumulating but keep rAF running
+
+      animationFrameId = requestAnimationFrame(loop)
+    }
+
+    animationFrameId = requestAnimationFrame(loop)
+  } else {
+    if (animationFrameId) cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+    slowDurationMs = 0
+  }
+})
 </script>
 
 <template>

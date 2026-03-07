@@ -405,6 +405,47 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
     id: 'marathon_runner',
     title: 'Langkah yang Tak Kunjung Berhenti',
     description: 'Bermain satu sesi penuh tanpa jeda selama 2 jam non-stop.'
+  },
+  {
+    id: 'self_isolation',
+    title: 'Isolasi Mandiri',
+    description: 'Taruh 1 elemen di ujung pojok layar sementara yang lain di tengah.'
+  },
+  {
+    id: 'ice_age',
+    title: 'Zaman Es',
+    description: 'Jangan lakukan apapun ketika di dalam mode RRE selama sisa waktu 30 detik.'
+  },
+  {
+    id: 'off_beat',
+    title: 'Ketukan Tak Seirama',
+    description: 'Klik kanvas kosong sebanyak 50 kali dalam satu sesi.'
+  },
+  {
+    id: 'lab_assistant',
+    title: 'Asisten Lab',
+    description: "Selesaikan total 10 tantangan 'Pemula' tanpa menyentuh mode 'Sepuh'."
+  },
+  {
+    id: 'lead_researcher',
+    title: 'Peneliti Utama',
+    description: "Menang RRE dalam mode 'Sepuh' 5x beruntun menggunakan waktu <50% per ronde."
+  },
+  {
+    id: 'viscosity',
+    title: 'Viskositas',
+    description:
+      'Gerakkan sebuah elemen sangat lambat (< 30px/detik) selama 5 detik tanpa melepaskannya dari kursor.'
+  },
+  {
+    id: 'pollution',
+    title: 'Bencana di Gelas Kimia',
+    description: 'Akumulasi total 50 kali kegagalan reaksi di kanvas.'
+  },
+  {
+    id: 'alchemists_laugh',
+    title: 'Tawa Alkemis',
+    description: 'Menang di sisa waktu tepat 0.01 detik.'
   }
 ]
 
@@ -471,7 +512,11 @@ export const useAchievementStore = defineStore('achievements', () => {
       conventionalAlchemistStreak: 0,
       mainGroupOnlyWins: 0,
       clearAllTimestamps: [] as number[],
-      sessionContinuousSecs: 0
+      sessionContinuousSecs: 0,
+      emptyCanvasClicks: 0,
+      pemulaOnlyWins: 0,
+      sepuhSpeedWinStreak: 0,
+      totalBonks: 0
     }
     try {
       const raw = localStorage.getItem(STATS_KEY)
@@ -556,8 +601,15 @@ export const useAchievementStore = defineStore('achievements', () => {
     stats.value.loseStreak = 0
     saveStats()
 
-    if (difficulty === 'pemula') unlock('win_pemula_first')
-    if (difficulty === 'sepuh') unlock('win_sepuh_first')
+    if (difficulty === 'pemula') {
+      unlock('win_pemula_first')
+      stats.value.pemulaOnlyWins++
+      if (stats.value.pemulaOnlyWins >= 10) unlock('lab_assistant')
+    }
+    if (difficulty === 'sepuh') {
+      unlock('win_sepuh_first')
+      stats.value.pemulaOnlyWins = 0
+    }
     if (difficulty === 'alkemis') unlock('win_alkemis_first')
 
     if (difficulty === 'pemula' && stats.value.winCounts.pemula >= 25) unlock('win_pemula_25')
@@ -570,6 +622,7 @@ export const useAchievementStore = defineStore('achievements', () => {
 
     if (timeLeft <= 1.9) unlock('close_call')
     if (timeLeft < 0.1) unlock('close_call_01')
+    if (Math.abs(timeLeft - 0.01) < 0.005) unlock('alchemists_laugh') // Exact ~0.01 calculation
     if (timeLeft <= 0 && timeLeft >= -1.0) unlock('fortune_teller')
 
     if (difficulty === 'alkemis' && !usedNonMainGroup.value) {
@@ -591,10 +644,19 @@ export const useAchievementStore = defineStore('achievements', () => {
     saveStats()
   }
 
-  function recordRreWin(difficulty: string, durationSec: number) {
+  function recordRreWin(difficulty: string, durationSec: number, totalTimeSec: number = 60) {
     if (difficulty === 'pemula' && durationSec <= 5) {
       unlock('lightning_thumb')
     }
+    if (difficulty === 'sepuh' && durationSec <= totalTimeSec * 0.5) {
+      stats.value.sepuhSpeedWinStreak++
+      if (stats.value.sepuhSpeedWinStreak >= 5) {
+        unlock('lead_researcher')
+      }
+    } else if (difficulty === 'sepuh') {
+      stats.value.sepuhSpeedWinStreak = 0
+    }
+    saveStats()
   }
 
   function onChallengeLose(difficulty: string) {
@@ -610,6 +672,11 @@ export const useAchievementStore = defineStore('achievements', () => {
     const totalGames = stats.value.totalWins + stats.value.totalLosses
     if (totalGames >= 25) unlock('total_games_25')
     if (totalGames >= 50) unlock('total_games_50')
+
+    if (difficulty === 'sepuh') {
+      stats.value.pemulaOnlyWins = 0
+      stats.value.sepuhSpeedWinStreak = 0
+    }
 
     if (difficulty === 'alkemis') {
       stats.value.consecutiveAlchemistFails++
@@ -799,6 +866,9 @@ export const useAchievementStore = defineStore('achievements', () => {
 
     stats.value.consecutiveBonks++
     if (stats.value.consecutiveBonks >= 20) unlock('mysterious_compound')
+
+    stats.value.totalBonks++
+    if (stats.value.totalBonks >= 50) unlock('pollution')
 
     stats.value.chainReactionStreak = 0
     stats.value.greedyCollectorCount = 0
@@ -995,6 +1065,81 @@ export const useAchievementStore = defineStore('achievements', () => {
     saveStats()
   })
 
+  function recordEmptyCanvasClick() {
+    stats.value.emptyCanvasClicks++
+    saveStats()
+    if (stats.value.emptyCanvasClicks >= 50) {
+      unlock('off_beat')
+    }
+  }
+
+  function checkIceAge(initialTime: number, rreDurationSecs: number, rreInteracted: boolean) {
+    if (initialTime >= 30 && rreDurationSecs >= 30 && !rreInteracted) {
+      unlock('ice_age')
+    }
+  }
+
+  function resetPemulaOnlyStreak() {
+    if (stats.value.pemulaOnlyWins > 0) {
+      stats.value.pemulaOnlyWins = 0
+      saveStats()
+    }
+  }
+
+  function checkIsolasiMandiri(
+    boxes: any[],
+    viewportWidth: number,
+    viewportHeight: number,
+    sidebarWidth: number,
+    isMobile: boolean
+  ) {
+    if (boxes.length < 2) return
+    const tolerance = isMobile ? 40 : 60
+    const minSeparation = isMobile ? 200 : 300
+
+    // Desktop: Sidebar on right
+    // Mobile: Sidebar on bottom (approx 35dvh)
+    const rightBound = !isMobile ? viewportWidth - sidebarWidth : viewportWidth
+    const bottomBound = isMobile ? viewportHeight * 0.65 : viewportHeight
+
+    for (let i = 0; i < boxes.length; i++) {
+      const box = boxes[i]
+      const bx = box.left
+      const by = box.top
+
+      // Corner check - account for element width/height (approx 120x45)
+      // Left edge: bx < tolerance
+      // Right edge: bx is near the sidebar footprint (rightBound - width - tolerance)
+      const widthOffset = isMobile ? 160 : 180
+      const heightOffset = isMobile ? 85 : 105
+
+      const atXEdge = bx <= tolerance || (bx >= rightBound - widthOffset && bx <= rightBound)
+      const atYEdge = by <= tolerance || (by >= bottomBound - heightOffset && by <= bottomBound)
+
+      if (atXEdge && atYEdge) {
+        // Now determine if it's SPECIFICALLY in a corner area
+        const isNearLeft = bx <= tolerance
+        const isNearRight = bx >= rightBound - widthOffset
+        const isNearTop = by <= tolerance
+        const isNearBottom = by >= bottomBound - heightOffset
+
+        const isCorner = (isNearLeft || isNearRight) && (isNearTop || isNearBottom)
+
+        if (isCorner) {
+          const othersAreCentral = boxes.every((b, idx) => {
+            if (idx === i) return true
+            const distToBox = Math.hypot(b.left - bx, b.top - by)
+            return distToBox > minSeparation
+          })
+          if (othersAreCentral) {
+            unlock('self_isolation')
+            return
+          }
+        }
+      }
+    }
+  }
+
   return {
     achievements,
     pendingToast,
@@ -1036,6 +1181,10 @@ export const useAchievementStore = defineStore('achievements', () => {
     recordPrecisionDrag,
     checkCanvasCounts,
     recordRreElementUse,
-    resetPanicModeDragCount
+    resetPanicModeDragCount,
+    recordEmptyCanvasClick,
+    checkIceAge,
+    resetPemulaOnlyStreak,
+    checkIsolasiMandiri
   }
 })

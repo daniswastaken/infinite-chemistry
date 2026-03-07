@@ -23,9 +23,7 @@ export interface BoxStoreEntry {
 export const useBoxesStore = defineStore('counter', () => {
   const boxes = reactive<{
     [key: string]: BoxStoreEntry
-  }>({
-    a: { top: 200, left: 400, title: 'Hidrogen', symbol: 'H' }
-  })
+  }>({})
 
   const selectedIds = ref<string[]>([])
   const history = ref<string[]>([])

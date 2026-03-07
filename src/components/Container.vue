@@ -141,6 +141,8 @@ const startSelection = (e: MouseEvent) => {
   // If clicking on the right side where sidebar is, ignore
   if (e.clientX > window.innerWidth - sidebarWidth.value) return
 
+  achievementStore.recordEmptyCanvasClick()
+
   // Blur any active inputs so keyboard shortcuts work
   if (document.activeElement instanceof HTMLElement) {
     document.activeElement.blur()
@@ -238,6 +240,26 @@ onMounted(() => {
   window.addEventListener('resize', () => {
     isMobile.value = window.innerWidth <= 768
   })
+
+  // Add initial starter element if box list is empty
+  // (Ensures it is centered based on the current viewport)
+  if (Object.keys(boxes.value).length === 0) {
+    const usableWidth = isMobile.value ? window.innerWidth : window.innerWidth - sidebarWidth.value
+    const usableHeight = isMobile.value ? window.innerHeight * 0.65 : window.innerHeight
+
+    const centerX = usableWidth / 2
+    const centerY = usableHeight / 2
+
+    store.addBox(
+      {
+        left: centerX - 60, // approximate half width
+        top: centerY - 22, // approximate half height
+        title: 'Hidrogen',
+        symbol: 'H'
+      },
+      false
+    ) // Don't save history for the initial state
+  }
 })
 
 watch(
@@ -245,6 +267,13 @@ watch(
   (newBoxes) => {
     achievementStore.checkDynamicEquilibrium(Object.values(newBoxes))
     achievementStore.checkCanvasCounts(Object.values(newBoxes))
+    achievementStore.checkIsolasiMandiri(
+      Object.values(newBoxes),
+      window.innerWidth,
+      window.innerHeight,
+      sidebarWidth.value,
+      isMobile.value
+    )
   },
   { deep: true }
 )
