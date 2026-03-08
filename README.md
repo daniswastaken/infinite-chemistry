@@ -1,6 +1,8 @@
-# Infinite Chemistry
+# Infinite Chemistry - OSS For Gamified Studies
 
-![Banner](public/src/banner.jpg)
+<p align="center">
+   ![Banner](public/src/banner.jpg)
+</p>
 
 Infinite Chemistry is an open-source chemistry stoichiometry and nomenclature educational tool, inspired by [Infinite Craft](https://neal.fun/infinite-craft/). Designed for students, it provides an interactive way to learn how chemical elements bond to form compounds.
 
@@ -13,20 +15,23 @@ Example:
 - Drag **Nitrogen (N)** onto **Oksigen (O)** to form **Nitrogen Oksida (NO)**.
 - All element and compound names are currently localized in **Indonesian** to support local education.
 
-## Key Features
-
 - **Dynamic Bonding Logic:** Real chemistry rules governing ionic and covalent bonds.
-- **Interactive UI:** Smooth drag-and-drop interface powered by Vue 3.
+- **Experiment Mode (Flask):** Specialized mode for synthesizing polyatomic ions and watching them evolve (e.g., Sulfite -> Sulfate).
+- **Achievement System:** 20+ unlockable achievements with a sequential notification queue.
+- **Interactive UI:** Smooth drag-and-drop interface powered by Vue 3 with smart search prioritization.
 - **Atmospheric Background:** Dynamic particle system for a "chemical soup" feel.
-- **Indonesian Localization:** Tailored for the Indonesian education system.
+- **Indonesian Localization:** Tailored specifically for the Indonesian education system.
 
 ## Tech Stack
 
 - **Core:** [Vue 3](https://vuejs.org/) (Composition API)
 - **Build Tool:** [Vite](https://vitejs.dev/)
+- **Testing:** [Vitest](https://vitest.dev/)
+- **State Management:** [Pinia](https://pinia.vuejs.org/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Interactivity:** [Vue3-DnD](https://vue3-dnd.netlify.app/)
 - **Visuals:** [particles.js](https://vincentgarreau.com/particles.js/) (Customized)
+- **Animation:** [GSAP](https://gsap.com/)
 
 ## Getting Started
 
@@ -43,6 +48,10 @@ To run this project locally:
 3. **Run the development server:**
    ```bash
    npm run dev
+   ```
+4. **Run tests:**
+   ```bash
+   npx vitest
    ```
 
 ## Project Structure
