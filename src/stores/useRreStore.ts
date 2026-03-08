@@ -75,6 +75,7 @@ export const useRreStore = defineStore('rre', () => {
       }
     }, 100)
 
+    achievementStore.recordRreSideEffect(true)
     playSound('click', 0.5, 1.0)
   }
 
@@ -84,6 +85,8 @@ export const useRreStore = defineStore('rre', () => {
       clearInterval(timerInterval)
       timerInterval = null
     }
+    const achievementStore = useAchievementStore()
+    achievementStore.recordRreSideEffect(false)
   }
 
   function loseGame() {

@@ -520,7 +520,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   },
   {
     id: 'thermal_isolation',
-    title: 'Isolasi Termal',
+    title: 'Momen Kehancuran',
     description: "Gunakan tombol 'Hapus Semua' saat hanya ada 1 elemen tersisa di kanvas."
   },
   {
@@ -1318,7 +1318,7 @@ export const useAchievementStore = defineStore('achievements', () => {
     let deltaMs = now - lastPlaytimeCheck
     lastPlaytimeCheck = now
 
-    if (deltaMs > 0) {
+    if (deltaMs > 0 && document.visibilityState === 'visible') {
       stats.value.playDurationSecs += deltaMs / 1000
 
       if (now - lastSessionInteraction.value < 5 * 60 * 1000) {
@@ -1367,6 +1367,18 @@ export const useAchievementStore = defineStore('achievements', () => {
   window.addEventListener('beforeunload', () => {
     stats.value.lastPlayedAt = Date.now()
     saveStats()
+  })
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      if (academicBlockTimeout) {
+        clearTimeout(academicBlockTimeout)
+        academicBlockTimeout = null
+      }
+    } else {
+      // Refresh interaction time when returning so academic block starts fresh
+      recordInteraction()
+    }
   })
 
   // broken_cycle: check if user refreshed during an RRE challenge

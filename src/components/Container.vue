@@ -1176,8 +1176,6 @@ const [collectSidebar, dropSidebar] = useDrop(() => ({
             (e) => {
               const wasActive = rreStore.isActive
               rreStore.toggleGame()
-              // wasActive=true means we just stopped; wasActive=false means we just started
-              achievementStore.recordRreSideEffect(!wasActive)
               achievementStore.recordPianistPress('challenge')
               achievementStore.recordInteraction()
               ;(e.currentTarget as HTMLElement).blur()

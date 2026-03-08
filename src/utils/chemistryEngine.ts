@@ -595,9 +595,13 @@ export function attemptBond(
             }
           }
 
-          const divisor = gcd(valFirst, valSecond)
-          const countFirst = valSecond / divisor
-          const countSecond = valFirst / divisor
+          let countFirst = 1
+          let countSecond = 1
+
+          if (valFirst === 1 || valSecond === 1) {
+            countFirst = valSecond
+            countSecond = valFirst
+          }
 
           newComps = {
             [firstSym]: countFirst,
@@ -852,6 +856,12 @@ function isStrictDimerException(comps: Record<string, number>): boolean {
 
   // ClO3
   if (comps['Cl'] === 1 && comps['O'] === 3 && keys.length === 2) return true
+
+  // NO2
+  if (comps['N'] === 1 && comps['O'] === 2 && keys.length === 2) return true
+
+  // SO3
+  if (comps['S'] === 1 && comps['O'] === 3 && keys.length === 2) return true
 
   return false
 }

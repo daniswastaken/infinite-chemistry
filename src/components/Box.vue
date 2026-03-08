@@ -50,7 +50,9 @@ const [collect, drag] = useDrag(() => ({
 }))
 const { isDragging } = toRefs(collect)
 
+import { onUnmounted } from 'vue'
 import { useAchievementStore } from '@/stores/useAchievementStore'
+
 const achievementStore = useAchievementStore()
 
 let hoverStartTime = 0
@@ -59,24 +61,35 @@ let clickCount = 0
 let clickTimer: number | null = null
 let hoverInterval: number | null = null
 
+const cleanupHover = () => {
+  if (hoverInterval) {
+    clearInterval(hoverInterval)
+    hoverInterval = null
+  }
+}
+
 const onMouseEnter = () => {
   if (isDragging.value) return
   hoverStartTime = Date.now()
 
   // Start an interval to check duration in real-time
+  cleanupHover()
   hoverInterval = window.setInterval(() => {
     if (hoverStartTime > 0) {
-      const currentSessionTime = Date.now() - hoverStartTime
-      achievementStore.recordBoxHover(hoverTotalTime + currentSessionTime)
+      if (document.visibilityState === 'visible') {
+        const currentSessionTime = Date.now() - hoverStartTime
+        achievementStore.recordBoxHover(hoverTotalTime + currentSessionTime)
+      } else {
+        // If tab is hidden, we pause by resetting our start baseline to 'now'.
+        // This ensures the duration spent hidden is not added to the total.
+        hoverStartTime = Date.now()
+      }
     }
   }, 1000)
 }
 
 const onMouseLeave = () => {
-  if (hoverInterval) {
-    clearInterval(hoverInterval)
-    hoverInterval = null
-  }
+  cleanupHover()
 
   if (hoverStartTime > 0) {
     hoverTotalTime += Date.now() - hoverStartTime
@@ -84,6 +97,11 @@ const onMouseLeave = () => {
     achievementStore.recordBoxHover(hoverTotalTime)
   }
 }
+
+onUnmounted(() => {
+  cleanupHover()
+  if (clickTimer) clearTimeout(clickTimer)
+})
 
 const onClick = () => {
   // shimmering_mirage check

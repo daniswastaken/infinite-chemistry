@@ -116,6 +116,12 @@ export const playSound = (type: SoundType, volume?: number, pitch: number = 1.0)
     return
   }
 
+  // SPECIAL CASE: user requested 'put' to be 100% volume on mobile
+  if (isMobile && type === 'put') {
+    playSingleBuffer(ctx, buffer, 1.0, pitch)
+    return
+  }
+
   playSingleBuffer(ctx, buffer, effectiveVolume, pitch)
 }
 
