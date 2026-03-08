@@ -722,6 +722,7 @@ export const useAchievementStore = defineStore('achievements', () => {
   )
 
   const pendingToast = ref<Achievement | null>(null)
+  const toastQueue = ref<Achievement[]>([])
   let toastTimeout: number | null = null
 
   const winTimestamps = ref<number[]>([])
@@ -754,16 +755,27 @@ export const useAchievementStore = defineStore('achievements', () => {
     showToast(achievement)
   }
 
-  function showToast(achievement: Achievement) {
-    if (toastTimeout !== null) {
-      clearTimeout(toastTimeout)
-    }
-    pendingToast.value = achievement
+  function processQueue() {
+    // If already showing a toast, do nothing — the running timeout will call us when done.
+    if (pendingToast.value !== null) return
+    if (toastQueue.value.length === 0) return
+
+    const next = toastQueue.value.shift()!
+    pendingToast.value = next
     playSound('achievement')
+
     toastTimeout = window.setTimeout(() => {
       pendingToast.value = null
       toastTimeout = null
+      // Process the next one in queue after a short gap so the leave-animation
+      // of the Transition has time to complete before the enter-animation starts.
+      window.setTimeout(processQueue, 50)
     }, 4000)
+  }
+
+  function showToast(achievement: Achievement) {
+    toastQueue.value.push(achievement)
+    processQueue()
   }
 
   function onChallengeWin(difficulty: string, timeLeft: number) {
@@ -1593,6 +1605,7 @@ export const useAchievementStore = defineStore('achievements', () => {
   return {
     achievements,
     pendingToast,
+    toastQueue,
     stats,
     unlock,
     isUnlocked,

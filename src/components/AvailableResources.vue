@@ -41,11 +41,13 @@ const normalizeFormula = (text: string) => {
 }
 
 const filteredResources = computed(() => {
-  return resources.value.filter((resource) => {
+  const query = searchTerm.value.toLowerCase().trim()
+
+  const results = resources.value.filter((resource) => {
     // Filter by type matching the active tab
     if (resource.type !== activeTab.value) return false
 
-    const query = searchTerm.value.toLowerCase()
+    if (!query) return true
 
     // If formula mode is ON, search primarily by formula/symbol
     if (showFormulas.value) {
@@ -57,8 +59,9 @@ const filteredResources = computed(() => {
       return formulaMatch || symbolMatch
     }
 
-    // Regular search by Indonesian title
+    // Regular search by Indonesian title AND symbol
     const nameMatch = resource.title.toLowerCase().includes(query)
+    const symbolMatch = (resource.symbol || '').toLowerCase().includes(query)
 
     // Also search by ionic name if in Atomic Mode and it's a single element
     let ionicMatch = false
@@ -72,7 +75,39 @@ const filteredResources = computed(() => {
       }
     }
 
-    return nameMatch || ionicMatch
+    return nameMatch || symbolMatch || ionicMatch
+  })
+
+  if (!query) return results
+
+  // Sort results by match quality
+  return results.sort((a, b) => {
+    const aSymbol = (a.symbol || '').toLowerCase()
+    const bSymbol = (b.symbol || '').toLowerCase()
+    const aTitle = a.title.toLowerCase()
+    const bTitle = b.title.toLowerCase()
+
+    // 1. Exact symbol match
+    if (aSymbol === query && bSymbol !== query) return -1
+    if (bSymbol === query && aSymbol !== query) return 1
+
+    // 2. Exact title match
+    if (aTitle === query && bTitle !== query) return -1
+    if (bTitle === query && aTitle !== query) return 1
+
+    // 3. Starts with symbol
+    const aSymbolStarts = aSymbol.startsWith(query)
+    const bSymbolStarts = bSymbol.startsWith(query)
+    if (aSymbolStarts && !bSymbolStarts) return -1
+    if (bSymbolStarts && !aSymbolStarts) return 1
+
+    // 4. Starts with title
+    const aTitleStarts = aTitle.startsWith(query)
+    const bTitleStarts = bTitle.startsWith(query)
+    if (aTitleStarts && !bTitleStarts) return -1
+    if (bTitleStarts && !aTitleStarts) return 1
+
+    return 0 // Preserve original order for remaining ties
   })
 })
 
