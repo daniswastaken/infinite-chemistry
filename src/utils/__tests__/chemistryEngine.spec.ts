@@ -24,14 +24,19 @@ describe('chemistryEngine', () => {
       // O and N -> N comes before O
       const res = attemptBond({ N: 1 }, { O: 1 })
       expect(res.success).toBe(true)
-      expect(res.newCompound?.formula).toBe('N₂O') // Derived from actual valency math in engine
-      expect(res.newCompound?.name).toBe('Dinitrogen Monoksida')
+      expect(res.newCompound?.formula).toBe('N₂O₃') // Derived from actual valency math (N:3, O:2)
+      expect(res.newCompound?.name).toBe('Dinitrogen Trioksida')
 
       // S and F -> S comes before F
-      const res2 = attemptBond({ S: 1, F: 5 }, { F: 1 })
-      expect(res2.success).toBe(true)
-      expect(res2.newCompound?.formula).toBe('SF₆') // Sulfur Hexafluoride -> Belerang Heksafluorida
-      expect(res2.newCompound?.name).toBe('Belerang Heksafluorida')
+      const sf6 = generateNomenclature({ S: 1, F: 6 })
+      expect(sf6.formula).toBe('SF₆') // Sulfur Hexafluoride -> Belerang Heksafluorida
+      expect(sf6.name).toBe('Belerang Heksafluorida')
+
+      // Kr and F (Noble gas + Halogen expanded octet bond)
+      const res3 = attemptBond({ Kr: 1 }, { F: 1 }) // Should cross-multiply valency 2 and 1 -> KrF2
+      expect(res3.success).toBe(true)
+      expect(res3.newCompound?.formula).toBe('KrF₂')
+      expect(res3.newCompound?.name).toBe('Kripton Difluorida')
     })
 
     it('correctly handles vowel elision for oxides', () => {
