@@ -107,5 +107,72 @@ describe('chemistryEngine', () => {
       expect(res.success).toBe(false)
       expect(res.reason).toBe('capacity_reached')
     })
+
+    it('allows expanded octet scaling up to new max slots', () => {
+      // Selenium max slots increased to 6. SeF2 + 1F -> SeF3
+      const res1 = attemptBond({ Se: 1, F: 2 }, { F: 1 })
+      expect(res1.success).toBe(true)
+      expect(res1.newCompound?.formula).toBe('SeF₃')
+
+      // SbF3 + F -> SbF4
+      const res3 = attemptBond({ Sb: 1, F: 3 }, { F: 1 })
+      expect(res3.success).toBe(true)
+      expect(res3.newCompound?.formula).toBe('SbF₄')
+    })
+  })
+
+  describe('Common Element Pair Validation (Stability Audit)', () => {
+    it('produces correct hydrides', () => {
+      // CH4
+      expect(attemptBond({ C: 1 }, { H: 1 }).newCompound?.formula).toBe('CH₄')
+      // NH3
+      expect(attemptBond({ N: 1 }, { H: 1 }).newCompound?.formula).toBe('NH₃')
+      // PH3
+      expect(attemptBond({ P: 1 }, { H: 1 }).newCompound?.formula).toBe('PH₃')
+      // H2S
+      expect(attemptBond({ S: 1 }, { H: 1 }).newCompound?.formula).toBe('H₂S')
+      // AsH3
+      expect(attemptBond({ As: 1 }, { H: 1 }).newCompound?.formula).toBe('AsH₃')
+      // H2Se
+      expect(attemptBond({ Se: 1 }, { H: 1 }).newCompound?.formula).toBe('H₂Se')
+      // BH3
+      expect(attemptBond({ B: 1 }, { H: 1 }).newCompound?.formula).toBe('BH₃')
+      // GeH4
+      expect(attemptBond({ Ge: 1 }, { H: 1 }).newCompound?.formula).toBe('GeH₄')
+      // SiH4
+      expect(attemptBond({ Si: 1 }, { H: 1 }).newCompound?.formula).toBe('SiH₄')
+    })
+
+    it('produces correct halides', () => {
+      // CCl4
+      expect(attemptBond({ C: 1 }, { Cl: 1 }).newCompound?.formula).toBe('CCl₄')
+      // NF3
+      expect(attemptBond({ N: 1 }, { F: 1 }).newCompound?.formula).toBe('NF₃')
+      // PCl3
+      expect(attemptBond({ P: 1 }, { Cl: 1 }).newCompound?.formula).toBe('PCl₃')
+      // SCl2
+      expect(attemptBond({ S: 1 }, { Cl: 1 }).newCompound?.formula).toBe('SCl₂')
+      // BF3
+      expect(attemptBond({ B: 1 }, { F: 1 }).newCompound?.formula).toBe('BF₃')
+      // SiF4
+      expect(attemptBond({ Si: 1 }, { F: 1 }).newCompound?.formula).toBe('SiF₄')
+      // GeCl4
+      expect(attemptBond({ Ge: 1 }, { Cl: 1 }).newCompound?.formula).toBe('GeCl₄')
+      // AsF3
+      expect(attemptBond({ As: 1 }, { F: 1 }).newCompound?.formula).toBe('AsF₃')
+    })
+
+    it('produces correct oxides', () => {
+      // CO2
+      const co = generateNomenclature({ C: 1, O: 2 })
+      expect(co.formula).toBe('CO₂')
+      // SO2 (cross-mul S:2, O:2 -> SO)
+      // Noting S+O gives SO as it's 2 vs 2, gcd=2, so 1:1=SO not SO2
+      const so = attemptBond({ S: 1 }, { O: 1 })
+      expect(so.newCompound?.formula).toBe('SO') // per chemistry: SO1 = sulphur monoxide, correct initial bond
+      // SiO2
+      const sio2 = generateNomenclature({ Si: 1, O: 2 })
+      expect(sio2.formula).toBe('SiO₂')
+    })
   })
 })

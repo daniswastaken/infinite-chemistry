@@ -124,22 +124,26 @@ function toRomanNumeral(n: number): string {
  * Elements not in this list (should not appear, but fallback to Infinity).
  */
 const NOMENCLATURE_PRIORITY: string[] = [
+  'Rn',
   'Xe',
   'Kr',
   'Ar',
   'Ne',
   'He',
-  'Al',
   'B',
   'Si',
+  'Ge',
   'C',
   'Sb',
-  'Te',
   'As',
   'P',
   'N',
   'H',
+  'Po',
+  'Te',
+  'Se',
   'S',
+  'At',
   'I',
   'Br',
   'Cl',
@@ -590,8 +594,18 @@ export function attemptBond(
     const targetSaturated = !isTargetSingleAtom && targetComps[centralSym] && isStable(targetComps)
     const attachSaturated =
       !isAttachmentSingleAtom && attachmentComps[centralSym] && isStable(attachmentComps)
+
     if (targetSaturated || attachSaturated) {
-      return { success: false, reason: 'capacity_reached' }
+      // Expanded Octet Exception:
+      // Allow adding highly electronegative atoms (F, Cl, Br, O, I) to Period 3+ central atoms.
+      const attachingSym = isTargetSingleAtom ? targetKeys[0] : attachmentKeys[0]
+      const allowedLigands = ['F', 'Cl', 'Br', 'O', 'I']
+
+      const canExpand = centralEl.atomicNumber >= 14 && allowedLigands.includes(attachingSym)
+
+      if (!canExpand) {
+        return { success: false, reason: 'capacity_reached' }
+      }
     }
   }
 
