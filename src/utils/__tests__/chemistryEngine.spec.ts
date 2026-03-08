@@ -175,4 +175,49 @@ describe('chemistryEngine', () => {
       expect(sio2.formula).toBe('SiO₂')
     })
   })
+
+  describe('Chemistry Polish (Final QA)', () => {
+    it('formula never contains a raw digit "1"', () => {
+      // CO should not render as C1O
+      const co = generateNomenclature({ C: 1, O: 1 })
+      expect(co.formula).not.toMatch(/\d/)
+
+      // H2O should not render with any raw digits
+      const water = attemptBond({ H: 2 }, { O: 1 })
+      expect(water.newCompound?.formula).not.toMatch(/[0-9]/)
+    })
+
+    it('component keys are sorted deterministically (A onto B == B onto A)', () => {
+      // H dragged onto O
+      const res1 = attemptBond({ H: 1 }, { O: 1 })
+      // O dragged onto H
+      const res2 = attemptBond({ O: 1 }, { H: 1 })
+      expect(res1.newCompound?.formula).toBe(res2.newCompound?.formula)
+      expect(res1.newCompound?.name).toBe(res2.newCompound?.name)
+      // Ensure the components keys are in the same order
+      const keys1 = Object.keys(res1.newCompound?.components ?? {})
+      const keys2 = Object.keys(res2.newCompound?.components ?? {})
+      expect(keys1).toEqual(keys2)
+    })
+
+    it('Noble Gases (Kr, Xe) bond with Oxygen (strong oxidizer)', () => {
+      // Kr + O should succeed — Oxygen is a strong oxidizer
+      const krO = attemptBond({ Kr: 1 }, { O: 1 })
+      expect(krO.success).toBe(true)
+
+      // Xe + O should succeed
+      const xeO = attemptBond({ Xe: 1 }, { O: 1 })
+      expect(xeO.success).toBe(true)
+    })
+
+    it('Noble Gases (Kr, Xe) reject non-oxidizer partners', () => {
+      // Kr + C — Carbon is not a strong oxidizer, should fail
+      const krC = attemptBond({ Kr: 1 }, { C: 1 })
+      expect(krC.success).toBe(false)
+
+      // Xe + H — Hydrogen is not a strong oxidizer, should fail
+      const xeH = attemptBond({ Xe: 1 }, { H: 1 })
+      expect(xeH.success).toBe(false)
+    })
+  })
 })

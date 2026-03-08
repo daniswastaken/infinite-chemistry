@@ -153,7 +153,12 @@ const NOMENCLATURE_PRIORITY: string[] = [
 
 function getNomenclaturePriority(symbol: string): number {
   const idx = NOMENCLATURE_PRIORITY.indexOf(symbol)
-  return idx === -1 ? Infinity : idx
+  if (idx !== -1) return idx
+
+  // Fallback: sort by electronegativity (lower EN = listed first)
+  const el = elements.find((e) => e.symbol === symbol)
+  const en = el?.electronegativity ?? Infinity
+  return 1000 + en // Push to back of priority array, but sort among themselves
 }
 
 /**
@@ -192,11 +197,10 @@ function isStable(comps: Record<string, number>): boolean {
     if (sym === centralSym) {
       const attCount = count - 1
       if (attCount > 0) {
-        occupied += (centralEl.valence_requirement ?? 0) * attCount
+        occupied += attCount
       }
     } else {
-      const el = elements.find((e) => e.symbol === sym)
-      occupied += (el?.valence_requirement ?? 0) * count
+      occupied += count
     }
   }
 
@@ -409,6 +413,22 @@ export function attemptBond(
 
   const elA = elements.find((e) => e.symbol === targetKeys[0])
   const elB = elements.find((e) => e.symbol === attachmentKeys[0])
+
+  // ─── [NEW] Strong Oxidizer Helper ─────────────
+  const isStrongOxidizer = (sym: string) => ['O', 'F', 'Cl', 'Br', 'I'].includes(sym)
+
+  // ─── [NEW] Noble Gas Restriction ─────────────
+  // If either element is a noble gas, reject the bond entirely UNLESS the partner is a strong oxidizer.
+  if (elA && elA.group_number === 18) {
+    // Only bonded to strong oxidizers?
+    const allPartnersOxidizers = attachmentKeys.every(isStrongOxidizer)
+    if (!allPartnersOxidizers) return { success: false, reason: 'incompatible' }
+  }
+  if (elB && elB.group_number === 18) {
+    const allPartnersOxidizers = targetKeys.every(isStrongOxidizer)
+    if (!allPartnersOxidizers) return { success: false, reason: 'incompatible' }
+  }
+
   const isNobleA =
     elA?.group_number === 18 && targetKeys.length === 1 && targetComps[targetKeys[0]] === 1
   const isNobleB =
@@ -486,14 +506,19 @@ export function attemptBond(
               newComps[sym] = (targetComps[sym] || 0) + (attachmentComps[sym] || 0)
             }
 
-            const { name, formula } = generateNomenclature(newComps)
+            // Sort components alphabetically for deterministic IDs
+            const sortedComps = Object.fromEntries(
+              Object.entries(newComps).sort(([a], [b]) => a.localeCompare(b))
+            )
+
+            const { name, formula } = generateNomenclature(sortedComps)
             return {
               success: true,
               newCompound: {
                 name,
                 formula,
                 icon: COVALENT_ICON_URL,
-                components: newComps,
+                components: sortedComps,
                 current_occupied_slots: 999,
                 bondType: 'covalent'
               }
@@ -529,10 +554,46 @@ export function attemptBond(
           const priorityB = getNomenclaturePriority(symB)
 
           const [firstSym, secondSym] = priorityA <= priorityB ? [symA, symB] : [symB, symA]
-          const [valFirst, valSecond] =
-            priorityA <= priorityB
-              ? [elA.primary_covalent_valency, elB.primary_covalent_valency]
-              : [elB.primary_covalent_valency, elA.primary_covalent_valency]
+          const [elFirst, elSecond] = priorityA <= priorityB ? [elA, elB] : [elB, elA]
+
+          // ─── [NEW] Dynamic Oxidation State Resolution ─────────────
+          // If the second element is a strong oxidizer, the first element (central atom)
+          // should try to use its highest possible oxidation state to form the most saturated primary.
+          let valFirst = elFirst.primary_covalent_valency!
+          let valSecond = elSecond.primary_covalent_valency!
+
+          // Only force hyper-oxidation for deep pnictogens, chalcogens, halogens, or noble gases
+          // (Groups 15, 16, 17, 18) when reacting with the MOST aggressive oxidizers (F, O)
+          // AND when their atomic weight is high enough (Period 3+ / atomicNumber >= 14).
+          // We exclude Phosphorus (P) and Sulfur (S) here because their base stable binaries are PCl3 and SO.
+          const isHypervalentTarget = (el: any) =>
+            el.atomicNumber >= 34 && [15, 16, 17, 18].includes(el.group_number)
+
+          if (
+            ['F', 'O'].includes(secondSym) &&
+            elFirst.possible_oxidation_states &&
+            elFirst.possible_oxidation_states.length > 0 &&
+            isHypervalentTarget(elFirst)
+          ) {
+            const maxOxState = Math.max(
+              ...elFirst.possible_oxidation_states.filter((v: number) => v > 0)
+            )
+            if (maxOxState > valFirst) {
+              valFirst = maxOxState
+            }
+          } else if (
+            ['F', 'O'].includes(firstSym) &&
+            elSecond.possible_oxidation_states &&
+            elSecond.possible_oxidation_states.length > 0 &&
+            isHypervalentTarget(elSecond)
+          ) {
+            const maxOxState = Math.max(
+              ...elSecond.possible_oxidation_states.filter((v: number) => v > 0)
+            )
+            if (maxOxState > valSecond) {
+              valSecond = maxOxState
+            }
+          }
 
           const divisor = gcd(valFirst, valSecond)
           const countFirst = valSecond / divisor
@@ -613,15 +674,12 @@ export function attemptBond(
   let occupied = 0
   for (const [sym, count] of Object.entries(newComps)) {
     if (sym === centralSym) {
-      // Central atom takes max_covalent_slots.
-      // Other atoms of the EXACT SAME type count as attachments.
       const attCount = count - 1
       if (attCount > 0) {
-        occupied += (centralEl.valence_requirement ?? 0) * attCount
+        occupied += attCount
       }
     } else {
-      const el = elements.find((e) => e.symbol === sym)
-      occupied += (el?.valence_requirement ?? 0) * count
+      occupied += count
     }
   }
 
@@ -631,7 +689,12 @@ export function attemptBond(
     return { success: false, reason: 'capacity_reached' }
   }
 
-  const { name, formula } = generateNomenclature(newComps)
+  // Sort components alphabetically for deterministic compound IDs
+  const sortedNewComps = Object.fromEntries(
+    Object.entries(newComps).sort(([a], [b]) => a.localeCompare(b))
+  )
+
+  const { name, formula } = generateNomenclature(sortedNewComps)
 
   return {
     success: true,
@@ -639,7 +702,7 @@ export function attemptBond(
       name,
       formula,
       icon: COVALENT_ICON_URL,
-      components: newComps,
+      components: sortedNewComps,
       current_occupied_slots: occupied,
       bondType: 'covalent'
     }
@@ -666,6 +729,17 @@ export function generateNomenclature(comps: Record<string, number>): {
     const count = comps[sym]
     const el = elements.find((e) => e.symbol === sym)!
     if (count === 1) return { name: capitalize(el.name), formula }
+
+    // Homonuclear diatomic naming (e.g. O2 -> Dioksida, N2 -> Dinitrogen)
+    if (count === 2 && el.is_diatomic_element) {
+      if (el.ide_name) {
+        // e.g. Fluor -> fluorida -> Difluorida
+        return { name: applyPrefix(getGreekPrefix(count), el.ide_name), formula }
+      } else {
+        return { name: applyPrefix(getGreekPrefix(count), el.name), formula }
+      }
+    }
+
     return { name: applyPrefix(getGreekPrefix(count), el.name), formula }
   }
 
@@ -757,11 +831,10 @@ function isMoleculeSaturated(comps: Record<string, number>): boolean {
     if (sym === centralSym) {
       const attCount = count - 1
       if (attCount > 0) {
-        occupied += (centralEl.valence_requirement ?? 0) * attCount
+        occupied += attCount
       }
     } else {
-      const el = elements.find((e) => e.symbol === sym)
-      occupied += (el?.valence_requirement ?? 0) * count
+      occupied += count
     }
   }
 
