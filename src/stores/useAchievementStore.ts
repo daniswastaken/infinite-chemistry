@@ -251,7 +251,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   },
   {
     id: 'playtime_60m',
-    title: 'Spesialis Elemen',
+    title: 'Aliran Elemental',
     description: 'Mencapai total waktu bermain 60 menit.'
   },
   {
@@ -278,7 +278,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'hesitant_scientist',
     title: 'Ilmuwan yang Ragu',
-    description: 'Ganti target RRE sebanyak 20 kali tanpa menyelesaikan tantangan.'
+    description: 'Ganti target Mode Tantangan sebanyak 20 kali tanpa menyelesaikan tantangan.'
   },
   {
     id: 'credits_seen',
@@ -293,7 +293,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'mysterious_compound',
     title: 'Senyawa Misterius',
-    description: 'Reaksi elemen yang tidak kompatibel (bonk) 20 kali berturut-turut.'
+    description: 'Reaksikan elemen yang tidak kompatibel 20 kali berturut-turut.'
   },
   {
     id: 'cracked_beaker',
@@ -304,12 +304,12 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
     id: 'dynamic_equilibrium',
     title: 'Terang dan Gelap, Senja dan Subuh',
     description:
-      'Miliki jumlah senyawa Ionik dan Kovalen yang sama di kanvas (min. 5 masing-masing).'
+      'Miliki jumlah senyawa Ionik dan Kovalen yang sama di kanvas.'
   },
   {
     id: 'warm_hearth',
     title: 'Perapian yang Hangat',
-    description: 'Biarkan layar Credits terbuka selama lebih dari 30 detik.'
+    description: 'Biarkan layar kredit terbuka selama lebih dari 30 detik.'
   },
   {
     id: 'organized_alchemist',
@@ -319,7 +319,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'sweet_dreams',
     title: 'Mimpi Indah, Alkemis',
-    description: 'Lakukan reaksi setelah tab didiamkan (idle) selama lebih dari 10 menit.'
+    description: 'Lakukan reaksi setelah idle selama lebih dari 10 menit.'
   },
   {
     id: 'academic_block',
@@ -339,7 +339,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'catalyst',
     title: 'Katalisator',
-    description: 'Lakukan 5 reaksi sukses beruntun dengan jeda < 2 detik antar reaksi.'
+    description: 'Lakukan 5 reaksi sukses beruntun dengan cepat.'
   },
   {
     id: 'chain_reaction',
@@ -359,7 +359,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'conventional_alchemist',
     title: 'Alkemis Konvensional',
-    description: 'Selesaikan 10 reaksi berturut-turut tanpa mengganti mode (tombol Nama/Simbol).'
+    description: 'Selesaikan 10 reaksi berturut-turut tanpa mengganti mode.'
   },
   {
     id: 'forgetful',
@@ -369,7 +369,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'panic_mode',
     title: 'Panik!',
-    description: 'Di sisa waktu RRE kurang dari 5 detik, lakukan minimal 10 kali drag & drop.'
+    description: 'Di sisa waktu Mode Tantangan kurang dari 5 detik, lakukan minimal 10 kali drag & drop.'
   },
   {
     id: 'precision_scientist',
@@ -379,7 +379,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'anti_establishment',
     title: 'Kemurnian Elemen yang Hakiki',
-    description: "Menangkan mode 'Alkemis' 5x hanya menggunakan elemen Golongan Utama."
+    description: "Menangkan Mode Tantangan tingkat 'Alkemis' 5x hanya menggunakan elemen Golongan Utama."
   },
   {
     id: 'abstract_artist',
@@ -389,18 +389,18 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'hydrophile',
     title: 'Seribu Mata Air Mengalir',
-    description: 'Ada 10 elemen box H2O di atas kanvas secara bersamaan.'
+    description: 'Ada 10 elemen box H₂O di atas kanvas secara bersamaan.'
   },
   {
     id: 'fortune_teller',
     title: 'Bintang Berpihak',
     description:
-      'Selesaikan target elemen maksimal 1 detik setelah tantangan RRE berakhir (Terlambat).'
+      'Terlambat 1 detik dalam menyelesaikan Mode Tantangan.'
   },
   {
     id: 'symphony_of_destruction',
     title: 'Simfoni Kehancuran',
-    description: "Gunakan tombol 'Hapus Semua' 3 kali dalam waktu < 10 detik."
+    description: "Gunakan tombol 'Hapus Semua' 3 kali dalam waktu 10 detik."
   },
   {
     id: 'marathon_runner',
@@ -415,12 +415,12 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'ice_age',
     title: 'Zaman Es',
-    description: 'Jangan lakukan apapun ketika di dalam mode RRE selama sisa waktu 30 detik.'
+    description: 'Tidak melakukan apapun ketika di dalam Mode Tantangan selama 30 detik.'
   },
   {
     id: 'off_beat',
     title: 'Ketukan Tak Seirama',
-    description: 'Klik kanvas kosong sebanyak 50 kali dalam satu sesi.'
+    description: 'Klik kanvas kosong sebanyak 50 kali.'
   },
   {
     id: 'lab_assistant',
@@ -430,38 +430,38 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'lead_researcher',
     title: 'Peneliti Utama',
-    description: "Menang RRE dalam mode 'Sepuh' 5x beruntun menggunakan waktu <50% per ronde."
+    description: "Menang Mode Tantangan tingkat 'Sepuh' 5x beruntun menggunakan setengah waktu per ronde."
   },
   {
     id: 'viscosity',
     title: 'Viskositas',
     description:
-      'Gerakkan sebuah elemen sangat lambat (< 30px/detik) selama 5 detik tanpa melepaskannya dari kursor.'
+      'Gerakkan sebuah elemen dengan sangat lambat selama 5 detik.'
   },
   {
     id: 'pollution',
     title: 'Bencana di Gelas Kimia',
-    description: 'Akumulasi total 50 kali kegagalan reaksi di kanvas.'
+    description: 'Gagal mereaksikan elemen sebanyak 50 kali.'
   },
   {
     id: 'alchemists_laugh',
     title: 'Tawa Alkemis',
-    description: 'Menang di sisa waktu tepat 0.01 detik.'
+    description: 'Menang Mode Tantangan di sisa waktu tepat 0.01 detik.'
   },
   {
     id: 'gravity_anomaly',
     title: 'Anomali Gravitasi',
-    description: 'Tumpuk 5 elemen di satu titik koordinat yang persis sama (toleransi 5px).'
+    description: 'Tumpuk 5 elemen di satu titik koordinat yang persis sama.'
   },
   {
     id: 'perfect_analysis',
     title: 'Analisis yang Sempurna',
-    description: 'Menangkan 5 RRE beruntun dengan efisiensi gerakan 100% (tanpa gagal reaksi).'
+    description: 'Menangkan 5 Mode Tantangan beruntun dengan efisiensi 100%.'
   },
   {
     id: 'scroll_lover',
     title: 'Suka Scroll',
-    description: 'Scroll sidebar dari ujung ke ujung sebanyak 5 kali dalam 8 detik.'
+    description: 'Scroll sidebar dari ujung ke ujung sebanyak 5 kali dalam waktu singkat.'
   },
   {
     id: 'one_final_experiment',
@@ -477,27 +477,94 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
     id: 'the_pianist',
     title: 'Pianis',
     description:
-      'Tekan 4 tombol kontrol (RRE, Flask, Formula, Hapus Semua) berurutan dalam < 0.5 detik.'
+      'Tekan 4 tombol kontrol secara berurutan dalam waktu singkat.'
   },
   {
     id: 'settings_lover',
     title: 'Peneliti yang Sangat Teliti',
-    description: 'Buka modal Pengaturan sebanyak 50 kali.'
+    description: 'Buka menu Pengaturan sebanyak 50 kali.'
   },
   {
     id: 'tri_element',
     title: 'Simfoni Tiga Elemen',
-    description: 'Bentuk senyawa yang terdiri dari 3 unsur berbeda.'
+    description: 'Bentuk sebuah senyawa yang terdiri dari 3 unsur berbeda.'
   },
   {
     id: 'broken_cycle',
     title: 'Siklus Terputus',
-    description: 'Muat ulang halaman game di tengah-tengah tantangan RRE.'
+    description: 'Muat ulang halaman game di tengah-tengah Mode Tantangan.'
   },
   {
     id: 'particle_rain',
     title: 'Hujan Partikel',
     description: 'Miliki tepat 20 elemen (10 di mobile) di kanvas, lalu gunakan tombol Hapus Semua.'
+  },
+  {
+    id: 'lonely_particle',
+    title: 'Reuni yang Panjang',
+    description: 'Biarkan satu elemen berada di kanvas tanpa direaksikan.'
+  },
+  {
+    id: 'uncertainty_principle',
+    title: 'Prinsip Ketidakpastian',
+    description: 'Hover kursor di atas boks elemen selama 1 menit.'
+  },
+  {
+    id: 'activation_energy',
+    title: '"Tok, Tok, Tok"',
+    description: 'Klik sebuah elemen 10 kali berturut-turut.'
+  },
+  {
+    id: 'orbital',
+    title: 'Orbital',
+    description: 'Orbit satu elemen mengelilingi elemen lain.'
+  },
+  {
+    id: 'thermal_isolation',
+    title: 'Isolasi Termal',
+    description:
+      "Gunakan tombol 'Hapus Semua' saat hanya ada 1 elemen tersisa di kanvas."
+  },
+  {
+    id: 'entropy',
+    title: 'Entropi',
+    description:
+      'Miliki 20 elemen di kanvas yang sepenuhnya tersebar di 4 kuadran berbeda secara merata.'
+  },
+  {
+    id: 'element_destroyer',
+    title: 'Penghancur Elemen',
+    description: 'Hapus total 1000 elemen dari kanvas secara akumulatif.'
+  },
+  {
+    id: 'atomic_dance',
+    title: 'Tarian Atom',
+    description: 'Geser sebuah elemen sejauh total 10.000 pixel tanpa melepaskannya.'
+  },
+  {
+    id: 'quantum_physics',
+    title: 'Kilatan Cahaya yang Melintas',
+    description: 'Lakukan drag & drop elemen sebanyak 30 kali dalam 10 detik.'
+  },
+  {
+    id: 'forbidden_magnetism',
+    title: 'Magnetisme Terlarang',
+    description: 'Tahan sebuah elemen di atas elemen lain yang sejenis selama 10 detik.'
+  },
+  {
+    id: 'perfect_void',
+    title: 'Kekosongan Sempurna',
+    description: "Klik tombol 'Hapus Semua' saat kanvas sudah benar-benar kosong."
+  },
+  {
+    id: 'cold_reaction',
+    title: 'Reaksi Dingin',
+    description: 'Segera hapus sebuah senyawa setelah ia terbentuk.'
+  },
+  {
+    id: 'stuck_calculator',
+    title: 'Formula yang Tak Berakhir',
+    description: 'Bentuk senyawa dengan formula kimia lebih dari 15 karakter.'
   }
 ]
 
@@ -573,7 +640,9 @@ export const useAchievementStore = defineStore('achievements', () => {
       failedBondsInCurrentRre: 0,
       settingsOpenedCount: 0,
       sessionTimeNoShortcuts: 0,
-      scrollLoverTimestamps: [] as number[]
+      scrollLoverTimestamps: [] as number[],
+      totalDeletedElements: 0,
+      quantumDropTimestamps: [] as number[]
     }
     try {
       const raw = localStorage.getItem(STATS_KEY)
@@ -822,6 +891,10 @@ export const useAchievementStore = defineStore('achievements', () => {
     if (stats.value.sidebarDeletes >= 15) unlock('sidebar_delete_15')
     if (stats.value.sidebarDeletes >= 30) unlock('sidebar_delete_30')
 
+    if (box?.createdAt && Object.keys(box.components || {}).length > 1) {
+      recordColdReaction(box.createdAt)
+    }
+
     // one_final_experiment: deleting a compound with > 10 total atoms
     if (box?.components) {
       const totalAtoms = Object.values(box.components as Record<string, number>).reduce(
@@ -829,6 +902,11 @@ export const useAchievementStore = defineStore('achievements', () => {
         0
       )
       if (totalAtoms > 10) unlock('one_final_experiment')
+    }
+
+    stats.value.totalDeletedElements++
+    if (stats.value.totalDeletedElements >= 1000) {
+      unlock('element_destroyer')
     }
   }
 
@@ -847,6 +925,11 @@ export const useAchievementStore = defineStore('achievements', () => {
     const requiredCount = isMobile ? 10 : 20
     if (boxCount === requiredCount) {
       unlock('particle_rain')
+    }
+
+    stats.value.totalDeletedElements += boxCount
+    if (stats.value.totalDeletedElements >= 1000) {
+      unlock('element_destroyer')
     }
 
     saveStats()
@@ -913,6 +996,8 @@ export const useAchievementStore = defineStore('achievements', () => {
     }
 
     const formula = compound.formula
+    recordStuckCalculator(compound)
+
     if (formula === 'H₂O' || formula === 'H2O') {
       recordH2oBond()
     }
@@ -1316,6 +1401,93 @@ export const useAchievementStore = defineStore('achievements', () => {
     }
   }
 
+  // new batch 3 methods
+  function recordBoxHover(durationMs: number) {
+    if (durationMs >= 60000) {
+      unlock('uncertainty_principle')
+    }
+  }
+
+  function recordBoxActivateClick(clickCount: number) {
+    // the click count is managed on the box itself, if it reaches 10 and is involved in a reaction, it triggers the achievement.
+    // This is just a hook if we need it here, but typically we trigger unlock('activation_energy') from Container.vue.
+  }
+
+  // entropy: 20 boxes evenly distributed in 4 quadrants (5 each)
+  function checkEntropy(boxes: any[], viewportWidth: number, viewportHeight: number) {
+    if (boxes.length !== 20) return
+
+    const midX = viewportWidth / 2
+    const midY = viewportHeight / 2
+    const quadrants = [0, 0, 0, 0]
+
+    for (const box of boxes) {
+      const cx = box.left + 60 // approx center
+      const cy = box.top + 22
+      if (cx < midX && cy < midY) quadrants[0]++
+      else if (cx >= midX && cy < midY) quadrants[1]++
+      else if (cx < midX && cy >= midY) quadrants[2]++
+      else quadrants[3]++
+    }
+
+    if (quadrants.every((q) => q === 5)) {
+      unlock('entropy')
+    }
+  }
+
+  // orbital: track cumulative angle of element A around element B
+  function recordOrbital(cumulativeAngle: number) {
+    // 3 full rotations = 3 * 2 * PI = 6 * PI radians (~18.84)
+    if (Math.abs(cumulativeAngle) >= 6 * Math.PI) {
+      unlock('orbital')
+    }
+  }
+
+  // Batch 5 Tracking Functions
+  function recordStuckCalculator(compound: any) {
+    const nameLen = compound?.name?.length || 0
+    const formulaLen = compound?.formula?.length || 0
+    if (nameLen > 15 || formulaLen > 15) {
+      unlock('stuck_calculator')
+    }
+  }
+
+  function recordQuantumDrop() {
+    const now = Date.now()
+    stats.value.quantumDropTimestamps.push(now)
+    stats.value.quantumDropTimestamps = stats.value.quantumDropTimestamps.filter(
+      (ts: number) => now - ts <= 10000
+    )
+    if (stats.value.quantumDropTimestamps.length >= 30) {
+      unlock('quantum_physics')
+    }
+    saveStats()
+  }
+
+  function recordColdReaction(createdAt: number) {
+    if (Date.now() - createdAt < 500) {
+      unlock('cold_reaction')
+    }
+  }
+
+  function recordPerfectVoid(isCanvasEmpty: boolean) {
+    if (isCanvasEmpty) {
+      unlock('perfect_void')
+    }
+  }
+
+  function recordAtomicDance(dragDistance: number) {
+    if (dragDistance >= 10000) {
+      unlock('atomic_dance')
+    }
+  }
+
+  function recordForbiddenMagnetism(overlapDuration: number) {
+    if (overlapDuration >= 10000) {
+      unlock('forbidden_magnetism')
+    }
+  }
+
   return {
     achievements,
     pendingToast,
@@ -1365,6 +1537,16 @@ export const useAchievementStore = defineStore('achievements', () => {
     checkGravityAnomaly,
     recordScrollerPass,
     recordPianistPress,
-    recordRreSideEffect
+    recordRreSideEffect,
+    recordBoxHover,
+    recordBoxActivateClick,
+    checkEntropy,
+    recordOrbital,
+    recordStuckCalculator,
+    recordQuantumDrop,
+    recordColdReaction,
+    recordPerfectVoid,
+    recordAtomicDance,
+    recordForbiddenMagnetism
   }
 })

@@ -48,12 +48,28 @@ let lastPosX = 0
 let lastPosY = 0
 let slowDurationMs = 0
 
+// Orbital tracking
+let cumulativeAngle = 0
+let lastReferenceAngle = 0
+let activeOrbitBoxId: string | null = null
+
+// Atomic Dance tracking
+let dragDistance = 0
+
+// Forbidden Magnetism tracking
+let magnetismDurationMs = 0
+
 watch(isDragging, (dragging) => {
   if (dragging) {
-    lastTimeMs = 0 // Will be initialized on first valid frame
+    lastTimeMs = 0
     lastPosX = 0
     lastPosY = 0
     slowDurationMs = 0
+    cumulativeAngle = 0
+    lastReferenceAngle = 0
+    activeOrbitBoxId = null
+    dragDistance = 0
+    magnetismDurationMs = 0
 
     const loop = (time: number) => {
       if (!isDragging.value) return
@@ -61,15 +77,22 @@ watch(isDragging, (dragging) => {
       const offset = currentOffset.value
       if (offset) {
         if (lastTimeMs === 0) {
-          // First valid frame: initialize without accumulating time
           lastTimeMs = time
           lastPosX = offset.x
           lastPosY = offset.y
         } else {
           const dtMs = time - lastTimeMs
-          // Only evaluate speed every ~200ms to avoid 1-frame micro-jitters (1px / 16ms = 62.5px/s)
-          if (dtMs >= 200) {
+
+          if (dtMs >= 16) {
+            // run ~60fps
+            // Viscosity and Atomic Dance logic
             const dist = Math.hypot(offset.x - lastPosX, offset.y - lastPosY)
+
+            dragDistance += dist
+            if (dragDistance >= 10000) {
+              achievementStore.recordAtomicDance(dragDistance)
+            }
+
             const speed = (dist / dtMs) * 1000
 
             if (speed < 30) {
@@ -82,22 +105,97 @@ watch(isDragging, (dragging) => {
               slowDurationMs = 0
             }
 
+            // Orbital logic
+            // Find the closest box on the canvas (generous radius so spinning works naturally)
+            let closestBoxId = null
+            let minDistance = 500 // large enough to allow realistic orbiting
+
+            const boxesVal = store.boxes
+            for (const boxId in boxesVal) {
+              if (boxId === item.value?.id) continue
+              const b = (boxesVal as any)[boxId]
+
+              // approx center of target box
+              const targetX = b.left + 60
+              const targetY = b.top + 22
+              // approx center of dragging box
+              const dragPointX = offset.x + 60
+              const dragPointY = offset.y + 22
+
+              const d = Math.hypot(dragPointX - targetX, dragPointY - targetY)
+              if (d < minDistance) {
+                minDistance = d
+                closestBoxId = boxId
+              }
+            }
+
+            if (closestBoxId) {
+              const b = (boxesVal as any)[closestBoxId]
+
+              // Forbidden Magnetism logic
+              const itemBox = (store.boxes as any)[item.value?.id || ''] || item.value
+              const isIdentical =
+                itemBox &&
+                b &&
+                ((itemBox.atomicId && b.atomicId && itemBox.atomicId === b.atomicId) ||
+                  (itemBox.symbol && b.symbol && itemBox.symbol === b.symbol) ||
+                  (itemBox.formula && b.formula && itemBox.formula === b.formula) ||
+                  (itemBox.title && b.title && itemBox.title === b.title))
+
+              if (minDistance < 80 && isIdentical) {
+                magnetismDurationMs += dtMs
+                if (magnetismDurationMs >= 10000) {
+                  achievementStore.recordForbiddenMagnetism(magnetismDurationMs)
+                }
+              } else {
+                magnetismDurationMs = 0
+              }
+
+              const targetX = b.left + 60
+              const targetY = b.top + 22
+              const currentAngle = Math.atan2(offset.y + 22 - targetY, offset.x + 60 - targetX)
+
+              if (activeOrbitBoxId === closestBoxId) {
+                // Determine shortest angular distance and accumulate
+                let angleDiff = currentAngle - lastReferenceAngle
+                // Normalize to [-PI, PI]
+                if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI
+                else if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI
+
+                cumulativeAngle += angleDiff
+              } else {
+                // Switch tracked box — carry over angle, just reset reference
+                activeOrbitBoxId = closestBoxId
+                cumulativeAngle = 0
+              }
+
+              lastReferenceAngle = currentAngle
+              achievementStore.recordOrbital(cumulativeAngle)
+            } else {
+              activeOrbitBoxId = null
+              cumulativeAngle = 0
+            }
+
             lastPosX = offset.x
             lastPosY = offset.y
             lastTimeMs = time
           }
         }
       }
-      // If offset null, skip accumulating but keep rAF running
 
       animationFrameId = requestAnimationFrame(loop)
     }
 
     animationFrameId = requestAnimationFrame(loop)
   } else {
+    // End of drag
     if (animationFrameId) cancelAnimationFrame(animationFrameId)
     animationFrameId = null
     slowDurationMs = 0
+    cumulativeAngle = 0
+    activeOrbitBoxId = null
+    dragDistance = 0
+    magnetismDurationMs = 0
   }
 })
 </script>

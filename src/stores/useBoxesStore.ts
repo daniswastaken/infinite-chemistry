@@ -18,6 +18,7 @@ export interface BoxStoreEntry {
   components?: Record<string, number>
   zIndex?: number
   atomicId?: string
+  createdAt?: number
 }
 
 export const useBoxesStore = defineStore('counter', () => {
@@ -98,6 +99,7 @@ export const useBoxesStore = defineStore('counter', () => {
     if (shouldSaveHistory) saveHistory()
     highestZIndex.value++
     box.zIndex = highestZIndex.value
+    box.createdAt = Date.now()
     const randomId = Math.random().toString(36).substr(2, 5)
     boxes[randomId] = box
     return randomId

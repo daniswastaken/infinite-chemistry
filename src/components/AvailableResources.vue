@@ -76,8 +76,9 @@ const filteredResources = computed(() => {
   })
 })
 
-watch(searchTerm, (newVal) => {
-  if (newVal.trim()) {
+watch(searchTerm, (newVal, oldVal) => {
+  // Only record a search when a term is cleared (meaning a search was "completed")
+  if (!newVal.trim() && oldVal.trim()) {
     achievementStore.recordSearch()
   }
 })

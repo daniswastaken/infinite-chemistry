@@ -223,12 +223,20 @@ const finishSelection = () => {
 const handleClearClick = () => {
   if (Object.keys(boxes.value).length > 0) {
     isConfirming.value = true
+  } else {
+    achievementStore.recordPerfectVoid(true)
   }
 }
 
 const confirmClear = () => {
   achievementStore.recordShortcutUse('clear')
-  achievementStore.recordClearCanvas(Object.keys(boxes.value).length, isMobile.value)
+
+  const count = Object.keys(boxes.value).length
+  if (count === 1) {
+    achievementStore.unlock('thermal_isolation')
+  }
+
+  achievementStore.recordClearCanvas(count, isMobile.value)
   clearBoxes()
   isConfirming.value = false
 }
@@ -265,19 +273,46 @@ onMounted(() => {
 watch(
   boxes,
   (newBoxes) => {
-    achievementStore.checkDynamicEquilibrium(Object.values(newBoxes))
-    achievementStore.checkCanvasCounts(Object.values(newBoxes))
-    achievementStore.checkGravityAnomaly(Object.values(newBoxes))
+    const boxArr = Object.values(newBoxes)
+    achievementStore.checkDynamicEquilibrium(boxArr)
+    achievementStore.checkCanvasCounts(boxArr)
+    achievementStore.checkGravityAnomaly(boxArr)
     achievementStore.checkIsolasiMandiri(
-      Object.values(newBoxes),
+      boxArr,
       window.innerWidth,
       window.innerHeight,
       sidebarWidth.value,
       isMobile.value
     )
+    achievementStore.checkEntropy(
+      boxArr,
+      isMobile.value ? window.innerWidth : window.innerWidth - sidebarWidth.value,
+      isMobile.value ? window.innerHeight * 0.65 : window.innerHeight
+    )
+
+    // lonely_particle: if exactly 1 box remains, start its timer
+    if (boxArr.length === 1) {
+      if (!lastSingleBoxTime) lastSingleBoxTime = Date.now()
+      else if (Date.now() - lastSingleBoxTime >= 10 * 60 * 1000) {
+        achievementStore.unlock('lonely_particle')
+      }
+    } else {
+      lastSingleBoxTime = 0
+    }
   },
   { deep: true }
 )
+
+let lastSingleBoxTime = 0
+// Also check lonely_particle periodically in case they just leave the tab open
+setInterval(() => {
+  if (lastSingleBoxTime > 0 && Date.now() - lastSingleBoxTime >= 10 * 60 * 1000) {
+    const boxArr = Object.values(boxes.value)
+    if (boxArr.length === 1) {
+      achievementStore.unlock('lonely_particle')
+    }
+  }
+}, 30000)
 
 const sidebarWidth = ref(350)
 const isResizing = ref(false)
@@ -418,6 +453,7 @@ const [collect, drop] = useDrop(() => ({
   },
   drop(item: DragItem, monitor) {
     achievementStore.recordDrag(rreStore.isActive, rreStore.timeLeft)
+    achievementStore.recordQuantumDrop()
     overlappingId.value = null
     const offset = monitor.getSourceClientOffset() as XYCoord
     if (offset && containerElement.value) {
