@@ -86,6 +86,11 @@ const onMouseLeave = () => {
 }
 
 const onClick = () => {
+  // shimmering_mirage check
+  if (store.successBoxId === props.id) {
+    achievementStore.recordShimmeringMirage()
+  }
+
   clickCount++
   if (clickTimer) clearTimeout(clickTimer)
 

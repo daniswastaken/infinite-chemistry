@@ -119,6 +119,10 @@ export const useRreStore = defineStore('rre', () => {
     const durationSec = gameStartTime.value ? (Date.now() - gameStartTime.value) / 1000 : 999
     achievementStore.recordRreWin(settingsStore.difficulty, durationSec, settingsStore.timeLimit)
 
+    if (durationSec < 1.0) {
+      achievementStore.unlock('flash_point')
+    }
+
     showSuccessPopup.value = true
     if (!achievementStore.pendingToast) {
       playSound('success', 0.8)

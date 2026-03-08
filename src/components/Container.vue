@@ -293,7 +293,7 @@ watch(
     // lonely_particle: if exactly 1 box remains, start its timer
     if (boxArr.length === 1) {
       if (!lastSingleBoxTime) lastSingleBoxTime = Date.now()
-      else if (Date.now() - lastSingleBoxTime >= 10 * 60 * 1000) {
+      else if (Date.now() - lastSingleBoxTime >= 8 * 60 * 1000) {
         achievementStore.unlock('lonely_particle')
       }
     } else {
@@ -306,7 +306,7 @@ watch(
 let lastSingleBoxTime = 0
 // Also check lonely_particle periodically in case they just leave the tab open
 setInterval(() => {
-  if (lastSingleBoxTime > 0 && Date.now() - lastSingleBoxTime >= 10 * 60 * 1000) {
+  if (lastSingleBoxTime > 0 && Date.now() - lastSingleBoxTime >= 8 * 60 * 1000) {
     const boxArr = Object.values(boxes.value)
     if (boxArr.length === 1) {
       achievementStore.unlock('lonely_particle')
@@ -520,7 +520,11 @@ const [collect, drop] = useDrop(() => ({
               })
               store.triggerSuccessAnimation(newId)
             }
-            achievementStore.recordBond(result.newCompound!)
+            const sourceCreatedAt = Math.min(
+              itemBox?.createdAt ?? Date.now(),
+              overlapping.createdAt ?? Date.now()
+            )
+            achievementStore.recordBond(result.newCompound!, sourceCreatedAt)
             achievementStore.checkComponentAchievements(result.newCompound!.components)
 
             // Anti-Establishment Check
@@ -575,7 +579,11 @@ const [collect, drop] = useDrop(() => ({
                 })
                 store.triggerSuccessAnimation(newId)
               }
-              achievementStore.recordBond(fallbackResult.newCompound!)
+              const fallbackSourceCreatedAt = Math.min(
+                itemBox?.createdAt ?? Date.now(),
+                overlapping.createdAt ?? Date.now()
+              )
+              achievementStore.recordBond(fallbackResult.newCompound!, fallbackSourceCreatedAt)
               achievementStore.checkComponentAchievements(fallbackResult.newCompound!.components)
 
               // Anti-Establishment Check
@@ -663,7 +671,11 @@ const [collect, drop] = useDrop(() => ({
               })
               store.triggerSuccessAnimation(newId)
             }
-            achievementStore.recordBond(result.newCompound!)
+            const stdSourceCreatedAt = Math.min(
+              itemBox?.createdAt ?? Date.now(),
+              overlapping.createdAt ?? Date.now()
+            )
+            achievementStore.recordBond(result.newCompound!, stdSourceCreatedAt)
             achievementStore.checkComponentAchievements(result.newCompound!.components)
 
             // Anti-Establishment Check

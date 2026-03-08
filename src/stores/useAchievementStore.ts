@@ -303,8 +303,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'dynamic_equilibrium',
     title: 'Terang dan Gelap, Senja dan Subuh',
-    description:
-      'Miliki jumlah senyawa Ionik dan Kovalen yang sama di kanvas.'
+    description: 'Miliki jumlah senyawa Ionik dan Kovalen yang sama di kanvas.'
   },
   {
     id: 'warm_hearth',
@@ -369,7 +368,8 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'panic_mode',
     title: 'Panik!',
-    description: 'Di sisa waktu Mode Tantangan kurang dari 5 detik, lakukan minimal 10 kali drag & drop.'
+    description:
+      'Di sisa waktu Mode Tantangan kurang dari 5 detik, lakukan minimal 10 kali drag & drop.'
   },
   {
     id: 'precision_scientist',
@@ -379,7 +379,8 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'anti_establishment',
     title: 'Kemurnian Elemen yang Hakiki',
-    description: "Menangkan Mode Tantangan tingkat 'Alkemis' 5x hanya menggunakan elemen Golongan Utama."
+    description:
+      "Menangkan Mode Tantangan tingkat 'Alkemis' 5x hanya menggunakan elemen Golongan Utama."
   },
   {
     id: 'abstract_artist',
@@ -394,8 +395,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'fortune_teller',
     title: 'Bintang Berpihak',
-    description:
-      'Terlambat 1 detik dalam menyelesaikan Mode Tantangan.'
+    description: 'Terlambat 1 detik dalam menyelesaikan Mode Tantangan.'
   },
   {
     id: 'symphony_of_destruction',
@@ -430,13 +430,13 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'lead_researcher',
     title: 'Peneliti Utama',
-    description: "Menang Mode Tantangan tingkat 'Sepuh' 5x beruntun menggunakan setengah waktu per ronde."
+    description:
+      "Menang Mode Tantangan tingkat 'Sepuh' 5x beruntun menggunakan setengah waktu per ronde."
   },
   {
     id: 'viscosity',
     title: 'Viskositas',
-    description:
-      'Gerakkan sebuah elemen dengan sangat lambat selama 5 detik.'
+    description: 'Gerakkan sebuah elemen dengan sangat lambat selama 5 detik.'
   },
   {
     id: 'pollution',
@@ -460,7 +460,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   },
   {
     id: 'scroll_lover',
-    title: 'Suka Scroll',
+    title: 'Gulungan Lembaran',
     description: 'Scroll sidebar dari ujung ke ujung sebanyak 5 kali dalam waktu singkat.'
   },
   {
@@ -476,8 +476,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'the_pianist',
     title: 'Pianis',
-    description:
-      'Tekan 4 tombol kontrol secara berurutan dalam waktu singkat.'
+    description: 'Tekan 4 tombol kontrol secara berurutan dalam waktu singkat.'
   },
   {
     id: 'settings_lover',
@@ -502,7 +501,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'lonely_particle',
     title: 'Reuni yang Panjang',
-    description: 'Biarkan satu elemen berada di kanvas tanpa direaksikan.'
+    description: 'Biarkan satu elemen berada di kanvas selama 8 menit tanpa direaksikan.'
   },
   {
     id: 'uncertainty_principle',
@@ -522,8 +521,7 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'thermal_isolation',
     title: 'Isolasi Termal',
-    description:
-      "Gunakan tombol 'Hapus Semua' saat hanya ada 1 elemen tersisa di kanvas."
+    description: "Gunakan tombol 'Hapus Semua' saat hanya ada 1 elemen tersisa di kanvas."
   },
   {
     id: 'entropy',
@@ -564,7 +562,54 @@ const ACHIEVEMENTS_DEFINITION: { id: string; title: string; description: string 
   {
     id: 'stuck_calculator',
     title: 'Formula yang Tak Berakhir',
-    description: 'Bentuk senyawa dengan formula kimia lebih dari 15 karakter.'
+    description: 'Bentuk senyawa dengan panjang formula kimia lebih dari 25 karakter.'
+  },
+  // --- BATCH 6 ---
+  {
+    id: 'the_wanderer',
+    title: 'Sang Pengembara',
+    description: 'Membawa sebuah elemen mengunjungi keempat sudut kanvas tanpa melepaskannya.'
+  },
+  {
+    id: 'hidden_illusion',
+    title: 'Ilusi yang Tersembunyi',
+    description: 'Menggunakan pencarian di sidebar hingga tidak ada hasil sebanyak 5 kali.'
+  },
+  {
+    id: 'twin_stars_dance',
+    title: 'Tarian Dua Bintang',
+    description: 'Lakukan orbit 25 kali pada sebuah elemen.'
+  },
+  {
+    id: 'fate_turning_point',
+    title: 'Titik Balik Takdir',
+    description: 'Tekan tombol Undo sebanyak 10 kali dalam waktu 10 detik.'
+  },
+  {
+    id: 'flash_point',
+    title: 'Titik Nyala',
+    description: 'Selesaikan Mode Tantangan kurang dari 1 detik sejak ronde dimulai.'
+  },
+  // --- BATCH 7 ---
+  {
+    id: 'elemental_diversity',
+    title: 'Gema Pesona Dunia',
+    description: 'Miliki setidaknya 10 jenis unsur yang berbeda di atas kanvas secara bersamaan.'
+  },
+  {
+    id: 'relic_of_the_past',
+    title: 'Relik Masa Lalu',
+    description: 'Reaksikan elemen yang sudah ada di kanvas selama lebih dari 5 menit.'
+  },
+  {
+    id: 'shimmering_mirage',
+    title: 'Fatamorgana Berkilau',
+    description: 'Klik sebuah senyawa yang sedang bersinar sebelum ia menghilang.'
+  },
+  {
+    id: 'celestial_order',
+    title: 'Tatanan Prinsip Langit',
+    description: 'Susun 5 elemen dalam garis horizontal yang sempurna.'
   }
 ]
 
@@ -642,7 +687,9 @@ export const useAchievementStore = defineStore('achievements', () => {
       sessionTimeNoShortcuts: 0,
       scrollLoverTimestamps: [] as number[],
       totalDeletedElements: 0,
-      quantumDropTimestamps: [] as number[]
+      quantumDropTimestamps: [] as number[],
+      hiddenIllusionCount: 0,
+      undoTimestamps: [] as number[]
     }
     try {
       const raw = localStorage.getItem(STATS_KEY)
@@ -947,6 +994,28 @@ export const useAchievementStore = defineStore('achievements', () => {
 
     const h2oCount = boxes.filter((b) => b.formula === 'H₂O' || b.formula === 'H2O').length
     if (h2oCount >= 10) unlock('hydrophile')
+
+    // celestial_order: 5 boxes with top coordinates within 10px of each other
+    if (boxes.length >= 5) {
+      const sorted = [...boxes].sort((a, b) => a.top - b.top)
+      for (let i = 0; i <= sorted.length - 5; i++) {
+        const w = sorted.slice(i, i + 5)
+        if (Math.max(...w.map((b) => b.top)) - Math.min(...w.map((b) => b.top)) <= 10) {
+          unlock('celestial_order')
+          break
+        }
+      }
+    }
+
+    // elemental_diversity: 10 unique element symbols on canvas right now
+    const uniqueSymbols = new Set<string>()
+    boxes.forEach((box) => {
+      if (box.symbol) uniqueSymbols.add(box.symbol)
+      if (box.components) {
+        Object.keys(box.components).forEach((sym) => uniqueSymbols.add(sym))
+      }
+    })
+    if (uniqueSymbols.size >= 10) unlock('elemental_diversity')
   }
 
   function recordRreElementUse(groupNumber: number | string) {
@@ -988,7 +1057,7 @@ export const useAchievementStore = defineStore('achievements', () => {
     unlock('xe_bond_first')
   }
 
-  function recordBond(compound: any) {
+  function recordBond(compound: any, sourceBoxCreatedAt?: number) {
     if (compound.bondType === 'covalent') {
       recordCovalentBond()
     } else if (compound.bondType === 'ionic' || compound.bondType === 'ionic-atomic') {
@@ -1032,6 +1101,11 @@ export const useAchievementStore = defineStore('achievements', () => {
     // tri_element: compound made from 3 or more distinct elements
     if (compound.components && Object.keys(compound.components).length >= 3) {
       unlock('tri_element')
+    }
+
+    // relic_of_the_past: one of the reacting boxes was on canvas for 5+ minutes
+    if (sourceBoxCreatedAt && now - sourceBoxCreatedAt >= 5 * 60 * 1000) {
+      unlock('relic_of_the_past')
     }
 
     saveStats()
@@ -1136,6 +1210,26 @@ export const useAchievementStore = defineStore('achievements', () => {
     )
     if (stats.value.searchTimestamps.length >= 10) {
       unlock('searching_answers')
+    }
+    saveStats()
+  }
+
+  function recordHiddenIllusion() {
+    stats.value.hiddenIllusionCount++
+    if (stats.value.hiddenIllusionCount >= 5) {
+      unlock('hidden_illusion')
+    }
+    saveStats()
+  }
+
+  function recordUndo() {
+    const now = Date.now()
+    stats.value.undoTimestamps.push(now)
+    stats.value.undoTimestamps = stats.value.undoTimestamps.filter(
+      (ts: number) => now - ts <= 10000
+    )
+    if (stats.value.undoTimestamps.length >= 10) {
+      unlock('fate_turning_point')
     }
     saveStats()
   }
@@ -1441,13 +1535,17 @@ export const useAchievementStore = defineStore('achievements', () => {
     if (Math.abs(cumulativeAngle) >= 6 * Math.PI) {
       unlock('orbital')
     }
+    // 25 full rotations = 50 * PI radians
+    if (Math.abs(cumulativeAngle) >= 50 * Math.PI) {
+      unlock('twin_stars_dance')
+    }
   }
 
   // Batch 5 Tracking Functions
   function recordStuckCalculator(compound: any) {
     const nameLen = compound?.name?.length || 0
     const formulaLen = compound?.formula?.length || 0
-    if (nameLen > 15 || formulaLen > 15) {
+    if (nameLen > 25 || formulaLen > 25) {
       unlock('stuck_calculator')
     }
   }
@@ -1486,6 +1584,10 @@ export const useAchievementStore = defineStore('achievements', () => {
     if (overlapDuration >= 10000) {
       unlock('forbidden_magnetism')
     }
+  }
+
+  function recordShimmeringMirage() {
+    unlock('shimmering_mirage')
   }
 
   return {
@@ -1547,6 +1649,9 @@ export const useAchievementStore = defineStore('achievements', () => {
     recordColdReaction,
     recordPerfectVoid,
     recordAtomicDance,
-    recordForbiddenMagnetism
+    recordForbiddenMagnetism,
+    recordHiddenIllusion,
+    recordUndo,
+    recordShimmeringMirage
   }
 })

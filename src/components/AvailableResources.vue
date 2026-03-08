@@ -76,10 +76,27 @@ const filteredResources = computed(() => {
   })
 })
 
+// Track if the active search had zero results WHILE the user was typing.
+// We cannot check filteredResources at clear-time because by then the query is ''
+// and filteredResources re-evaluates to show everything.
+const hadEmptyResultsDuringSearch = ref(false)
+
+watch(filteredResources, (newVal) => {
+  // Only update the "was empty" flag when a search is actually active
+  if (searchTerm.value.trim()) {
+    hadEmptyResultsDuringSearch.value = newVal.length === 0
+  }
+})
+
 watch(searchTerm, (newVal, oldVal) => {
   // Only record a search when a term is cleared (meaning a search was "completed")
   if (!newVal.trim() && oldVal.trim()) {
     achievementStore.recordSearch()
+    // hidden_illusion: the search that just ended had zero results
+    if (hadEmptyResultsDuringSearch.value) {
+      achievementStore.recordHiddenIllusion()
+    }
+    hadEmptyResultsDuringSearch.value = false
   }
 })
 

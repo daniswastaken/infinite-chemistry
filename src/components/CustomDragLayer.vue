@@ -14,12 +14,14 @@ const collect = useDragLayer((monitor) => ({
   item: monitor.getItem(),
   itemType: monitor.getItemType(),
   currentOffset: monitor.getSourceClientOffset(),
+  clientOffset: monitor.getClientOffset(),
   isDragging: monitor.isDragging()
 }))
 
 const isDragging = computed(() => collect.value.isDragging)
 const item = computed(() => collect.value.item)
 const currentOffset = computed(() => collect.value.currentOffset)
+const clientOffset = computed(() => collect.value.clientOffset)
 const isBox = computed(() => collect.value.itemType === ItemTypes.BOX)
 
 const layerStyle = computed(() => {
@@ -59,6 +61,12 @@ let dragDistance = 0
 // Forbidden Magnetism tracking
 let magnetismDurationMs = 0
 
+// The Wanderer tracking
+let wandererTopLeft = false
+let wandererTopRight = false
+let wandererBottomLeft = false
+let wandererBottomRight = false
+
 watch(isDragging, (dragging) => {
   if (dragging) {
     lastTimeMs = 0
@@ -70,6 +78,12 @@ watch(isDragging, (dragging) => {
     activeOrbitBoxId = null
     dragDistance = 0
     magnetismDurationMs = 0
+
+    // Wanderer resets
+    wandererTopLeft = false
+    wandererTopRight = false
+    wandererBottomLeft = false
+    wandererBottomRight = false
 
     const loop = (time: number) => {
       if (!isDragging.value) return
@@ -174,6 +188,35 @@ watch(isDragging, (dragging) => {
             } else {
               activeOrbitBoxId = null
               cumulativeAngle = 0
+            }
+
+            // --- The Wanderer Logic ---
+            const pointer = clientOffset.value
+            if (pointer) {
+              const px = pointer.x
+              const py = pointer.y
+              // Respect sidebar boundary on desktop (same as self_isolation logic)
+              const isMobile = window.innerWidth <= 768
+              const sidebarEl = document.querySelector('.sidebar-panel') as HTMLElement | null
+              const sidebarW = sidebarEl ? sidebarEl.getBoundingClientRect().width : 350
+              const canvasRight = isMobile ? window.innerWidth : window.innerWidth - sidebarW
+              const canvasBottom = isMobile ? window.innerHeight * 0.65 : window.innerHeight
+              const margin = 150
+
+              if (px < margin && py < margin) wandererTopLeft = true
+              if (px > canvasRight - margin && py < margin) wandererTopRight = true
+              if (px < margin && py > canvasBottom - margin) wandererBottomLeft = true
+              if (px > canvasRight - margin && py > canvasBottom - margin)
+                wandererBottomRight = true
+
+              if (
+                wandererTopLeft &&
+                wandererTopRight &&
+                wandererBottomLeft &&
+                wandererBottomRight
+              ) {
+                achievementStore.unlock('the_wanderer')
+              }
             }
 
             lastPosX = offset.x

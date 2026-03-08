@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { playSound } from '@/utils/audio'
+import { useAchievementStore } from '@/stores/useAchievementStore'
 
 export interface BoxStoreEntry {
   top: number
@@ -93,6 +94,7 @@ export const useBoxesStore = defineStore('counter', () => {
     Object.assign(boxes, lastState)
     selectedIds.value = []
     playSound('put', 0.3)
+    useAchievementStore().recordUndo()
   }
 
   function addBox(box: BoxStoreEntry, shouldSaveHistory = true) {
