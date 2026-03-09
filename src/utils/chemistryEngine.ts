@@ -351,17 +351,18 @@ export function attemptBond(
 
   // ─── [NEW] Experiment Mode: Atomic Resolution Intercept ─────────────
   if (isAtomicModeActive) {
-    // 1. All-Symbol Resolution (e.g. (C+H) + O -> Acetate)
-    const allUniqueSymbols = new Set<string>()
+    // 1. Symbol Resolution (supports same-element pairs like O+O -> Peroxide,
+    //    and multi-element combos like (C+H) + O -> Acetate)
+    const allSymbolsArr: string[] = []
     const combinedKeys = [...targetKeys, ...attachmentKeys]
 
     combinedKeys.forEach((k) => {
       if (elements.some((e) => e.symbol === k)) {
-        allUniqueSymbols.add(k)
+        allSymbolsArr.push(k)
       }
     })
 
-    const sortedSymbols = [...allUniqueSymbols].sort().join(',')
+    const sortedSymbols = allSymbolsArr.sort().join(',')
     const matchedResolutionId = atomicResolutionMap[sortedSymbols]
 
     if (matchedResolutionId) {
