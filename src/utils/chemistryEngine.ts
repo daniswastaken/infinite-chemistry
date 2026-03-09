@@ -153,12 +153,15 @@ const NOMENCLATURE_PRIORITY: string[] = [
 
 function getNomenclaturePriority(symbol: string): number {
   const idx = NOMENCLATURE_PRIORITY.indexOf(symbol)
-  if (idx !== -1) return idx
+  if (idx !== -1) {
+    // Non-metals in the list get high priority (100+)
+    return 100 + idx
+  }
 
-  // Fallback: sort by electronegativity (lower EN = listed first)
+  // Fallback: Metals/unlisted get priority by electronegativity (usually 0.7 - 2.5)
+  // This ensures they appear before the 100+ non-metals.
   const el = elements.find((e) => e.symbol === symbol)
-  const en = el?.electronegativity ?? Infinity
-  return 1000 + en // Push to back of priority array, but sort among themselves
+  return el?.electronegativity ?? 5 // fallback for unknown EN
 }
 
 /**
@@ -298,6 +301,7 @@ const atomicResolutionMap: Record<string, string> = {
   'N,O,S': 'thiocyanate', // Special triple case? Current engine handles duo, adding common duo paths:
   'C,S': 'thiocyanate', // simplified for engine
   'N,S': 'thiocyanate', // simplified for engine
+  'C,H,O': 'acetate',
   'O,O': 'peroxide'
 }
 
@@ -327,6 +331,7 @@ const atomicEvolutionMap: Record<string, string> = {
   'cyanate:S': 'thiocyanate',
   'cyanide:S': 'thiocyanate',
   'carbonate:H': 'bicarbonate',
+  'oxalate:H': 'acetate',
   'sulfate:H': 'bisulfate',
   'phosphate:H': 'hydrogen_phosphate',
   'hydrogen_phosphate:H': 'dihydrogen_phosphate'
@@ -346,33 +351,41 @@ export function attemptBond(
 
   // ─── [NEW] Experiment Mode: Atomic Resolution Intercept ─────────────
   if (isAtomicModeActive) {
-    if (targetKeys.length === 1 && attachmentKeys.length === 1) {
-      const keyA = targetKeys[0]
-      const keyB = attachmentKeys[0]
+    // 1. All-Symbol Resolution (e.g. (C+H) + O -> Acetate)
+    const allUniqueSymbols = new Set<string>()
+    const combinedKeys = [...targetKeys, ...attachmentKeys]
 
-      // 1. Element + Element Resolution (e.g. S + O -> Sulfit)
-      const sortedKey = [keyA, keyB].sort().join(',')
-      const matchedIonId = atomicResolutionMap[sortedKey]
+    combinedKeys.forEach((k) => {
+      if (elements.some((e) => e.symbol === k)) {
+        allUniqueSymbols.add(k)
+      }
+    })
 
-      if (matchedIonId) {
-        const ionData = getAtomicIonById(matchedIonId)
-        if (ionData) {
-          return {
-            success: true,
-            newCompound: {
-              name: ionData.name,
-              formula: formatFormula(ionData.formula) + formatIonCharge(ionData.charge),
-              components: { [ionData.id]: 1 },
-              current_occupied_slots: 0,
-              bondType: 'ionic-atomic',
-              atomicId: ionData.id,
-              icon: FLASK_ICON_URL
-            }
+    const sortedSymbols = [...allUniqueSymbols].sort().join(',')
+    const matchedResolutionId = atomicResolutionMap[sortedSymbols]
+
+    if (matchedResolutionId) {
+      const ionData = getAtomicIonById(matchedResolutionId)
+      if (ionData) {
+        return {
+          success: true,
+          newCompound: {
+            name: ionData.name,
+            formula: formatFormula(ionData.formula) + formatIonCharge(ionData.charge),
+            components: { [ionData.id]: 1 },
+            current_occupied_slots: 0,
+            bondType: 'ionic-atomic',
+            atomicId: ionData.id,
+            icon: FLASK_ICON_URL
           }
         }
       }
+    }
 
-      // 2. Atomic Ion + Element Evolution (e.g. Sulfit + O -> Sulfat)
+    // 2. Atomic Ion + Element Evolution (e.g. Sulfit + O -> Sulfat)
+    if (targetKeys.length === 1 && attachmentKeys.length === 1) {
+      const keyA = targetKeys[0]
+      const keyB = attachmentKeys[0]
       const ionKey = atomicIons.find((p) => p.id === keyA)
         ? keyA
         : atomicIons.find((p) => p.id === keyB)
@@ -445,8 +458,7 @@ export function attemptBond(
     return { success: false, reason: 'incompatible' }
   }
 
-  // ─── Step 0.2: Ionic Bond Detection ──────────────────────────────────────
-  // Route to ionic bonding if BOTH sides are single element boxes and combined set is Metal + Non-metal.
+  // ─── Step 0.2: Ionic Bond Detection (Element + Element) ─────────────────
   if (targetKeys.length === 1 && attachmentKeys.length === 1 && allSyms.size === 2) {
     const symArr = [...allSyms]
     const elA = elements.find((e) => e.symbol === symArr[0])
@@ -460,6 +472,18 @@ export function attemptBond(
         return handleIonicBond(metalEl, nonMetalEl)
       }
     }
+  }
+
+  // ─── [NEW] Polyatomic Ion Routing (Element + Ion or Ion + Ion) ──────────
+  // If either side already represents a specific atomic ion (Experiment Mode),
+  // route to attemptAtomicBond to handle ionic stoichiometry/naming.
+  const targetIon = targetKeys.find((k) => getAtomicIonById(k))
+  const attachIon = attachmentKeys.find((k) => getAtomicIonById(k))
+
+  if (targetIon || attachIon) {
+    const targetSymbol = targetIon ? null : targetKeys[0]
+    const attachSymbol = attachIon ? null : attachmentKeys[0]
+    return attemptAtomicBond(targetIon || null, targetSymbol, attachIon || null, attachSymbol)
   }
 
   // ─── Step 1+: Covalent Logic ──────────────────────────────────────────
@@ -745,6 +769,41 @@ export function generateNomenclature(comps: Record<string, number>): {
     }
 
     return { name: applyPrefix(getGreekPrefix(count), el.name), formula }
+  }
+
+  // 3. Ionic vs Covalent Nomenclature
+  const symbols = Object.keys(comps)
+  if (symbols.length === 2) {
+    const elA = elements.find((e) => e.symbol === symbols[0])
+    const elB = elements.find((e) => e.symbol === symbols[1])
+    if (elA && elB) {
+      const metal = elA.is_metal ? elA : elB.is_metal ? elB : null
+      const nonMetal = !elA.is_metal ? elA : !elB.is_metal ? elB : null
+
+      if (metal && nonMetal) {
+        // Ionic naming: [Metal] ([Oxidation]) [Anion]
+        // Calculate oxidation state of metal
+        const nonMetalMag = Math.abs(
+          nonMetal.fixed_ionic_charge ?? nonMetal.primary_ionic_charge ?? -1
+        )
+        const metalCount = comps[metal.symbol]
+        const nonMetalCount = comps[nonMetal.symbol]
+        const metalOxState = Math.round((nonMetalMag * nonMetalCount) / metalCount)
+
+        const anionName = capitalize(nonMetal.anion_name || nonMetal.name.toLowerCase() + 'ida')
+
+        if (metal.fixed_ionic_charge !== undefined) {
+          // Fixed charge → no Roman numerals (e.g. "Natrium Klorida")
+          return { name: `${capitalize(metal.name)} ${anionName}`, formula }
+        } else {
+          // Variable charge → include Roman numerals (e.g. "Besi(III) Klorida")
+          return {
+            name: `${capitalize(metal.name)}(${toRomanNumeral(metalOxState)}) ${anionName}`,
+            formula
+          }
+        }
+      }
+    }
   }
 
   const nameParts = []

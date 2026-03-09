@@ -69,5 +69,6 @@ export const atomicIons: AtomicIon[] = [
   { id: 'silicate', formula: 'SiO3', name: 'Silikat', charge: -2, is_cation: false },
   { id: 'borate', formula: 'BO3', name: 'Borat', charge: -3, is_cation: false },
   { id: 'aluminate', formula: 'AlO2', name: 'Aluminat', charge: -1, is_cation: false },
-  { id: 'zincate', formula: 'ZnO2', name: 'Zinkat', charge: -2, is_cation: false }
+  { id: 'zincate', formula: 'ZnO2', name: 'Zinkat', charge: -2, is_cation: false },
+  { id: 'superoxide', formula: 'O2', name: 'Superoksida', charge: -1, is_cation: false }
 ]

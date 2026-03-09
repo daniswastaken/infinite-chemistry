@@ -664,12 +664,12 @@ export const elements: ElementInfo[] = [
   {
     atomicNumber: 44,
     symbol: 'Ru',
-    name: 'Ruthenium',
+    name: 'Rutenium',
     supports_covalent: false,
     supports_ionic: true,
     possible_oxidation_states: [3, 4],
     is_diatomic_element: false,
-    anion_name: 'rutheniumida',
+    anion_name: 'ruteniumida',
     primary_ionic_charge: 3,
     is_metal: true,
     group_number: 8
@@ -677,12 +677,12 @@ export const elements: ElementInfo[] = [
   {
     atomicNumber: 45,
     symbol: 'Rh',
-    name: 'Rhodium',
+    name: 'Rodium',
     supports_covalent: false,
     supports_ionic: true,
     possible_oxidation_states: [3],
     is_diatomic_element: false,
-    anion_name: 'rhodiumida',
+    anion_name: 'rodiumida',
     primary_ionic_charge: 3,
     is_metal: true,
     group_number: 9
