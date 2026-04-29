@@ -1,7 +1,7 @@
 # Infinite Chemistry - OSS For Gamified Studies
 
 <p align="center">
-   ![Banner](https://raw.githubusercontent.com/daniswastaken/infinite-chemistry/main/public/src/banner.jpg)
+  <img src="./public/src/banner.jpg" alt="Banner" width="100%">
 </p>
 
 Infinite Chemistry is an open-source chemistry stoichiometry and nomenclature educational tool, inspired by [Infinite Craft](https://neal.fun/infinite-craft/). Designed for students, it provides an interactive way to learn how chemical elements bond to form compounds.
