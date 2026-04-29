@@ -73,3 +73,6 @@ This project is open-source and available under the [MIT License](LICENSE).
 ## Disclaimer
 
 This is a non-commercial educational project built to help students learn chemistry stoichiometry and nomenclature in a fun, interactive way.
+
+## TODO ROADMAP
+- [ ] Add serverless multiplayer. 
